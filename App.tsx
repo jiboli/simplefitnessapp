@@ -132,7 +132,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopWidth: 0,
     elevation: 10,
-    paddingVertical: 100,
+    height: 80, // Adjusted height for a larger tab bar
+    paddingVertical: 10, // Reduced padding to balance spacing
   },
   tabBarLabel: {
     fontSize: 12,
@@ -141,8 +142,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10, // Adjust padding as needed
+    padding: 1,
   },
 });
+
 
 export default App;

@@ -1,6 +1,7 @@
-// Home.tsx
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+
+const { height } = Dimensions.get('window'); // Get screen height for dynamic sizing
 
 export default function Home({ navigation }: any) {
   return (
@@ -10,7 +11,9 @@ export default function Home({ navigation }: any) {
 
       {/* Create a Workout Section */}
       <View style={[styles.card, styles.blackCard]}>
-        <Text style={[styles.cardTitle, styles.whiteText]}>Create a workout.</Text>
+        <Text style={[styles.cardTitle, styles.whiteText]}>
+          Create a{"\n"}workout.
+        </Text>
         <TouchableOpacity
           style={[styles.button, styles.whiteButton]}
           onPress={() => navigation.navigate('My Workouts')}
@@ -21,7 +24,9 @@ export default function Home({ navigation }: any) {
 
       {/* Schedule Your Workout Section */}
       <View style={[styles.card, styles.grayCard]}>
-        <Text style={[styles.cardTitle, styles.darkGrayText]}>Schedule your workout.</Text>
+        <Text style={[styles.cardTitle, styles.darkGrayText]}>
+          Schedule{"\n"}your{"\n"}workout.
+        </Text>
         <TouchableOpacity
           style={[styles.button, styles.darkGrayButton]}
           onPress={() => navigation.navigate('My Calendar')}
@@ -32,7 +37,9 @@ export default function Home({ navigation }: any) {
 
       {/* Track Your Progress Section */}
       <View style={[styles.card, styles.lightGrayCard]}>
-        <Text style={[styles.cardTitle, styles.blackText]}>Track your progress.</Text>
+        <Text style={[styles.cardTitle, styles.blackText]}>
+          Track{"\n"}your{"\n"}progress.
+        </Text>
         <TouchableOpacity
           style={[styles.button, styles.blackButton]}
           onPress={() => navigation.navigate('My Progress')}
@@ -47,68 +54,72 @@ export default function Home({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // Background color
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
-    paddingTop: 50,
+    paddingTop: 30, // Reduced spacing above the title
   },
   title: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    marginBottom: 30,
+    fontSize: 44,
+    fontWeight: '900',
+    marginBottom: 20, // Compact spacing between title and first card
     textAlign: 'center',
-    color: '#000000', // Black text for title
+    color: '#000000',
   },
   card: {
     borderRadius: 15,
-    padding: 25,
-    marginBottom: 20,
-    height: 120, // Uniform height for all cards
-    justifyContent: 'center', // Centers content vertically
+    padding: 20,
+    marginBottom: 10, // Compact spacing between cards
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   blackCard: {
-    backgroundColor: '#000000', // Black background
+    backgroundColor: '#000000',
+    height: height * 0.25, // Adjusted to 25% of screen height
   },
   grayCard: {
-    backgroundColor: '#808080', // Medium gray background
+    backgroundColor: '#808080',
+    height: height * 0.22, // Slightly smaller than the first card
   },
   lightGrayCard: {
-    backgroundColor: '#D3D3D3', // Light gray background
+    backgroundColor: '#D3D3D3',
+    height: height * 0.22, // Matches the gray card
   },
   cardTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    textAlign: 'center', // Center text horizontally
-    marginBottom: 10,
+    fontSize: 24,
+    fontWeight: '800',
+    textAlign: 'center',
+    lineHeight: 30, // Add line spacing for better readability
   },
   whiteText: {
-    color: '#FFFFFF', // White text
+    color: '#FFFFFF',
   },
   blackText: {
-    color: '#000000', // Black text
+    color: '#000000',
   },
   darkGrayText: {
-    color: '#505050', // Dark gray text for the "Schedule your workout" card
+    color: '#404040',
   },
   button: {
     borderRadius: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    alignSelf: 'center', // Centers button horizontally
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    marginTop: 10, // Space between text and button
+    alignSelf: 'center',
   },
   whiteButton: {
-    backgroundColor: '#FFFFFF', // White button
+    backgroundColor: '#FFFFFF',
   },
   blackButton: {
-    backgroundColor: '#000000', // Black button
+    backgroundColor: '#000000',
   },
   darkGrayButton: {
-    backgroundColor: '#505050', // Dark gray button for "Schedule your workout" card
+    backgroundColor: '#04040',
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '800',
   },
   lightGrayText: {
-    color: '#B0B0B0', // Light gray text for button on the "Schedule your workout" card
+    color: '#B0B0B0',
   },
 });
