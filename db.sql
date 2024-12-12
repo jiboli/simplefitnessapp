@@ -23,10 +23,8 @@ CREATE TABLE IF NOT EXISTS Exercises (
 
 CREATE TABLE IF NOT EXISTS Workout_Log (
     workout_log_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    workout_id INTEGER NOT NULL,
     day_id INTEGER NOT NULL,
     workout_date DATE NOT NULL,
-    FOREIGN KEY (workout_id) REFERENCES Workouts(workout_id),
     FOREIGN KEY (day_id) REFERENCES     Days(day_id)
 );
 
