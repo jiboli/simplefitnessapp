@@ -26,7 +26,7 @@ export interface Workout {
   export interface WorkoutLog {
     workout_log_id: number;
     day_id: number; // Foreign key to Days
-    workout_date: string; // Date in ISO format (YYYY-MM-DD)
+    workout_date: number; // Date in ISO format (YYYY-MM-DD)
   }
   
   // Interface for the Exercise_Log table
@@ -36,22 +36,5 @@ export interface Workout {
     exercise_id: number; // Foreign key to Exercises
     set_number: number;
     weight_logged: number;
-  }
-  
-  // Composite Interfaces for Relationships
-  
-  // A workout with its associated days
-  export interface WorkoutWithDays extends Workout {
-    days: Day[];
-  }
-  
-  // A day with its associated exercises
-  export interface DayWithExercises extends Day {
-    exercises: Exercise[];
-  }
-  
-  // A workout log with its associated exercise logs
-  export interface WorkoutLogWithExerciseLogs extends WorkoutLog {
-    exercise_logs: ExerciseLog[];
   }
   

@@ -1,7 +1,8 @@
 // App.tsx
 import React, { useEffect, useState } from 'react';
-import { View, ActivityIndicator, StatusBar, StyleSheet, Pressable } from 'react-native'; // Import Pressable here
+import { View,Text, ActivityIndicator, StatusBar, StyleSheet, Pressable } from 'react-native'; // Import Pressable here
 import * as FileSystem from 'expo-file-system';
+import * as SQLite from 'expo-sqlite'
 import { SQLiteProvider } from 'expo-sqlite';
 import { Asset } from 'expo-asset';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -12,27 +13,35 @@ import Workouts from './screens/Workouts';
 
 const Bottom = createBottomTabNavigator();
 
+
 const loadDatabase = async () => {
-  const dbName = "SimpleDB.db";
-  const dbAsset = require("./assets/SimpleDB.db");
-  const dbUri = Asset.fromModule(dbAsset).uri;
-  const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
+  try {
+    const dbName = "SimpleDB1.db";
+    const dbAsset = require("./assets/SimpleDB1.db");
+    const dbUri = Asset.fromModule(dbAsset).uri;
+    const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
 
-  const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
+    const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
 
-  if (!fileInfo.exists) {
-    await FileSystem.makeDirectoryAsync(
-      `${FileSystem.documentDirectory}SQLite`,
-      { intermediates: true }
-    );
-    await FileSystem.downloadAsync(dbUri, dbFilePath);
+    if (!fileInfo.exists) {
+      await FileSystem.makeDirectoryAsync(
+        `${FileSystem.documentDirectory}SQLite`,
+        { intermediates: true }
+      );
+      console.log("Downloading database...");
+      await FileSystem.downloadAsync(dbUri, dbFilePath);
+    } else {
+      console.log("Database already exists.");
+    }
+  } catch (error) {
+    console.error("Error in loadDatabase:", error);
   }
 };
 
-const App: React.FC = () => {
+export default function App() {
   const [dbLoaded, setDbLoaded] = useState<boolean>(false);
 
-  useEffect(() => {
+  React.useEffect(() => {
     loadDatabase()
       .then(() => setDbLoaded(true))
       .catch((e) => console.error("Database loading error:", e));
@@ -49,7 +58,16 @@ const App: React.FC = () => {
   return (
     <NavigationContainer>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <SQLiteProvider databaseName="SimpleDB.db">
+      <React.Suspense
+        fallback={
+          <View style={{ flex:1, backgroundColor: "red"}}>
+            <ActivityIndicator size={'large'}/>
+            <Text> Loading Database...</Text>
+          </View>
+        }
+        />
+
+      <SQLiteProvider databaseName="SimpleDB1.db">
         <Bottom.Navigator
           screenOptions={{
             headerShown: false,
@@ -147,4 +165,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default App;
+
