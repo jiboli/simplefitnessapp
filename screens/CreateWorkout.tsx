@@ -13,7 +13,6 @@ import {
 import { WorkoutStackParamList } from '../App'; // Adjust path to where WorkoutStackParamList is defined
 import { StackNavigationProp } from '@react-navigation/stack';
 
-
 type WorkoutListNavigationProp = StackNavigationProp<WorkoutStackParamList, 'WorkoutsList'>;
 
 // Modify this function to accept db as a parameter
@@ -30,7 +29,6 @@ async function createWorkout(
       await db.runAsync('INSERT INTO Workouts (workout_name) VALUES (?);', [workoutName]);
       console.log(`Workout inserted: ${workoutName}`);
 
-      console.log('Fetching workout ID...');
       const workoutIdResult = (await db.getAllAsync('SELECT last_insert_rowid() as workout_id;')) as {
         workout_id: number;
       }[];
@@ -46,9 +44,6 @@ async function createWorkout(
           workoutId,
           day.dayName,
         ]);
-        console.log(`Day inserted: ${day.dayName}`);
-
-        console.log('Fetching day ID...');
         const dayIdResult = (await db.getAllAsync('SELECT last_insert_rowid() as day_id;')) as {
           day_id: number;
         }[];
@@ -64,13 +59,8 @@ async function createWorkout(
             'INSERT INTO Exercises (day_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
             [dayId, exercise.exerciseName, exercise.sets, exercise.reps]
           );
-          console.log(
-            `Exercise inserted: ${exercise.exerciseName}, Sets: ${exercise.sets}, Reps: ${exercise.reps}`
-          );
         }
       }
-
-      console.log('All operations completed successfully!');
     } catch (error) {
       console.error('Error during transaction:', error);
       throw error; // Re-throw the error to abort the transaction
@@ -78,14 +68,11 @@ async function createWorkout(
   });
 }
 
-
-
-
 export default function CreateWorkout() {
-  const db = useSQLiteContext(); // Use the hook here
+  const db = useSQLiteContext();
   const [workoutName, setWorkoutName] = useState('');
   const [days, setDays] = useState<
-    { dayName: string; exercises: { exerciseName: string; sets: number; reps: number }[] }[]
+    { dayName: string; exercises: { exerciseName: string; sets: string; reps: string }[] }[]
   >([]);
 
   const navigation = useNavigation<WorkoutListNavigationProp>();
@@ -93,16 +80,56 @@ export default function CreateWorkout() {
   const addDay = () => {
     setDays((prev) => [
       ...prev,
-      { dayName: '', exercises: [{ exerciseName: '', sets: 0, reps: 0 }] },
+      { dayName: '', exercises: [{ exerciseName: '', sets: '', reps: '' }] },
     ]);
   };
 
   const addExercise = (dayIndex: number) => {
     setDays((prev) => {
       const updatedDays = [...prev];
-      updatedDays[dayIndex].exercises.push({ exerciseName: '', sets: 0, reps: 0 });
+      updatedDays[dayIndex].exercises.push({ exerciseName: '', sets: '', reps: '' });
       return updatedDays;
     });
+  };
+
+  const deleteDay = (index: number) => {
+    Alert.alert(
+      'Delete Day',
+      `Are you sure you want to delete Day ${index + 1}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setDays((prev) => prev.filter((_, dayIndex) => dayIndex !== index));
+          },
+        },
+      ]
+    );
+  };
+
+  const deleteExercise = (dayIndex: number, exerciseIndex: number) => {
+    Alert.alert(
+      'Delete Exercise',
+      `Are you sure you want to delete this exercise?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => {
+            setDays((prev) => {
+              const updatedDays = [...prev];
+              updatedDays[dayIndex].exercises = updatedDays[dayIndex].exercises.filter(
+                (_, exIndex) => exIndex !== exerciseIndex
+              );
+              return updatedDays;
+            });
+          },
+        },
+      ]
+    );
   };
 
   const handleSaveWorkout = async () => {
@@ -120,7 +147,7 @@ export default function CreateWorkout() {
       days.some((day) =>
         day.exercises.some(
           (exercise) =>
-            !exercise.exerciseName.trim() || exercise.sets <= 0 || exercise.reps <= 0
+            !exercise.exerciseName.trim() || !exercise.sets || !exercise.reps
         )
       )
     ) {
@@ -128,10 +155,19 @@ export default function CreateWorkout() {
       return;
     }
 
+    const formattedDays = days.map((day) => ({
+      ...day,
+      exercises: day.exercises.map((exercise) => ({
+        ...exercise,
+        sets: parseInt(exercise.sets),
+        reps: parseInt(exercise.reps),
+      })),
+    }));
+
     try {
-      await createWorkout(db, workoutName, days); // Pass the db context here
+      await createWorkout(db, workoutName, formattedDays);
       Alert.alert('Success', 'Workout created successfully!');
-      navigation.navigate('WorkoutsList'); // Redirect to Workouts
+      navigation.navigate('WorkoutsList');
       setWorkoutName('');
       setDays([]);
     } catch (error) {
@@ -144,7 +180,6 @@ export default function CreateWorkout() {
     <View style={styles.container}>
       <Text style={styles.title}>Create a New Workout</Text>
 
-      {/* Input for Workout Name */}
       <TextInput
         style={styles.input}
         placeholder="Workout Name"
@@ -152,12 +187,15 @@ export default function CreateWorkout() {
         onChangeText={setWorkoutName}
       />
 
-      {/* List of Days */}
       <FlatList
         data={days}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item, index }) => (
-          <View style={styles.dayContainer}>
+          <TouchableOpacity
+            onLongPress={() => deleteDay(index)}
+            activeOpacity={0.8}
+            style={styles.dayContainer}
+          >
             <TextInput
               style={styles.input}
               placeholder={`Day ${index + 1} Name`}
@@ -169,9 +207,13 @@ export default function CreateWorkout() {
               }}
             />
 
-            {/* List of Exercises for this Day */}
             {item.exercises.map((exercise, exerciseIndex) => (
-              <View key={exerciseIndex} style={styles.exerciseContainer}>
+              <TouchableOpacity
+                key={exerciseIndex}
+                onLongPress={() => deleteExercise(index, exerciseIndex)}
+                activeOpacity={0.8}
+                style={styles.exerciseContainer}
+              >
                 <TextInput
                   style={[styles.input, styles.exerciseInput]}
                   placeholder="Exercise Name"
@@ -186,10 +228,11 @@ export default function CreateWorkout() {
                   style={[styles.input, styles.smallInput]}
                   placeholder="Sets"
                   keyboardType="numeric"
-                  value={exercise.sets.toString()}
+                  value={exercise.sets}
                   onChangeText={(text) => {
+                    const sanitizedText = text.replace(/[^0-9]/g, '');
                     const updatedDays = [...days];
-                    updatedDays[index].exercises[exerciseIndex].sets = parseInt(text) || 0;
+                    updatedDays[index].exercises[exerciseIndex].sets = sanitizedText;
                     setDays(updatedDays);
                   }}
                 />
@@ -197,24 +240,24 @@ export default function CreateWorkout() {
                   style={[styles.input, styles.smallInput]}
                   placeholder="Reps"
                   keyboardType="numeric"
-                  value={exercise.reps.toString()}
+                  value={exercise.reps}
                   onChangeText={(text) => {
+                    const sanitizedText = text.replace(/[^0-9]/g, '');
                     const updatedDays = [...days];
-                    updatedDays[index].exercises[exerciseIndex].reps = parseInt(text) || 0;
+                    updatedDays[index].exercises[exerciseIndex].reps = sanitizedText;
                     setDays(updatedDays);
                   }}
                 />
-              </View>
+              </TouchableOpacity>
             ))}
 
-            {/* Add Exercise Button */}
             <TouchableOpacity
               style={styles.addButton}
               onPress={() => addExercise(index)}
             >
               <Text style={styles.addButtonText}>+ Add Exercise</Text>
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
         ListFooterComponent={
           <TouchableOpacity style={styles.addButton} onPress={addDay}>
@@ -223,13 +266,13 @@ export default function CreateWorkout() {
         }
       />
 
-      {/* Save Workout Button */}
       <TouchableOpacity style={styles.saveButton} onPress={handleSaveWorkout}>
         <Text style={styles.saveButtonText}>Save Workout</Text>
       </TouchableOpacity>
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
