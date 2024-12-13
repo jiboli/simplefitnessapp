@@ -1,3 +1,5 @@
+-- db.sql
+
 -- Create Tables
 CREATE TABLE IF NOT EXISTS Workouts (
     workout_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

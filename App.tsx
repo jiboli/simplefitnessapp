@@ -112,7 +112,7 @@ export default function App() {
   React.useEffect(() => {
     (async () => {
       try {
-        await resetDatabase();
+        //await resetDatabase();
         await loadDatabase();
         setDbLoaded(true);
       } catch (e) {

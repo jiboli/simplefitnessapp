@@ -1,9 +1,12 @@
+// screens/Workouts.tsx
+
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Workout } from '../types';
 import WorkoutList from '../components/WorkoutList';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function Workouts() {
   const [workouts, setWorkouts] = React.useState<Workout[]>([]);
@@ -14,6 +17,13 @@ export default function Workouts() {
       await getWorkouts();
     });
   }, [db]);
+
+   // Use useFocusEffect to fetch workouts when the screen is focused
+   useFocusEffect(
+    React.useCallback(() => {
+      db.withTransactionAsync(getWorkouts);
+    }, [db])
+  );
 
   async function getWorkouts() {
     const result = await db.getAllAsync<Workout>('SELECT * FROM Workouts;');
