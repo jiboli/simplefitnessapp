@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -20,35 +20,75 @@ export default function WorkoutDetails() {
   const [days, setDays] = useState<Day[]>([]);
 
   useEffect(() => {
-    const fetchWorkoutDetails = async () => {
-      // Fetch workout name
-      const workoutResult = await db.getAllAsync<{ workout_name: string }>(
-        'SELECT workout_name FROM Workouts WHERE workout_id = ?',
-        [workout_id]
-      );
-      setWorkoutName(workoutResult[0]?.workout_name || '');
-
-      // Fetch days and exercises
-      const daysResult = await db.getAllAsync<{ day_id: number; day_name: string }>(
-        'SELECT day_id, day_name FROM Days WHERE workout_id = ?',
-        [workout_id]
-      );
-
-      const daysWithExercises = await Promise.all(
-        daysResult.map(async (day) => {
-          const exercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
-            'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?',
-            [day.day_id]
-          );
-          return { ...day, exercises };
-        })
-      );
-
-      setDays(daysWithExercises);
-    };
-
     fetchWorkoutDetails();
   }, [workout_id]);
+
+  const fetchWorkoutDetails = async () => {
+    // Fetch workout name
+    const workoutResult = await db.getAllAsync<{ workout_name: string }>(
+      'SELECT workout_name FROM Workouts WHERE workout_id = ?',
+      [workout_id]
+    );
+    setWorkoutName(workoutResult[0]?.workout_name || '');
+
+    // Fetch days and exercises
+    const daysResult = await db.getAllAsync<{ day_id: number; day_name: string }>(
+      'SELECT day_id, day_name FROM Days WHERE workout_id = ?',
+      [workout_id]
+    );
+
+    const daysWithExercises = await Promise.all(
+      daysResult.map(async (day) => {
+        const exercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
+          'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?',
+          [day.day_id]
+        );
+        return { ...day, exercises };
+      })
+    );
+
+    setDays(daysWithExercises);
+  };
+
+  const deleteDay = async (day_id: number) => {
+    Alert.alert(
+      'Delete Day',
+      'Are you sure you want to delete this day? All associated exercises will also be deleted.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await db.runAsync('DELETE FROM Days WHERE day_id = ?;', [day_id]);
+            await db.runAsync('DELETE FROM Exercises WHERE day_id = ?;', [day_id]);
+            fetchWorkoutDetails(); // Refresh the UI
+          },
+        },
+      ]
+    );
+  };
+
+  const deleteExercise = async (day_id: number, exercise_name: string) => {
+    Alert.alert(
+      'Delete Exercise',
+      `Are you sure you want to delete "${exercise_name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await db.runAsync(
+              'DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;',
+              [day_id, exercise_name]
+            );
+            fetchWorkoutDetails(); // Refresh the UI
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -68,20 +108,33 @@ export default function WorkoutDetails() {
         data={days}
         keyExtractor={(item) => item.day_id.toString()}
         renderItem={({ item: day }) => (
-          <View style={styles.dayContainer}>
+          <TouchableOpacity
+            onLongPress={() => deleteDay(day.day_id)}
+            activeOpacity={0.8}
+            style={styles.dayContainer}
+          >
             {/* Day Title */}
             <Text style={styles.dayTitle}>{day.day_name}</Text>
-            
+
             {/* Exercises */}
-            {day.exercises.map((exercise, index) => (
-              <View key={index} style={styles.exerciseContainer}>
-                <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
-                <Text style={styles.exerciseDetails}>
-                  {exercise.sets} sets x {exercise.reps} reps
-                </Text>
-              </View>
-            ))}
-          </View>
+            {day.exercises.length > 0 ? (
+              day.exercises.map((exercise, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
+                  activeOpacity={0.8}
+                  style={styles.exerciseContainer}
+                >
+                  <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
+                  <Text style={styles.exerciseDetails}>
+                    {exercise.sets} sets x {exercise.reps} reps
+                  </Text>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Text style={styles.noExercisesText}>No exercises on this day</Text>
+            )}
+          </TouchableOpacity>
         )}
         ListEmptyComponent={
           <Text style={styles.emptyText}>No days or exercises available for this workout.</Text>
@@ -151,6 +204,13 @@ const styles = StyleSheet.create({
   exerciseDetails: {
     fontSize: 16,
     color: '#000000',
+  },
+  noExercisesText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontStyle: 'italic',
+    color: 'rgba(0, 0, 0, 0.5)',
+    marginTop: 10,
   },
   emptyText: {
     textAlign: 'center',
