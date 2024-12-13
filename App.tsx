@@ -12,6 +12,7 @@ import Workouts from './screens/Workouts';
 import CreateWorkout from './screens/CreateWorkout';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import WorkoutDetails from './screens/WorkoutDetails';
 
 const Bottom = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<WorkoutStackParamList>();
@@ -78,6 +79,7 @@ const loadDatabase = async () => {
 export type WorkoutStackParamList = {
   WorkoutsList: undefined; // No parameters for this route
   CreateWorkout: undefined; // No parameters for this route
+  WorkoutDetails: undefined;
 };
 
 function WorkoutStack() {
@@ -96,6 +98,10 @@ function WorkoutStack() {
         component={CreateWorkout}
         options={{ title: 'Create Workout' }}
       />
+      <Stack.Screen
+        name='WorkoutDetails'
+        component={WorkoutDetails}
+        />
     </Stack.Navigator>
   );
 }
