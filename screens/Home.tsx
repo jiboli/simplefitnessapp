@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
   darkGrayButton: {
-    backgroundColor: '#04040',
+    backgroundColor: '#505050',
   },
   buttonText: {
     fontSize: 16,

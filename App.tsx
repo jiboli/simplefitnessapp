@@ -10,6 +10,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Home from './screens/Home'; // Assuming you have a Home screen component
 import Workouts from './screens/Workouts';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 const Bottom = createBottomTabNavigator();
 
@@ -78,6 +79,7 @@ export default function App() {
   React.useEffect(() => {
     (async () => {
       try {
+        //await resetDatabase();
         await loadDatabase();
         setDbLoaded(true);
       } catch (e) {
@@ -95,80 +97,72 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-      <React.Suspense
-        fallback={
-          <View style={{ flex:1}}>
-            <ActivityIndicator size={'large'}/>
-            <Text> Loading Database...</Text>
-          </View>
-        }
-        />
+    <GestureHandlerRootView>
+      <NavigationContainer>
+        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+        <React.Suspense
+          fallback={
+            <View style={{ flex:1}}>
+              <ActivityIndicator size={'large'}/>
+              <Text> Loading Database...</Text>
+            </View>
+          }
+          />
 
-      <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
-        <Bottom.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarStyle: styles.tabBar,
-            tabBarLabelStyle: styles.tabBarLabel,
-            tabBarActiveTintColor: 'black', // Active icon color
-            tabBarInactiveTintColor: 'gray', // Inactive icon color
-          }}
-        >
-          <Bottom.Screen
-            name="Home"
-            component={Home}
-            options={{
-              tabBarButton: (props) => (
-                <TabButton {...props} iconName="home" />
-              ),
-              tabBarLabel: 'Home',
+        <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
+          <Bottom.Navigator
+            screenOptions={{
+              headerShown: false,
+              tabBarStyle: styles.tabBar,
+              tabBarLabelStyle: styles.tabBarLabel,
+              tabBarActiveTintColor: 'black', // Active icon color
+              tabBarInactiveTintColor: 'gray', // Inactive icon color
             }}
-          />
-          <Bottom.Screen
-            name="My Workouts"
-            component={Workouts}
-            options={{
-              tabBarButton: (props) => (
-                <TabButton {...props} iconName="barbell" />
-              ),
-              tabBarLabel: 'My Workouts',
-            }}
-          />
-          <Bottom.Screen
-            name="My Calendar"
-            component={Home}
-            options={{
-              tabBarButton: (props) => (
-                <TabButton {...props} iconName="calendar" />
-              ),
-              tabBarLabel: 'My Calendar',
-            }}
-          />
-          <Bottom.Screen
-            name="My Progress"
-            component={Home}
-            options={{
-              tabBarButton: (props) => (
-                <TabButton {...props} iconName="stats-chart" />
-              ),
-              tabBarLabel: 'My Progress',
-            }}
-          />
-          <Bottom.Screen
-            name="Settings"
-            component={Home}
-            options={{
-              tabBarButton: (props) => (
-                <TabButton {...props} iconName="settings" />
-              ),
-              tabBarLabel: 'Settings',
-            }}
-          />
-        </Bottom.Navigator>
-      </SQLiteProvider>
-    </NavigationContainer>
+          >
+            <Bottom.Screen
+              name="Home"
+              component={Home}
+              options={{
+                tabBarButton: (props) => (
+                  <TabButton {...props} iconName="home" />
+                ),
+                tabBarLabel: 'Home',
+              }}
+            />
+            <Bottom.Screen
+              name="My Workouts"
+              component={Workouts}
+              options={{
+                tabBarButton: (props) => (
+                  <TabButton {...props} iconName="barbell" />
+                ),
+                tabBarLabel: 'My Workouts',
+              }}
+            />
+            <Bottom.Screen
+              name="My Calendar"
+              component={Home}
+              options={{
+                tabBarButton: (props) => (
+                  <TabButton {...props} iconName="calendar" />
+                ),
+                tabBarLabel: 'My Calendar',
+              }}
+            />
+            <Bottom.Screen
+              name="My Progress"
+              component={Home}
+              options={{
+                tabBarButton: (props) => (
+                  <TabButton {...props} iconName="stats-chart" />
+                ),
+                tabBarLabel: 'My Progress',
+              }}
+            />
+          </Bottom.Navigator>
+        </SQLiteProvider>
+      </NavigationContainer>
+      </GestureHandlerRootView>
   );
 }
 

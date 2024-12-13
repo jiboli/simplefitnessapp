@@ -4,6 +4,13 @@ CREATE TABLE IF NOT EXISTS Workouts (
     workout_name TEXT NOT NULL UNIQUE
 );
 
+-- Updated Schema
+
+CREATE TABLE IF NOT EXISTS Workouts (
+    workout_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    workout_name TEXT NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS Days (
     day_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     workout_id INTEGER NOT NULL,
@@ -23,21 +30,22 @@ CREATE TABLE IF NOT EXISTS Exercises (
 
 CREATE TABLE IF NOT EXISTS Workout_Log (
     workout_log_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    day_id INTEGER NOT NULL,
+    day_id INTEGER,
     workout_date INTEGER NOT NULL,
-    FOREIGN KEY (day_id) REFERENCES Days(day_id) ON DELETE CASCADE
+    FOREIGN KEY (day_id) REFERENCES Days(day_id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS Exercise_Log (
     exercise_log_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     workout_log_id INTEGER NOT NULL,
-    exercise_id INTEGER NOT NULL,
+    exercise_id INTEGER,
     set_number INTEGER NOT NULL,
     weight_logged REAL NOT NULL,
     FOREIGN KEY (workout_log_id) REFERENCES Workout_Log(workout_log_id) ON DELETE CASCADE,
-    FOREIGN KEY (exercise_id) REFERENCES Exercises(exercise_id) ON DELETE CASCADE,
+    FOREIGN KEY (exercise_id) REFERENCES Exercises(exercise_id) ON DELETE SET NULL,
     UNIQUE(workout_log_id, exercise_id, set_number)
 );
+
 
 -- Insert Data into Workouts
 INSERT INTO Workouts (workout_name) VALUES 

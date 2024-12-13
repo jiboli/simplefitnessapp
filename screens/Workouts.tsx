@@ -1,48 +1,61 @@
-import * as React from 'react';
-import {Text, View } from "react-native"
-import { Workout } from '../types'; 
-import { Day } from '../types';
-import { Exercise } from '../types';
-import { useSQLiteContext } from 'expo-sqlite';
-import { ScrollView } from 'react-native-gesture-handler';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { Workout } from '../types';
 import WorkoutList from '../components/WorkoutList';
-
+import { useSQLiteContext } from 'expo-sqlite';
+import { Alert } from 'react-native';
 
 export default function Workouts() {
-    const [workouts, setWorkouts] = React.useState<Workout[]>([]);
-    const [days, setDays] = React.useState<Day[]>([]);
-    const [exercises, setExercises] = React.useState<Exercise[]>([]);
+  const [workouts, setWorkouts] = React.useState<Workout[]>([]);
+  const db = useSQLiteContext();
 
-    const db = useSQLiteContext();
+  React.useEffect(() => {
+    db.withTransactionAsync(async () => {
+      await getWorkouts();
+    });
+  }, [db]);
 
+  async function getWorkouts() {
+    const result = await db.getAllAsync<Workout>('SELECT * FROM Workouts;');
+    setWorkouts(result);
+  }
 
-    React.useEffect(()=>{
-        db.withTransactionAsync(async () => {await getData();})
-    }, [db] )
-
-    async function getData() { 
-        const result = await db.getAllAsync<Workout>(`SELECT * FROM Workouts;`);
-        setWorkouts(result);
-        
-    }
-
-    async function deleteWorkout(workout_id:number) {
-        db.withTransactionAsync(async () => {
-            await db.runAsync(`DELETE FROM Workouts WHERE workout_id = ?;`, [workout_id])
-            await getData();
-            
-        })
-        
-    }
-    
-
-    return (
-        <View>
-          <WorkoutList
-          workouts={workouts} 
-          deleteWorkout={deleteWorkout}
-          /> 
-        </View>
+  async function deleteWorkout(workout_id: number, workout_name: string) {
+    Alert.alert(
+      `Deleting ${workout_name}`,
+      `Are you sure you want to delete "${workout_name}"?`,
+      [
+        {
+          text: 'No',
+          onPress: () => console.log('Cancel pressed'), // Do nothing
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            await db.withTransactionAsync(async () => {
+              await db.runAsync('DELETE FROM Workouts WHERE workout_id = ?;', [
+                workout_id,
+              ]);
+              await getWorkouts();
+            });
+          },
+        },
+      ]
     );
+  }
+  
+
+  return (
+    <View style={styles.container}>
+      <WorkoutList workouts={workouts} deleteWorkout={deleteWorkout} />
+    </View>
+  );
 }
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+});
