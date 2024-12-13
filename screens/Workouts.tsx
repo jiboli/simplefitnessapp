@@ -19,7 +19,7 @@ export default function Workouts() {
     }, [db] )
 
     async function getData() { 
-        const result = await db.execAsync(`SELECT * FROM Exercise_Log;`)
+        const result = await db.getAllAsync(`SELECT * FROM Workouts;`)
         console.log(result);
         
     }

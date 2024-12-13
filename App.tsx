@@ -76,12 +76,16 @@ export default function App() {
   const [dbLoaded, setDbLoaded] = useState<boolean>(false);
 
   React.useEffect(() => {
-    resetDatabase()
-    loadDatabase()
-      .then(() => setDbLoaded(true))
-      .catch((e) => console.error("Database loading error:", e));
+    (async () => {
+      try {
+        await loadDatabase();
+        setDbLoaded(true);
+      } catch (e) {
+        console.error("Database loading error:", e);
+      }
+    })();
   }, []);
-
+  
   if (!dbLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
