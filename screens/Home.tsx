@@ -1,3 +1,5 @@
+// screens/Home.tsx
+
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 
@@ -107,6 +109,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   whiteButton: {
+    marginTop:20,
     backgroundColor: '#FFFFFF',
   },
   blackButton: {
@@ -120,6 +123,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   lightGrayText: {
-    color: '#B0B0B0',
+    color: '#bfbfbf',
   },
 });

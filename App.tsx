@@ -79,7 +79,7 @@ const loadDatabase = async () => {
 export type WorkoutStackParamList = {
   WorkoutsList: undefined; // No parameters for this route
   CreateWorkout: undefined; // No parameters for this route
-  WorkoutDetails: undefined;
+  WorkoutDetails: { workout_id: number }; // Add this
 };
 
 function WorkoutStack() {
@@ -101,6 +101,7 @@ function WorkoutStack() {
       <Stack.Screen
         name='WorkoutDetails'
         component={WorkoutDetails}
+        options={{title: 'WorkoutDetails'}}
         />
     </Stack.Navigator>
   );

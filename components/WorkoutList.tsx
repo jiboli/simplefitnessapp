@@ -42,8 +42,8 @@ export default function WorkoutList({
           style={styles.workoutCard}
           activeOpacity={0.7}
           onLongPress={() => deleteWorkout(workout.workout_id, workout.workout_name)} 
-          onPress={()=> navigation.navigate('WorkoutDetails')}
-        >
+          onPress={() => navigation.navigate('WorkoutDetails', { workout_id: workout.workout_id })}
+>
           <Text style={styles.workoutText}>{workout.workout_name}</Text>
           <Ionicons name="chevron-forward" size={20} color="gray" />
         </TouchableOpacity>
