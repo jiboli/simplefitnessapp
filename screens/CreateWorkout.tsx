@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { WorkoutStackParamList } from '../App'; // Adjust path to where WorkoutStackParamList is defined
 import { StackNavigationProp } from '@react-navigation/stack';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 type WorkoutListNavigationProp = StackNavigationProp<WorkoutStackParamList, 'WorkoutsList'>;
 
@@ -178,6 +180,13 @@ export default function CreateWorkout() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+       style={styles.backButton}
+       onPress={() => navigation.goBack()}
+      > 
+      <Ionicons name="chevron-back" size={40} color="#000000" />
+      </TouchableOpacity>
+
       <Text style={styles.title}>Create a New Workout</Text>
 
       <TextInput
@@ -341,6 +350,7 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: 'center',
     borderRadius: 15,
+    marginRight: 10,
     padding: 12,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
@@ -378,4 +388,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginLeft: 8,
   },
+  backButton: {
+    position: 'absolute',
+    top: 33, // A little spacing from the top for tidy alignment
+    left: 5, // Align neatly with the left edge
+    zIndex: 10,
+    padding: 8, // Smaller padding for a tighter look
+  },
+  
+  
 });
