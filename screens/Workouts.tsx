@@ -4,6 +4,8 @@ import { Workout } from '../types';
 import { Day } from '../types';
 import { Exercise } from '../types';
 import { useSQLiteContext } from 'expo-sqlite';
+import { ScrollView } from 'react-native-gesture-handler';
+import WorkoutList from '../components/WorkoutList';
 
 
 export default function Workouts() {
@@ -19,16 +21,27 @@ export default function Workouts() {
     }, [db] )
 
     async function getData() { 
-        const result = await db.getAllAsync(`SELECT * FROM Workouts;`)
-        console.log(result);
+        const result = await db.getAllAsync<Workout>(`SELECT * FROM Workouts;`);
+        setWorkouts(result);
         
     }
 
+    async function deleteWorkout(workout_id:number) {
+        db.withTransactionAsync(async () => {
+            await db.runAsync(`DELETE FROM Workouts WHERE workout_id = ?;`, [workout_id])
+            await getData();
+            
+        })
+        
+    }
     
 
     return (
         <View>
-          <Text>Workouts </Text>  
+          <WorkoutList
+          workouts={workouts} 
+          deleteWorkout={deleteWorkout}
+          /> 
         </View>
     );
 }

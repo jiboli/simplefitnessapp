@@ -99,7 +99,7 @@ export default function App() {
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <React.Suspense
         fallback={
-          <View style={{ flex:1, backgroundColor: "red"}}>
+          <View style={{ flex:1}}>
             <ActivityIndicator size={'large'}/>
             <Text> Loading Database...</Text>
           </View>
