@@ -19,12 +19,9 @@ export default function Workouts() {
     }, [db] )
 
     async function getData() { 
-        const workoutsResult = await db.getAllAsync<Workout>(
-            `SELECT name AS table_name FROM sqlite_master WHERE type = 'table'
-;`
-        )
-        console.log('Workouts:', workoutsResult);
-        setWorkouts(workoutsResult);
+        const result = await db.execAsync(`SELECT * FROM Exercise_Log;`)
+        console.log(result);
+        
     }
 
     

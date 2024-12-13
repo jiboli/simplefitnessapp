@@ -14,10 +14,44 @@ import Workouts from './screens/Workouts';
 const Bottom = createBottomTabNavigator();
 
 
+const resetDatabase = async () => {
+  try {
+    const dbName = "SimpleDB.db";
+    const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
+
+    // Check if the database file exists
+    const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
+    if (fileInfo.exists) {
+      // Delete the existing database file
+      console.log("Deleting existing database...");
+      await FileSystem.deleteAsync(dbFilePath, { idempotent: true });
+      console.log("Database deleted.");
+    }
+
+    // Recreate the database folder if necessary
+    await FileSystem.makeDirectoryAsync(
+      `${FileSystem.documentDirectory}SQLite`,
+      { intermediates: true }
+    );
+
+    // Initialize a new database (or download a fresh copy)
+    const dbAsset = require("./assets/SimpleDB.db");
+    const dbUri = Asset.fromModule(dbAsset).uri;
+
+    console.log("Downloading new database...");
+    await FileSystem.downloadAsync(dbUri, dbFilePath);
+    console.log("New database downloaded.");
+  } catch (error) {
+    console.error("Error resetting database:", error);
+  }
+};
+
+
+
 const loadDatabase = async () => {
   try {
-    const dbName = "SimpleDB1.db";
-    const dbAsset = require("./assets/SimpleDB1.db");
+    const dbName = "SimpleDB.db";
+    const dbAsset = require("./assets/SimpleDB.db");
     const dbUri = Asset.fromModule(dbAsset).uri;
     const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
 
@@ -42,6 +76,7 @@ export default function App() {
   const [dbLoaded, setDbLoaded] = useState<boolean>(false);
 
   React.useEffect(() => {
+    resetDatabase()
     loadDatabase()
       .then(() => setDbLoaded(true))
       .catch((e) => console.error("Database loading error:", e));
@@ -67,7 +102,7 @@ export default function App() {
         }
         />
 
-      <SQLiteProvider databaseName="SimpleDB1.db">
+      <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
         <Bottom.Navigator
           screenOptions={{
             headerShown: false,
