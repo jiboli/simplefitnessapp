@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { View,Text, ActivityIndicator, StatusBar, StyleSheet, Pressable } from 'react-native'; // Import Pressable here
 import * as FileSystem from 'expo-file-system';
-import * as SQLite from 'expo-sqlite'
 import { SQLiteProvider } from 'expo-sqlite';
 import { Asset } from 'expo-asset';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,10 +9,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Home from './screens/Home'; // Assuming you have a Home screen component
 import Workouts from './screens/Workouts';
+import CreateWorkout from './screens/CreateWorkout';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 const Bottom = createBottomTabNavigator();
-
+const Stack = createNativeStackNavigator<WorkoutStackParamList>();
 
 const resetDatabase = async () => {
   try {
@@ -73,13 +74,39 @@ const loadDatabase = async () => {
   }
 };
 
+
+export type WorkoutStackParamList = {
+  WorkoutsList: undefined; // No parameters for this route
+  CreateWorkout: undefined; // No parameters for this route
+};
+
+function WorkoutStack() {
+  return (
+    <Stack.Navigator screenOptions={{
+      headerShown: false, // Disable headers for all screens in this stack
+    }}
+  >
+      <Stack.Screen
+        name="WorkoutsList"
+        component={Workouts}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="CreateWorkout"
+        component={CreateWorkout}
+        options={{ title: 'Create Workout' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 export default function App() {
   const [dbLoaded, setDbLoaded] = useState<boolean>(false);
 
   React.useEffect(() => {
     (async () => {
       try {
-        //await resetDatabase();
+        await resetDatabase();
         await loadDatabase();
         setDbLoaded(true);
       } catch (e) {
@@ -131,7 +158,7 @@ export default function App() {
             />
             <Bottom.Screen
               name="My Workouts"
-              component={Workouts}
+              component={WorkoutStack}
               options={{
                 tabBarButton: (props) => (
                   <TabButton {...props} iconName="barbell" />

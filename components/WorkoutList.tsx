@@ -1,22 +1,34 @@
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { WorkoutStackParamList } from '../App'; // Adjust path to where WorkoutStackParamList is defined
 import { Workout } from '../types';
 import React from 'react';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+type WorkoutListNavigationProp = StackNavigationProp<WorkoutStackParamList, 'WorkoutsList'>;
 
 export default function WorkoutList({
   workouts,
   deleteWorkout,
 }: {
   workouts: Workout[];
-  deleteWorkout: (workout_id: number, workout_name:string) => Promise<void>;
+  deleteWorkout: (workout_id: number, workout_name: string) => Promise<void>;
 }) {
+  const navigation = useNavigation<WorkoutListNavigationProp>();
+
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       {/* Title */}
       <Text style={styles.title}>Simple.</Text>
 
       {/* Create New Workout Button */}
-      <TouchableOpacity style={styles.createButton} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.createButton}
+        activeOpacity={0.7}
+        onPress={() => navigation.navigate('CreateWorkout')}
+      >
         <Text style={styles.createButtonText}>Create a new workout</Text>
         <Text style={styles.plus}>+</Text>
       </TouchableOpacity>
@@ -33,7 +45,7 @@ export default function WorkoutList({
           <Ionicons name="chevron-forward" size={20} color="gray" />
         </TouchableOpacity>
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -68,7 +80,7 @@ const styles = StyleSheet.create({
   },
   plus: {
     color: 'white',
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
   },
   workoutCard: {
