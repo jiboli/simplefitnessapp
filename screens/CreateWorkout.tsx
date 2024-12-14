@@ -184,7 +184,7 @@ export default function CreateWorkout() {
        style={styles.backButton}
        onPress={() => navigation.goBack()}
       > 
-      <Ionicons name="chevron-back" size={40} color="#000000" />
+      <Ionicons name="arrow-back" size={40} color="#000000" />
       </TouchableOpacity>
 
       <Text style={styles.title}>Create a New Workout</Text>

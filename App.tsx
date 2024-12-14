@@ -13,9 +13,14 @@ import CreateWorkout from './screens/CreateWorkout';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WorkoutDetails from './screens/WorkoutDetails';
+import MyCalendar from './screens/MyCalendar';
+import LogWorkout from './screens/LogWorkout';
+
+
 
 const Bottom = createBottomTabNavigator();
-const Stack = createNativeStackNavigator<WorkoutStackParamList>();
+const WorkoutStackScreen = createNativeStackNavigator<WorkoutStackParamList>();
+const WorkoutLogStackScreen= createNativeStackNavigator<WorkoutLogStackParamList>();
 
 const resetDatabase = async () => {
   try {
@@ -82,30 +87,57 @@ export type WorkoutStackParamList = {
   WorkoutDetails: { workout_id: number }; // Add this
 };
 
+export type WorkoutLogStackParamList = {
+  MyCalendar: undefined; // No parameters for this route
+  LogWorkout: undefined; // No parameters for this route
+};
+
 function WorkoutStack() {
   return (
-    <Stack.Navigator screenOptions={{
+    <WorkoutStackScreen.Navigator screenOptions={{
       headerShown: false, // Disable headers for all screens in this stack
     }}
   >
-      <Stack.Screen
+      <WorkoutStackScreen.Screen
         name="WorkoutsList"
         component={Workouts}
         options={{ headerShown: false }}
       />
-      <Stack.Screen
+      <WorkoutStackScreen.Screen
         name="CreateWorkout"
         component={CreateWorkout}
         options={{ title: 'Create Workout' }}
       />
-      <Stack.Screen
+      <WorkoutStackScreen.Screen
         name='WorkoutDetails'
         component={WorkoutDetails}
         options={{title: 'WorkoutDetails'}}
         />
-    </Stack.Navigator>
+    </WorkoutStackScreen.Navigator>
   );
 }
+
+function WorkoutLogStack() {
+  return (
+    <WorkoutLogStackScreen.Navigator
+      screenOptions={{
+        headerShown: false, // Disable headers for all screens in this stack
+      }}
+    >
+      <WorkoutLogStackScreen.Screen
+        name="MyCalendar"
+        component={MyCalendar}
+        options={{ headerShown: false }} // No header for MyCalendar screen
+      />
+      <WorkoutLogStackScreen.Screen
+        name="LogWorkout"
+        component={LogWorkout}
+        options={{ title: 'Log a Workout' }} // Title for the LogWorkout screen
+      />
+    </WorkoutLogStackScreen.Navigator>
+  );
+}
+
 
 export default function App() {
   const [dbLoaded, setDbLoaded] = useState<boolean>(false);
@@ -175,7 +207,7 @@ export default function App() {
             />
             <Bottom.Screen
               name="My Calendar"
-              component={Home}
+              component={WorkoutLogStack}
               options={{
                 tabBarButton: (props) => (
                   <TabButton {...props} iconName="calendar" />
