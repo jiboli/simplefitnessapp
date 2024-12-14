@@ -1,54 +1,161 @@
-// screens/Home.tsx
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  Alert,
+} from 'react-native';
+import DatePicker from 'react-native-date-picker';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useNavigation } from '@react-navigation/native';
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+export default function LogWorkout() {
+  const db = useSQLiteContext();
+  const navigation = useNavigation();
 
-const { height } = Dimensions.get('window'); // Get screen height for dynamic sizing
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [workouts, setWorkouts] = useState<{ workout_id: number; workout_name: string }[]>([]);
+  const [selectedWorkout, setSelectedWorkout] = useState<number | null>(null);
+  const [days, setDays] = useState<{ day_id: number; day_name: string }[]>([]);
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
-export default function LogWorkout({ navigation }: any) {
+  useEffect(() => {
+    fetchWorkouts();
+  }, []);
+
+  const fetchWorkouts = async () => {
+    try {
+      const result = await db.getAllAsync<{ workout_id: number; workout_name: string }>(
+        'SELECT * FROM Workouts;'
+      );
+      setWorkouts(result);
+    } catch (error) {
+      console.error('Error fetching workouts:', error);
+    }
+  };
+
+  const fetchDays = async (workout_id: number) => {
+    try {
+      const result = await db.getAllAsync<{ day_id: number; day_name: string }>(
+        'SELECT * FROM Days WHERE workout_id = ?;',
+        [workout_id]
+      );
+      setDays(result);
+    } catch (error) {
+      console.error('Error fetching days:', error);
+    }
+  };
+
+  const logWorkout = async () => {
+    if (!selectedDate) {
+      Alert.alert('Error', 'Please select a date.');
+      return;
+    }
+    if (!selectedWorkout) {
+      Alert.alert('Error', 'Please select a workout.');
+      return;
+    }
+    if (!selectedDay) {
+      Alert.alert('Error', 'Please select a day.');
+      return;
+    }
+
+    try {
+      const workoutDate = Math.floor(selectedDate.getTime() / 1000); // Convert date to seconds
+      await db.runAsync(
+        'INSERT INTO Workout_Log (day_id, workout_date) VALUES (?, ?);',
+        [selectedDay, workoutDate]
+      );
+      Alert.alert('Success', 'Workout logged successfully!');
+      navigation.goBack(); // Navigate back to MyCalendar or previous screen
+    } catch (error) {
+      console.error('Error logging workout:', error);
+      Alert.alert('Error', 'Failed to log workout.');
+    }
+  };
+
   return (
     <View style={styles.container}>
-      {/* App Title */}
-      <Text style={styles.title}>Simple.</Text>
-
-      {/* Create a Workout Section */}
-      <View style={[styles.card, styles.blackCard]}>
-        <Text style={[styles.cardTitle, styles.whiteText]}>
-          Create a{"\n"}workout.
+      {/* Select Date */}
+      <TouchableOpacity
+        style={styles.input}
+        onPress={() => setShowDatePicker(true)}
+      >
+        <Text style={styles.inputText}>
+          {selectedDate ? selectedDate.toDateString() : 'Select a date'}
         </Text>
-        <TouchableOpacity
-          style={[styles.button, styles.whiteButton]}
-          onPress={() => navigation.navigate('My Workouts')}
-        >
-          <Text style={[styles.buttonText, styles.blackText]}>Go to My Workouts &gt;</Text>
-        </TouchableOpacity>
-      </View>
+      </TouchableOpacity>
 
-      {/* Schedule Your Workout Section */}
-      <View style={[styles.card, styles.grayCard]}>
-        <Text style={[styles.cardTitle, styles.darkGrayText]}>
-          Schedule{"\n"}your{"\n"}workout.
-        </Text>
-        <TouchableOpacity
-          style={[styles.button, styles.darkGrayButton]}
-          onPress={() => navigation.navigate('My Calendar')}
-        >
-          <Text style={[styles.buttonText, styles.lightGrayText]}>Go to My Calendar &gt;</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Date Picker Modal */}
+      <DatePicker
+        modal
+        open={showDatePicker}
+        date={selectedDate || new Date()}
+        onConfirm={(date) => {
+          setSelectedDate(date);
+          setShowDatePicker(false);
+        }}
+        onCancel={() => setShowDatePicker(false)}
+      />
 
-      {/* Track Your Progress Section */}
-      <View style={[styles.card, styles.lightGrayCard]}>
-        <Text style={[styles.cardTitle, styles.blackText]}>
-          Track{"\n"}your{"\n"}progress.
-        </Text>
-        <TouchableOpacity
-          style={[styles.button, styles.blackButton]}
-          onPress={() => navigation.navigate('My Progress')}
-        >
-          <Text style={[styles.buttonText, styles.whiteText]}>Go to My Progress &gt;</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Select Workout */}
+      <Text style={styles.sectionTitle}>Select Workout</Text>
+      <FlatList
+        data={workouts}
+        keyExtractor={(item) => item.workout_id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={[
+              styles.listItem,
+              selectedWorkout === item.workout_id && styles.selectedItem,
+            ]}
+            onPress={() => {
+              setSelectedWorkout(item.workout_id);
+              setDays([]); // Reset days when selecting a new workout
+              setSelectedDay(null);
+              fetchDays(item.workout_id);
+            }}
+          >
+            <Text style={styles.listItemText}>{item.workout_name}</Text>
+          </TouchableOpacity>
+        )}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No workouts available.</Text>
+        }
+      />
+
+      {/* Select Day */}
+      {selectedWorkout && (
+        <>
+          <Text style={styles.sectionTitle}>Select Day</Text>
+          <FlatList
+            data={days}
+            keyExtractor={(item) => item.day_id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.listItem,
+                  selectedDay === item.day_id && styles.selectedItem,
+                ]}
+                onPress={() => setSelectedDay(item.day_id)}
+              >
+                <Text style={styles.listItemText}>{item.day_name}</Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No days available for this workout.</Text>
+            }
+          />
+        </>
+      )}
+
+      {/* Log Workout Button */}
+      <TouchableOpacity style={styles.saveButton} onPress={logWorkout}>
+        <Text style={styles.saveButtonText}>Log Workout</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -56,73 +163,60 @@ export default function LogWorkout({ navigation }: any) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingTop: 30, // Reduced spacing above the title
   },
-  title: {
-    fontSize: 44,
-    fontWeight: '900',
-    marginBottom: 20, // Compact spacing between title and first card
-    textAlign: 'center',
+  input: {
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 20,
+  },
+  inputText: {
+    fontSize: 16,
     color: '#000000',
   },
-  card: {
-    borderRadius: 15,
-    padding: 20,
-    marginBottom: 10, // Compact spacing between cards
-    justifyContent: 'center',
-    alignItems: 'center',
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginVertical: 10,
+    color: '#000000',
   },
-  blackCard: {
+  listItem: {
+    padding: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#F7F7F7',
+  },
+  listItemText: {
+    fontSize: 16,
+    color: '#000000',
+  },
+  selectedItem: {
     backgroundColor: '#000000',
-    height: height * 0.25, // Adjusted to 25% of screen height
   },
-  grayCard: {
-    backgroundColor: '#808080',
-    height: height * 0.22, // Slightly smaller than the first card
-  },
-  lightGrayCard: {
-    backgroundColor: '#D3D3D3',
-    height: height * 0.22, // Matches the gray card
-  },
-  cardTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    textAlign: 'center',
-    lineHeight: 30, // Add line spacing for better readability
-  },
-  whiteText: {
+  selectedItemText: {
     color: '#FFFFFF',
   },
-  blackText: {
-    color: '#000000',
-  },
-  darkGrayText: {
-    color: '#404040',
-  },
-  button: {
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    marginTop: 10, // Space between text and button
-    alignSelf: 'center',
-  },
-  whiteButton: {
-    marginTop:20,
-    backgroundColor: '#FFFFFF',
-  },
-  blackButton: {
-    backgroundColor: '#000000',
-  },
-  darkGrayButton: {
-    backgroundColor: '#505050',
-  },
-  buttonText: {
+  emptyText: {
     fontSize: 16,
-    fontWeight: '800',
+    color: 'rgba(0, 0, 0, 0.5)',
+    textAlign: 'center',
+    marginTop: 10,
   },
-  lightGrayText: {
-    color: '#bfbfbf',
+  saveButton: {
+    backgroundColor: '#000000',
+    borderRadius: 8,
+    paddingVertical: 15,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  saveButtonText: {
+    fontSize: 18,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
 });
