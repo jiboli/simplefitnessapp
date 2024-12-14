@@ -7,7 +7,7 @@ import {
   FlatList,
   Alert,
 } from 'react-native';
-import DatePicker from 'react-native-date-picker';
+import DateTimePicker from '@react-native-community/datetimepicker'; // Use Expo-compatible date picker
 import { useSQLiteContext } from 'expo-sqlite';
 import { useNavigation } from '@react-navigation/native';
 
@@ -62,13 +62,33 @@ export default function LogWorkout() {
       Alert.alert('Error', 'Please select a day.');
       return;
     }
-
+  
     try {
       const workoutDate = Math.floor(selectedDate.getTime() / 1000); // Convert date to seconds
-      await db.runAsync(
-        'INSERT INTO Workout_Log (day_id, workout_date) VALUES (?, ?);',
-        [selectedDay, workoutDate]
+  
+      // Fetch workout_name and day_name
+      const [workoutResult] = await db.getAllAsync<{ workout_name: string }>(
+        'SELECT workout_name FROM Workouts WHERE workout_id = ?;',
+        [selectedWorkout]
       );
+      const [dayResult] = await db.getAllAsync<{ day_name: string }>(
+        'SELECT day_name FROM Days WHERE day_id = ?;',
+        [selectedDay]
+      );
+  
+      if (!workoutResult || !dayResult) {
+        throw new Error('Failed to fetch workout or day details.');
+      }
+  
+      const { workout_name } = workoutResult;
+      const { day_name } = dayResult;
+  
+      // Insert into Workout_Log
+      await db.runAsync(
+        'INSERT INTO Workout_Log (workout_date, day_name, workout_name) VALUES (?, ?, ?);',
+        [workoutDate, day_name, workout_name]
+      );
+  
       Alert.alert('Success', 'Workout logged successfully!');
       navigation.goBack(); // Navigate back to MyCalendar or previous screen
     } catch (error) {
@@ -76,7 +96,6 @@ export default function LogWorkout() {
       Alert.alert('Error', 'Failed to log workout.');
     }
   };
-
   return (
     <View style={styles.container}>
       {/* Select Date */}
@@ -89,17 +108,20 @@ export default function LogWorkout() {
         </Text>
       </TouchableOpacity>
 
-      {/* Date Picker Modal */}
-      <DatePicker
-        modal
-        open={showDatePicker}
-        date={selectedDate || new Date()}
-        onConfirm={(date) => {
-          setSelectedDate(date);
-          setShowDatePicker(false);
-        }}
-        onCancel={() => setShowDatePicker(false)}
-      />
+      {/* Date Picker */}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowDatePicker(false);
+            if (date) {
+              setSelectedDate(date);
+            }
+          }}
+        />
+      )}
 
       {/* Select Workout */}
       <Text style={styles.sectionTitle}>Select Workout</Text>
