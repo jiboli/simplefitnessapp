@@ -51,7 +51,7 @@ export default function MyCalendar() {
   const deleteWorkoutLog = (log_id: number) => {
     Alert.alert(
       'Delete Log',
-      'Are you sure you want to delete this workout log?',
+      'Are you sure you want to delete this workout log? Its progress is also going to be deleted.  ',
       [
         { text: 'Cancel', style: 'cancel' },
         {
