@@ -6,6 +6,9 @@ import { WorkoutLog, WeightLog } from '../types';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WorkoutLogStackParamList } from '../App';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+
 
 type MyCalendarNavigationProp = StackNavigationProp<WorkoutLogStackParamList, 'MyCalendar'>;
 
@@ -80,14 +83,18 @@ export default function MyCalendar() {
 
   return (
     <View style={styles.container}>
+
       <Text style={styles.title}>My Calendar</Text>
+      
 
       <TouchableOpacity
-        style={styles.logWorkoutButton}
-        onPress={() => navigation.navigate('LogWorkout')}
-      >
-        <Text style={styles.logWorkoutButtonText}>Log a Workout</Text>
-      </TouchableOpacity>
+  style={styles.logWorkoutButton}
+  onPress={() => navigation.navigate('LogWorkout')}
+>
+  <Ionicons name="calendar" size={24} color="#FFFFFF" style={styles.icon} />
+  <Text style={styles.logWorkoutButtonText}>Log a Workout</Text>
+</TouchableOpacity>
+
 
       <FlatList
         data={logs}
@@ -133,14 +140,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     borderRadius: 20,
     paddingVertical: 15,
-    marginBottom: 20,
-    alignItems: 'center',
+    paddingHorizontal: 20,
+    flexDirection: 'row', // Ensures icon and text are in a row
+    alignItems: 'center', // Vertically centers icon and text
+    justifyContent: 'center', // Centers icon and text horizontally
+    marginTop: 20,
+    marginBottom: 30, // Adds space between this button and the others below
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  icon: {
+    marginRight: 10, // Adds space between the icon and text
   },
   logWorkoutButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
   },
+
   logContainer: {
     backgroundColor: '#F7F7F7',
     borderRadius: 20,

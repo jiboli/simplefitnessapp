@@ -31,6 +31,7 @@ export default function WorkoutList({
         activeOpacity={0.7}
         onPress={() => navigation.navigate('CreateWorkout')}
       >
+        
         <Text style={styles.createButtonText}>Create a new workout</Text>
         <Text style={styles.plus}>+</Text>
       </TouchableOpacity>

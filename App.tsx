@@ -17,6 +17,8 @@ import MyCalendar from './screens/MyCalendar';
 import LogWorkout from './screens/LogWorkout';
 import MyProgress from './screens/MyProgress';
 import LogWeights from './screens/LogWeights';
+import WeightLogDetail from './screens/WeightLogDetail';
+
 
 
 
@@ -98,6 +100,7 @@ export type WorkoutLogStackParamList = {
 export type WeightLogStackParamList = {
   MyProgress: undefined;
   LogWeights: undefined;
+  WeightLogDetail:{ workoutName: string }
 }
 
 function WorkoutStack() {
@@ -162,8 +165,15 @@ function WeightLogStack() {
       <WeightLogStackScreen.Screen
         name="LogWeights"
         component={LogWeights}
-        options={{ title: 'Log a Workout' }} // Title for the LogWorkout screen
+        options={{ title: 'Log Weights' }} // Title for the LogWorkout screen
       />
+
+<WeightLogStackScreen.Screen
+        name="WeightLogDetail"
+        component={WeightLogDetail}
+        options={{ headerShown: false }} // No header for MyCalendar screen
+      />
+    
     </WeightLogStackScreen.Navigator>
   );
 }
