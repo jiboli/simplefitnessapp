@@ -9,15 +9,13 @@ import { WorkoutLogStackParamList } from '../App';
 
 type MyCalendarNavigationProp = StackNavigationProp<WorkoutLogStackParamList, 'MyCalendar'>;
 
-
-
-
 export default function MyCalendar() {
   const db = useSQLiteContext();
   const navigation = useNavigation<MyCalendarNavigationProp>();
   const [logs, setLogs] = useState<WorkoutLog[]>([]);
 
-  // Fetch logs whenever the screen is focused
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
   useFocusEffect(
     React.useCallback(() => {
       fetchWorkoutLogs();
@@ -47,7 +45,7 @@ export default function MyCalendar() {
           onPress: async () => {
             try {
               await db.runAsync('DELETE FROM Workout_Log WHERE workout_log_id = ?;', [log_id]);
-              fetchWorkoutLogs(); // Refresh logs after deletion
+              fetchWorkoutLogs();
             } catch (error) {
               console.error('Error deleting workout log:', error);
             }
@@ -57,12 +55,18 @@ export default function MyCalendar() {
     );
   };
 
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp * 1000);
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure 2-digit month
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Text style={styles.title}>My Calendar</Text>
 
-      {/* Log Workout Button */}
       <TouchableOpacity
         style={styles.logWorkoutButton}
         onPress={() => navigation.navigate('LogWorkout')}
@@ -70,22 +74,25 @@ export default function MyCalendar() {
         <Text style={styles.logWorkoutButtonText}>Log a Workout</Text>
       </TouchableOpacity>
 
-      {/* Workout Logs */}
       <FlatList
         data={logs}
         keyExtractor={(item) => item.workout_log_id.toString()}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onLongPress={() => deleteWorkoutLog(item.workout_log_id)}
-            style={styles.logContainer}
-          >
-            <Text style={styles.logDate}>
-              {new Date(item.workout_date * 1000).toLocaleDateString()}
-            </Text>
-            <Text style={styles.logDetails}>{item.workout_name}</Text>
-            <Text style={styles.logDetails}>Day: {item.day_name}</Text>
-          </TouchableOpacity>
-        )}
+        renderItem={({ item }) => {
+          const date = new Date(item.workout_date * 1000);
+          const dayOfWeek = daysOfWeek[date.getDay()];
+          return (
+            <TouchableOpacity
+              onLongPress={() => deleteWorkoutLog(item.workout_log_id)}
+              style={styles.logContainer}
+            >
+              <Text style={styles.logDate}>
+                {formatDate(item.workout_date)} ({dayOfWeek})
+              </Text>
+              <Text style={styles.logWorkoutName}>{item.workout_name}</Text>
+              <Text style={styles.logDayName}>{item.day_name}</Text>
+            </TouchableOpacity>
+          );
+        }}
         ListEmptyComponent={<Text style={styles.emptyText}>No workout logs available.</Text>}
       />
     </View>
@@ -120,20 +127,32 @@ const styles = StyleSheet.create({
   },
   logContainer: {
     backgroundColor: '#F7F7F7',
-    borderRadius: 15,
-    padding: 20,
+    borderRadius: 20,
+    padding: 30,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
   },
   logDate: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#000000',
+  },
+  logWorkoutName: {
+    fontSize: 20,
+    fontWeight: '900',
     marginBottom: 8,
     color: '#000000',
   },
-  logDetails: {
-    fontSize: 14,
+  logDayName: {
+    fontSize: 18,
+    fontWeight: '700',
     color: '#000000',
   },
   emptyText: {
