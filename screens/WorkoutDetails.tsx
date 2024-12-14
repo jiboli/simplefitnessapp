@@ -24,8 +24,8 @@ export default function WorkoutDetails() {
   const [showExerciseModal, setShowExerciseModal] = useState(false);
   const [currentDayId, setCurrentDayId] = useState<number | null>(null);
   const [exerciseName, setExerciseName] = useState('');
-  const [exerciseSets, setExerciseSets] = useState('3'); // Default value for sets
-  const [exerciseReps, setExerciseReps] = useState('10'); // Default value for reps
+  const [exerciseSets, setExerciseSets] = useState('');
+  const [exerciseReps, setExerciseReps] = useState('');
 
   useEffect(() => {
     fetchWorkoutDetails();
@@ -57,7 +57,7 @@ export default function WorkoutDetails() {
   };
 
   const openAddDayModal = () => {
-    setDayName(''); // Clear input field
+    setDayName('');
     setShowDayModal(true);
   };
 
@@ -80,8 +80,8 @@ export default function WorkoutDetails() {
   const openAddExerciseModal = (day_id: number) => {
     setCurrentDayId(day_id);
     setExerciseName('');
-    setExerciseSets(''); // Reset to default
-    setExerciseReps(''); // Reset to default
+    setExerciseSets('');
+    setExerciseReps('');
     setShowExerciseModal(true);
   };
 
@@ -93,22 +93,22 @@ export default function WorkoutDetails() {
   const addExercise = async () => {
     const sets = exerciseSets.trim();
     const reps = exerciseReps.trim();
-  
+
     if (!exerciseName.trim()) {
       Alert.alert('Error', 'Exercise name cannot be empty.');
       return;
     }
-  
+
     if (!sets || parseInt(sets, 10) <= 0) {
       Alert.alert('Error', 'Sets must be a number greater than 0.');
       return;
     }
-  
+
     if (!reps || parseInt(reps, 10) <= 0) {
       Alert.alert('Error', 'Reps must be a number greater than 0.');
       return;
     }
-  
+
     if (currentDayId) {
       await db.runAsync(
         'INSERT INTO Exercises (day_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
@@ -119,72 +119,103 @@ export default function WorkoutDetails() {
     }
   };
 
+  const deleteDay = async (day_id: number) => {
+    Alert.alert(
+      'Delete Day',
+      'Are you sure you want to delete this day? All associated exercises will also be deleted.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await db.runAsync('DELETE FROM Exercises WHERE day_id = ?;', [day_id]); // Delete associated exercises
+            await db.runAsync('DELETE FROM Days WHERE day_id = ?;', [day_id]); // Delete the day itself
+            fetchWorkoutDetails();
+          },
+        },
+      ]
+    );
+  };
+
+  const deleteExercise = async (day_id: number, exercise_name: string) => {
+    Alert.alert(
+      'Delete Exercise',
+      `Are you sure you want to delete "${exercise_name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            await db.runAsync(
+              'DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;',
+              [day_id, exercise_name]
+            );
+            fetchWorkoutDetails();
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </TouchableOpacity>
 
-      {/* Workout Name */}
       <Text style={styles.title}>{workoutName}</Text>
 
-      {/* Days and Exercises */}
       <FlatList
         data={days}
         keyExtractor={(item) => item.day_id.toString()}
         renderItem={({ item: day }) => (
-          <View style={styles.dayContainer}>
-            {/* Day Title */}
-            <View style={styles.dayHeader}>
-              <TouchableOpacity
-                onLongPress={() => Alert.alert('Long Press Detected', `Day: ${day.day_name}`)}
-                activeOpacity={0.8}
-              >
+            <TouchableOpacity
+              onLongPress={() => deleteDay(day.day_id)} // Long press triggers day deletion
+              activeOpacity={0.8}
+              style={styles.dayContainer} // Entire day card is now pressable
+            >
+              {/* Day Header */}
+              <View style={styles.dayHeader}>
                 <Text style={styles.dayTitle}>{day.day_name}</Text>
-              </TouchableOpacity>
-
-              {/* Add Exercise Button */}
-              <TouchableOpacity onPress={() => openAddExerciseModal(day.day_id)}>
-                <Ionicons name="add-circle" size={28} color="#000000" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Exercises */}
-            {day.exercises.length > 0 ? (
-              day.exercises.map((exercise, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onLongPress={() => Alert.alert('Long Press Detected', `Exercise: ${exercise.exercise_name}`)}
-                  activeOpacity={0.8}
-                  style={styles.exerciseContainer}
-                >
-                  <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
-                  <Text style={styles.exerciseDetails}>
-                    {exercise.sets} sets x {exercise.reps} reps
-                  </Text>
+          
+                {/* Add Exercise Button */}
+                <TouchableOpacity onPress={() => openAddExerciseModal(day.day_id)}>
+                  <Ionicons name="add-circle" size={28} color="#000000" />
                 </TouchableOpacity>
-              ))
-            ) : (
-              <Text style={styles.noExercisesText}>No exercises on this day</Text>
-            )}
-          </View>
-        )}
+              </View>
+          
+              {/* Exercises */}
+              {day.exercises.length > 0 ? (
+                day.exercises.map((exercise, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
+                    activeOpacity={0.8}
+                    style={styles.exerciseContainer}
+                  >
+                    <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
+                    <Text style={styles.exerciseDetails}>
+                      {exercise.sets} sets x {exercise.reps} reps
+                    </Text>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <Text style={styles.noExercisesText}>No exercises on this day</Text>
+              )}
+            </TouchableOpacity>
+          )}
+          
         ListFooterComponent={
           <TouchableOpacity style={styles.addDayButton} onPress={openAddDayModal}>
             <Ionicons name="add-circle" size={28} color="#FFFFFF" />
             <Text style={styles.addDayButtonText}>Add Day</Text>
           </TouchableOpacity>
         }
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No days or exercises available for this workout.</Text>
-        }
+        ListEmptyComponent={<Text style={styles.emptyText}>No days or exercises available for this workout.</Text>}
       />
 
-      {/* Add Day Modal */}
       <Modal visible={showDayModal} animationType="slide" transparent>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -205,54 +236,39 @@ export default function WorkoutDetails() {
         </View>
       </Modal>
 
-      {/* Add Exercise Modal */}
       <Modal visible={showExerciseModal} animationType="slide" transparent>
-  <View style={styles.modalContainer}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Add Exercise</Text>
-
-      {/* Exercise Name Input */}
-      <TextInput
-        style={styles.input}
-        placeholder="Exercise Name" // Placeholder for exercise name
-        value={exerciseName}
-        onChangeText={setExerciseName}
-      />
-
-<TextInput
-  style={styles.input}
-  placeholder="Sets (e.g., 3)"
-  keyboardType="numeric"
-  value={exerciseSets}
-  onChangeText={(text) => {
-    const numericValue = text.replace(/[^0-9]/g, ''); // Only allow numbers
-    setExerciseSets(numericValue);
-  }}
-/>
-
-<TextInput
-  style={styles.input}
-  placeholder="Reps (e.g., 10)"
-  keyboardType="numeric"
-  value={exerciseReps}
-  onChangeText={(text) => {
-    const numericValue = text.replace(/[^0-9]/g, ''); // Only allow numbers
-    setExerciseReps(numericValue);
-  }}
-/>
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={addExercise}>
-        <Text style={styles.saveButtonText}>Save</Text>
-      </TouchableOpacity>
-
-      {/* Cancel Button */}
-      <TouchableOpacity style={styles.cancelButton} onPress={closeAddExerciseModal}>
-        <Text style={styles.cancelButtonText}>Cancel</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
-
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Add Exercise</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Exercise Name"
+              value={exerciseName}
+              onChangeText={setExerciseName}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Sets (e.g., 3)"
+              keyboardType="numeric"
+              value={exerciseSets}
+              onChangeText={(text) => setExerciseSets(text.replace(/[^0-9]/g, ''))}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Reps (e.g., 10)"
+              keyboardType="numeric"
+              value={exerciseReps}
+              onChangeText={(text) => setExerciseReps(text.replace(/[^0-9]/g, ''))}
+            />
+            <TouchableOpacity style={styles.saveButton} onPress={addExercise}>
+              <Text style={styles.saveButtonText}>Save</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.cancelButton} onPress={closeAddExerciseModal}>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
