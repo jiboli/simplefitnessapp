@@ -62,33 +62,45 @@ export default function LogWorkout() {
       Alert.alert('Error', 'Please select a day.');
       return;
     }
-
+  
     try {
       const workoutDate = Math.floor(selectedDate.getTime() / 1000); // Convert date to seconds
-
+      const selectedDayName = days.find((day) => day.day_id === selectedDay)?.day_name;
+  
+      if (!selectedDayName) {
+        Alert.alert('Error', 'Failed to find the selected day.');
+        return;
+      }
+  
+      // Check if a log already exists for the same date and day
+      const existingLog = await db.getAllAsync<{ workout_log_id: number }>(
+        `SELECT workout_log_id FROM Workout_Log WHERE workout_date = ? AND day_name = ?;`,
+        [workoutDate, selectedDayName]
+      );
+  
+      if (existingLog.length > 0) {
+        Alert.alert('Duplicate Log', 'A workout log for this date and day already exists.');
+        return;
+      }
+  
       // Fetch workout_name and day_name
       const [workoutResult] = await db.getAllAsync<{ workout_name: string }>(
         'SELECT workout_name FROM Workouts WHERE workout_id = ?;',
         [selectedWorkout]
       );
-      const [dayResult] = await db.getAllAsync<{ day_name: string }>(
-        'SELECT day_name FROM Days WHERE day_id = ?;',
-        [selectedDay]
-      );
-
-      if (!workoutResult || !dayResult) {
-        throw new Error('Failed to fetch workout or day details.');
+  
+      if (!workoutResult) {
+        throw new Error('Failed to fetch workout details.');
       }
-
+  
       const { workout_name } = workoutResult;
-      const { day_name } = dayResult;
-
+  
       // Insert into Workout_Log
       await db.runAsync(
         'INSERT INTO Workout_Log (workout_date, day_name, workout_name) VALUES (?, ?, ?);',
-        [workoutDate, day_name, workout_name]
+        [workoutDate, selectedDayName, workout_name]
       );
-
+  
       Alert.alert('Success', 'Workout logged successfully!');
       navigation.goBack(); // Navigate back to MyCalendar or previous screen
     } catch (error) {
@@ -96,6 +108,8 @@ export default function LogWorkout() {
       Alert.alert('Error', 'Failed to log workout.');
     }
   };
+  
+  
 
   const formatDate = (date: Date | null): string => {
     if (!date) return 'Select a date';
