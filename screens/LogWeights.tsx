@@ -20,8 +20,8 @@ export default function LogWeights() {
   const [workouts, setWorkouts] = useState<WorkoutLog[]>([]);
   const [selectedWorkout, setSelectedWorkout] = useState<WorkoutLog | null>(null);
   const [exercises, setExercises] = useState<LoggedExercise[]>([]);
-  const [weights, setWeights] = useState<{ [key: string]: number }>({});
-  const [reps, setReps] = useState<{ [key: string]: number }>({});
+  const [weights, setWeights] = useState<{ [key: string]: string }>({});
+  const [reps, setReps] = useState<{ [key: string]: string }>({});
 
   useEffect(() => {
     fetchWorkouts();
@@ -50,13 +50,13 @@ export default function LogWeights() {
       );
       setExercises(result);
 
-      // Initialize weights and reps
-      const initialWeights: { [key: string]: number } = {};
-      const initialReps: { [key: string]: number } = {};
+      const initialWeights: { [key: string]: string } = {};
+      const initialReps: { [key: string]: string } = {};
       result.forEach((exercise) => {
         for (let i = 1; i <= exercise.sets; i++) {
-          initialWeights[`${exercise.logged_exercise_id}_${i}`] = 0; // Default weight = 0
-          initialReps[`${exercise.logged_exercise_id}_${i}`] = exercise.reps; // Default reps from Logged_Exercises
+          const key = `${exercise.logged_exercise_id}_${i}`;
+          initialWeights[key] = ''; // Empty default for user input
+          initialReps[key] = exercise.reps.toString(); // Default reps as string
         }
       });
       setWeights(initialWeights);
@@ -72,28 +72,19 @@ export default function LogWeights() {
       return;
     }
 
-    // Validate weights and reps
-    for (const [key, weight] of Object.entries(weights)) {
-      if (weight <= 0) {
-        Alert.alert('Error', `Weight for ${key} must be greater than 0.`);
-        return;
-      }
-    }
-
-    for (const [key, rep] of Object.entries(reps)) {
-      if (rep <= 0) {
-        Alert.alert('Error', `Reps for ${key} must be greater than 0.`);
-        return;
-      }
-    }
-
     try {
-      // Use db.withTransactionAsync without referencing txn explicitly
       await db.withTransactionAsync(async () => {
         for (const exercise of exercises) {
           for (let i = 1; i <= exercise.sets; i++) {
             const weightKey = `${exercise.logged_exercise_id}_${i}`;
             const repsKey = `${exercise.logged_exercise_id}_${i}`;
+
+            const weight = parseFloat(weights[weightKey].replace(',', '.')) || 0; // Convert to number
+            const repsCount = parseInt(reps[repsKey], 10) || 0;
+
+            if (weight <= 0 || repsCount <= 0) {
+              throw new Error('Weight and reps must be greater than 0.');
+            }
 
             await db.runAsync(
               `INSERT INTO Weight_Log 
@@ -104,8 +95,8 @@ export default function LogWeights() {
                 exercise.logged_exercise_id,
                 exercise.exercise_name,
                 i,
-                weights[weightKey],
-                reps[repsKey],
+                weight,
+                repsCount,
               ]
             );
           }
@@ -116,11 +107,9 @@ export default function LogWeights() {
       navigation.goBack(); // Navigate back to My Progress
     } catch (error) {
       console.error('Error logging weights:', error);
-      Alert.alert('Error', 'Failed to log weights.');
+      Alert.alert('Error','Failed to log weights.');
     }
   };
-
-  
 
   const renderExercise = (exercise: LoggedExercise) => {
     return (
@@ -128,7 +117,7 @@ export default function LogWeights() {
         <Text style={styles.exerciseTitle}>{exercise.exercise_name}</Text>
         <View style={styles.labelsRow}>
           <Text style={styles.label}>Reps</Text>
-          <Text style={styles.label}>Weight</Text>
+          <Text style={styles.label}>Weight (kg)</Text>
         </View>
         {Array.from({ length: exercise.sets }).map((_, index) => {
           const setNumber = index + 1;
@@ -142,26 +131,29 @@ export default function LogWeights() {
                 style={styles.input}
                 placeholder="Reps"
                 keyboardType="numeric"
-                value={reps[repsKey]?.toString()}
+                value={reps[repsKey]}
                 onChangeText={(text) =>
                   setReps((prev) => ({
                     ...prev,
-                    [repsKey]: parseInt(text, 10) || 0,
+                    [repsKey]: text.replace(/[^0-9]/g, ''), // Only allow numbers
                   }))
                 }
               />
               <TextInput
-                style={styles.input}
-                placeholder="Weight"
-                keyboardType="numeric"
-                value={weights[weightKey]?.toString()}
-                onChangeText={(text) =>
-                  setWeights((prev) => ({
-                    ...prev,
-                    [weightKey]: parseFloat(text) || 0,
-                  }))
-                }
-              />
+  style={styles.input}
+  placeholder="Weight"
+  keyboardType="decimal-pad"
+  value={weights[weightKey]}
+  onChangeText={(text) => {
+    // Allow only numbers, decimal points, and commas
+    const sanitizedText = text.replace(/[^0-9.,]/g, '');
+    setWeights((prev) => ({
+      ...prev,
+      [weightKey]: sanitizedText, // Save sanitized input
+    }));
+  }}
+/>
+
             </View>
           );
         })}
@@ -190,7 +182,7 @@ export default function LogWeights() {
               }}
             >
               <Text style={styles.workoutName}>{item.workout_name}</Text>
-              <Text style={styles.dayName}> {item.day_name}</Text>
+              <Text style={styles.dayName}>{item.day_name}</Text>
               <Text style={styles.workoutDate}>
                 {new Date(item.workout_date * 1000).toLocaleDateString()}
               </Text>
@@ -217,111 +209,109 @@ export default function LogWeights() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-      backgroundColor: '#FFFFFF',
-    },
-    backButton: {
-      position: 'absolute',
-      top: 20,
-      left: 10,
-      zIndex: 10,
-      padding: 8,
-    },
-    title: {
-      fontSize: 28, // Increased font size
-      fontWeight: 'bold',
-      marginBottom: 20,
-      textAlign: 'center',
-      color: '#000000',
-    },
-    workoutContainer: {
-      backgroundColor: '#F7F7F7',
-      padding: 15,
-      borderRadius: 10,
-      marginBottom: 10,
-    },
-    workoutName: {
-      fontSize: 20, // Increased font size
-      fontWeight: 'bold',
-      color: '#000000',
-      textAlign: 'center',
-    },
-    workoutDate: {
-      fontSize: 16, // Increased font size
-      color: '#666666',
-      textAlign: 'center',
-    },
-    exerciseContainer: {
-      marginBottom: 20,
-    },
-    exerciseTitle: {
-      fontSize: 22, // Increased font size
-      fontWeight: 'bold',
-      marginBottom: 30,
-      textAlign: 'center',
-    },
-    labelsRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginLeft: 100,
-      marginBottom: 5,
-      paddingHorizontal: 10,
-    },
-    label: {
-      fontSize: 16, // Increased font size
-      fontWeight: '700', // Bolder font weight
-      color: '#000000',
-      textAlign: 'center',
-      flex: 1,
-    },
-    setContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 10,
-      justifyContent: 'space-between',
-    },
-    setText: {
-      fontSize: 18, // Increased font size
-      textAlign: 'center',
-      flex: 1,
-      fontWeight: '600', // Bolder font weight
-    },
-    input: {
-      flex: 1,
-      borderWidth: 1,
-      borderColor: '#FFFFFF',
-      borderRadius: 5,
-      padding: 8, // Reduced padding to make the boxes smaller
-      marginHorizontal: 5,
-      textAlign: 'center',
-      fontSize: 16, // Increased font size inside the input box
-    },
-    saveButton: {
-      backgroundColor: '#000000',
-      paddingVertical: 15,
-      borderRadius: 10,
-      alignItems: 'center',
-      marginTop: 20,
-    },
-    saveButtonText: {
-      color: '#FFFFFF',
-      fontSize: 20, // Increased font size
-      fontWeight: 'bold',
-    },
-    emptyText: {
-      textAlign: 'center',
-      color: '#666666',
-      fontSize: 16,
-    },
-    dayName: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#666666',
-        textAlign: 'center',
-        marginBottom: 5,
-      },
-      
-  });
-  
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#000000',
+  },
+  workoutContainer: {
+    backgroundColor: '#F7F7F7',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  workoutName: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000000',
+    textAlign: 'center',
+  },
+  workoutDate: {
+    fontSize: 16,
+    color: '#666666',
+    textAlign: 'center',
+  },
+  dayName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#666666',
+    textAlign: 'center',
+    marginBottom: 5,
+  },
+  exerciseContainer: {
+    marginBottom: 20,
+  },
+  exerciseTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
+  labelsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginLeft: 100,
+    marginBottom: 5,
+    paddingHorizontal: 10,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#000000',
+    textAlign: 'center',
+    flex: 1,
+  },
+  setContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    justifyContent: 'space-between',
+  },
+  setText: {
+    fontSize: 18,
+    textAlign: 'center',
+    flex: 1,
+    fontWeight: '600',
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#CCCCCC',
+    borderRadius: 5,
+    padding: 8,
+    marginHorizontal: 5,
+    textAlign: 'center',
+    fontSize: 16,
+  },
+  saveButton: {
+    backgroundColor: '#000000',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  saveButtonText: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: '#666666',
+    fontSize: 16,
+  },
+});
