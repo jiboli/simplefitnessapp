@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { WorkoutLog } from '../types';
+import { WorkoutLog, WeightLog } from '../types';
 import { useFocusEffect } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WorkoutLogStackParamList } from '../App';
@@ -30,6 +30,21 @@ export default function MyCalendar() {
       setLogs(result);
     } catch (error) {
       console.error('Error fetching workout logs:', error);
+    }
+  };
+
+  const fetchLoggedWeights = async (workoutLogId: number) => {
+    try {
+      const weights = await db.getAllAsync<WeightLog>(
+        `SELECT wl.*, le.exercise_name 
+         FROM Weight_Log wl
+         JOIN Logged_Exercises le ON wl.logged_exercise_id = le.logged_exercise_id
+         WHERE wl.workout_log_id = ?;`,
+        [workoutLogId]
+      );
+      console.log('Logged Weights:', weights);
+    } catch (error) {
+      console.error('Error fetching logged weights:', error);
     }
   };
 
@@ -83,6 +98,7 @@ export default function MyCalendar() {
           return (
             <TouchableOpacity
               onLongPress={() => deleteWorkoutLog(item.workout_log_id)}
+              onPress={() => fetchLoggedWeights(item.workout_log_id)}
               style={styles.logContainer}
             >
               <Text style={styles.logDate}>

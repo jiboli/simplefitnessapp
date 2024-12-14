@@ -10,6 +10,7 @@ import {
 import DateTimePicker from '@react-native-community/datetimepicker'; // Use Expo-compatible date picker
 import { useSQLiteContext } from 'expo-sqlite';
 import { useNavigation } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function LogWorkout() {
   const db = useSQLiteContext();
@@ -83,7 +84,7 @@ export default function LogWorkout() {
         return;
       }
   
-      // Fetch workout_name and day_name
+      // Fetch workout_name
       const [workoutResult] = await db.getAllAsync<{ workout_name: string }>(
         'SELECT workout_name FROM Workouts WHERE workout_id = ?;',
         [selectedWorkout]
@@ -96,10 +97,26 @@ export default function LogWorkout() {
       const { workout_name } = workoutResult;
   
       // Insert into Workout_Log
-      await db.runAsync(
+      const { lastInsertRowId: workoutLogId } = await db.runAsync(
         'INSERT INTO Workout_Log (workout_date, day_name, workout_name) VALUES (?, ?, ?);',
         [workoutDate, selectedDayName, workout_name]
       );
+  
+      // Fetch all exercises for the selected day
+      const exercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
+        'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?;',
+        [selectedDay]
+      );
+  
+      // Insert each exercise into Logged_Exercises
+      const insertExercisePromises = exercises.map((exercise) =>
+        db.runAsync(
+          'INSERT INTO Logged_Exercises (workout_log_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
+          [workoutLogId, exercise.exercise_name, exercise.sets, exercise.reps]
+        )
+      );
+  
+      await Promise.all(insertExercisePromises);
   
       Alert.alert('Success', 'Workout logged successfully!');
       navigation.goBack(); // Navigate back to MyCalendar or previous screen
@@ -108,6 +125,7 @@ export default function LogWorkout() {
       Alert.alert('Error', 'Failed to log workout.');
     }
   };
+  
   
   
 
@@ -121,7 +139,12 @@ export default function LogWorkout() {
 
   return (
     <View style={styles.container}>
+
+    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color="#000000" />
+    </TouchableOpacity>
       {/* Select Date */}
+      <Text style={styles.Title}>Select Date</Text>
       <TouchableOpacity
         style={styles.input}
         onPress={() => setShowDatePicker(true)}
@@ -225,6 +248,13 @@ const styles = StyleSheet.create({
       padding: 20,
       backgroundColor: '#FFFFFF',
     },
+        backButton: {
+      position: 'absolute',
+      top: 20,
+      left: 10,
+      zIndex: 10,
+      padding: 8,
+    },
     input: {
       borderWidth: 1,
       borderColor: 'rgba(0, 0, 0, 0.2)',
@@ -248,6 +278,14 @@ const styles = StyleSheet.create({
       color: '#000000',
       textAlign: 'left',
     },
+
+   Title: {
+        fontSize: 22,
+        fontWeight: '800',
+        marginVertical: 15,
+        color: '#000000',
+        textAlign: 'center',
+      },
     listItem: {
       padding: 20,
       borderWidth: 1,

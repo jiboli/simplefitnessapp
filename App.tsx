@@ -15,12 +15,16 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import WorkoutDetails from './screens/WorkoutDetails';
 import MyCalendar from './screens/MyCalendar';
 import LogWorkout from './screens/LogWorkout';
+import MyProgress from './screens/MyProgress';
+import LogWeights from './screens/LogWeights';
+
 
 
 
 const Bottom = createBottomTabNavigator();
 const WorkoutStackScreen = createNativeStackNavigator<WorkoutStackParamList>();
 const WorkoutLogStackScreen= createNativeStackNavigator<WorkoutLogStackParamList>();
+const WeightLogStackScreen= createNativeStackNavigator<WeightLogStackParamList>();
 
 const resetDatabase = async () => {
   try {
@@ -91,6 +95,10 @@ export type WorkoutLogStackParamList = {
   MyCalendar: undefined; // No parameters for this route
   LogWorkout: undefined; // No parameters for this route
 };
+export type WeightLogStackParamList = {
+  MyProgress: undefined;
+  LogWeights: undefined;
+}
 
 function WorkoutStack() {
   return (
@@ -135,6 +143,28 @@ function WorkoutLogStack() {
         options={{ title: 'Log a Workout' }} // Title for the LogWorkout screen
       />
     </WorkoutLogStackScreen.Navigator>
+  );
+}
+
+
+function WeightLogStack() {
+  return (
+    <WeightLogStackScreen.Navigator
+      screenOptions={{
+        headerShown: false, // Disable headers for all screens in this stack
+      }}
+    >
+      <WeightLogStackScreen.Screen
+        name="MyProgress"
+        component={MyProgress}
+        options={{ headerShown: false }} // No header for MyCalendar screen
+      />
+      <WeightLogStackScreen.Screen
+        name="LogWeights"
+        component={LogWeights}
+        options={{ title: 'Log a Workout' }} // Title for the LogWorkout screen
+      />
+    </WeightLogStackScreen.Navigator>
   );
 }
 
@@ -217,7 +247,7 @@ export default function App() {
             />
             <Bottom.Screen
               name="My Progress"
-              component={Home}
+              component={WeightLogStack}
               options={{
                 tabBarButton: (props) => (
                   <TabButton {...props} iconName="stats-chart" />

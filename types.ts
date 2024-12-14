@@ -30,14 +30,24 @@ export interface WorkoutLog {
   workout_name: string; // Workout name (copied at the time of logging)
 }
 
-// Interface for the Exercise_Log table
-export interface ExerciseLog {
-  exercise_log_id: number; // Primary Key
+// Interface for the Logged_Exercises table
+export interface LoggedExercise {
+  logged_exercise_id: number; // Primary Key
   workout_log_id: number; // Foreign Key to Workout_Log
   exercise_name: string; // Exercise name (copied at the time of logging)
-  set_number: number; // Set number (e.g., 1st set, 2nd set, etc.)
-  weight_logged: number; // Weight logged for the set
-  reps: number; // Reps performed for the set
+  sets: number; // Sets count (copied at the time of logging)
+  reps: number; // Reps count (copied at the time of logging)
+}
+
+// Interface for the Weight_Log table
+export interface WeightLog {
+  weight_log_id: number; // Primary Key
+  workout_log_id: number; // Foreign Key to Workout_Log
+  logged_exercise_id: number; // Foreign Key to Logged_Exercises
+  exercise_name: string;
+  set_number: number; // Which set (e.g., 1st set, 2nd set, etc.)
+  weight_logged: number; // Weight logged for that set
+  reps_logged: number; // Reps performed for that set
 }
 
 
