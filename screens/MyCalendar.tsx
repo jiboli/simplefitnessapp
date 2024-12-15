@@ -4,6 +4,7 @@ import {
   Text,
   StyleSheet,
   FlatList,
+  ScrollView,
   TouchableOpacity,
   Alert,
 } from 'react-native';
@@ -48,9 +49,9 @@ export default function MyCalendar() {
         today.getFullYear(),
         today.getMonth(),
         today.getDate()
-      ).getTime() / 1000; // Start of today in seconds
+      ).getTime() / 1000;
 
-      const endOfDayTimestamp = startOfDayTimestamp + 86400 - 1; // End of today in seconds
+      const endOfDayTimestamp = startOfDayTimestamp + 86400 - 1;
 
       // Fetch today's workout
       const todayResult = await db.getAllAsync<{
@@ -100,7 +101,6 @@ export default function MyCalendar() {
 
   const deleteWorkoutLog = async (workout_log_id: number) => {
     try {
-      // Delete the workout log and any associated data
       await db.runAsync(`DELETE FROM Workout_Log WHERE workout_log_id = ?;`, [workout_log_id]);
       await db.runAsync(`DELETE FROM Weight_Log WHERE workout_log_id = ?;`, [workout_log_id]);
       await db.runAsync(`DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`, [workout_log_id]);
@@ -183,7 +183,7 @@ export default function MyCalendar() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>My Calendar</Text>
 
       {/* Schedule a Workout Button */}
@@ -214,35 +214,37 @@ export default function MyCalendar() {
 
       {/* Unlogged Past Workouts Section */}
       <Text style={styles.sectionTitle}>Unlogged Past Workouts</Text>
-      <FlatList
-        data={pastWorkouts}
-        keyExtractor={(item) => `${item.workout_log_id}`}
-        renderItem={({ item }) => renderWorkoutCard(item)}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No unlogged past workouts available.</Text>
-        }
-      />
+      {pastWorkouts.length > 0 ? (
+        <FlatList
+          data={pastWorkouts}
+          keyExtractor={(item) => `${item.workout_log_id}`}
+          renderItem={({ item }) => renderWorkoutCard(item)}
+          scrollEnabled={false}
+        />
+      ) : (
+        <Text style={styles.emptyText}>No unlogged past workouts available.</Text>
+      )}
 
       {/* Future Workouts Section */}
       <Text style={styles.sectionTitle}>Future Scheduled Workouts</Text>
-      <FlatList
-        data={futureWorkouts}
-        keyExtractor={(item) => `${item.workout_log_id}`}
-        renderItem={({ item }) => renderWorkoutCard(item)}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No future workouts scheduled.</Text>
-        }
-      />
-    </View>
+      {futureWorkouts.length > 0 ? (
+        <FlatList
+          data={futureWorkouts}
+          keyExtractor={(item) => `${item.workout_log_id}`}
+          renderItem={({ item }) => renderWorkoutCard(item)}
+          scrollEnabled={false}
+        />
+      ) : (
+        <Text style={styles.emptyText}>No future workouts scheduled.</Text>
+      )}
+    </ScrollView>
   );
 }
-
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 40,
     backgroundColor: '#FFFFFF',
   },
   title: {
@@ -261,11 +263,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 30,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
   },
   icon: {
     marginRight: 10,
@@ -288,11 +285,6 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
   },
   logDate: {
     fontSize: 18,
