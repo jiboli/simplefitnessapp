@@ -81,8 +81,7 @@ export default function MyCalendar() {
         workout_name: string;
         workout_date: number;
         day_name: string;
-        workout_log_id: number;
-      }>(
+        workout_log_id: number }>(
         `SELECT * FROM Workout_Log 
          WHERE workout_date < ? 
            AND workout_log_id NOT IN (SELECT DISTINCT workout_log_id FROM Weight_Log)
@@ -96,8 +95,7 @@ export default function MyCalendar() {
         workout_name: string;
         workout_date: number;
         day_name: string;
-        workout_log_id: number;
-      }>(
+        workout_log_id: number }>(
         `SELECT * FROM Workout_Log 
          WHERE workout_date > ? 
          ORDER BY workout_date ASC;`,
@@ -243,6 +241,16 @@ export default function MyCalendar() {
     >
       <Text style={styles.title}>My Calendar</Text>
 
+      {/* Schedule a Workout Button */}
+      <TouchableOpacity
+        style={styles.logWorkoutButton}
+        onPress={() => navigation.navigate('LogWorkout')}
+      >
+        <Ionicons name="calendar" size={24} color="#FFFFFF" style={styles.icon} />
+        <Text style={styles.logWorkoutButtonText}>Schedule a Workout</Text>
+      </TouchableOpacity>
+
+      {/* Today's Workout Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Today's Workout</Text>
         {todayWorkout ? (
@@ -259,7 +267,7 @@ export default function MyCalendar() {
             <View key={item.workout_log_id}>{renderWorkoutCard(item)}</View>
           ))
         ) : (
-          <Text style={styles.emptyText}>No untracked workouts found</Text>
+          <Text style={styles.emptyText}>No untracked workouts found.</Text>
         )}
       </View>
 
@@ -320,6 +328,8 @@ export default function MyCalendar() {
   );
 }
 
+
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   contentContainer: { alignItems: 'center', paddingHorizontal: 20 },
@@ -337,6 +347,24 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#000000',
     textAlign: 'center',
+  },
+  logWorkoutButton: {
+    backgroundColor: '#000000',
+    borderRadius: 20,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 30,
+  },
+  icon: {
+    marginRight: 10,
+  },
+  logWorkoutButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
   logContainer: {
     backgroundColor: '#FFFFFF',
