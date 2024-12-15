@@ -160,12 +160,49 @@ export default function WeightLogDetail() {
     const key = `${day_name}_${workout_date}`;
     const isExpanded = expandedDays[key];
     const formattedDate = formatDate(workout_date);
-
+  
+    const confirmDeleteDay = () => {
+      Alert.alert(
+        'Delete Day',
+        `Are you sure you want to delete all logs for "${day_name}" on ${formattedDate}?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: async () => {
+              await deleteDayLogs(day_name, workout_date);
+            },
+          },
+        ]
+      );
+    };
+  
+    const deleteDayLogs = async (dayName: string, workoutDate: number) => {
+      try {
+        await db.runAsync(
+          `DELETE FROM Weight_Log
+           WHERE workout_log_id IN (
+             SELECT workout_log_id 
+             FROM Workout_Log 
+             WHERE day_name = ? AND workout_date = ?
+           );`,
+          [dayName, workoutDate]
+        );
+  
+        // Refresh days after deletion
+        fetchDays();
+      } catch (error) {
+        console.error('Error deleting logs for day:', error);
+      }
+    };
+  
     return (
       <View key={key} style={styles.logContainer}>
         <TouchableOpacity
           style={styles.logHeader}
           onPress={() => toggleDayExpansion(day_name, workout_date)}
+          onLongPress={confirmDeleteDay} // Add this line for long press functionality
         >
           <Text style={styles.logDayName}>{day_name}</Text>
           <Text style={styles.logDate}>{formattedDate}</Text>
@@ -192,7 +229,7 @@ export default function WeightLogDetail() {
       </View>
     );
   };
-
+  
   return (
     <View style={styles.container}>
       {/* Back Button */}
