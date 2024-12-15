@@ -203,20 +203,22 @@ export default function WeightLogDetail() {
     return (
       <View key={key} style={styles.logContainer}>
         <TouchableOpacity
-          style={styles.logHeader}
-          onPress={() => toggleDayExpansion(day_name, workout_date)}
-          onLongPress={() => confirmDeleteDay(day_name, workout_date)} // Handle long press for day deletion
-        >
-          <View>
-            <Text style={styles.logDayName}>{day_name}</Text>
-            <Text style={styles.logDate}>{formattedDate}</Text>
-          </View>
-          <Ionicons
-            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-            size={20}
-            color="#000"
-          />
-        </TouchableOpacity>
+  style={styles.logHeader}
+  onPress={() => toggleDayExpansion(day_name, workout_date)}
+  onLongPress={() => confirmDeleteDay(day_name, workout_date)} // Handle long press for day deletion
+>
+  <View>
+    <Text style={styles.logDayName}>{day_name}</Text>
+    <Text style={styles.logDate}>{formattedDate}</Text>
+  </View>
+  <Ionicons
+    name={isExpanded ? 'chevron-up' : 'chevron-down'}
+    size={25}
+    color="#000"
+    style={styles.icon} // Use the new icon style
+  />
+</TouchableOpacity>
+
 
         {isExpanded && logs[key] && (
           <View style={styles.logList}>
@@ -286,83 +288,90 @@ export default function WeightLogDetail() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 40,
-    backgroundColor: '#FFFFFF',
-  },
-  backButton: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    zIndex: 10,
-    padding: 8,
-  },
-  logContainer: {
-    backgroundColor: '#F7F7F7',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-  },
-  logHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  logDate: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginTop: 5,
-    color: '#000000',
-  },
-  logDayName: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#000000',
-  },
-  logList: {
-    marginTop: 10,
-    paddingLeft: 10,
-  },
-  logItem: {
-    marginBottom: 10,
-  },
-  exerciseName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  logDetail: {
-    fontSize: 14,
-    color: '#666666',
-  },
-  filterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#000000',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    alignSelf: 'center',
-  },
-  filterButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 10,
-  },
-  emptyText: {
-    textAlign: 'center',
-    fontSize: 16,
-    color: 'rgba(0, 0, 0, 0.5)',
-  },
-});
+    container: {
+      flex: 1,
+      paddingHorizontal: 20,
+      paddingTop: 40,
+      backgroundColor: '#FFFFFF',
+    },
+    backButton: {
+      position: 'absolute',
+      top: 10,
+      left: 10,
+      zIndex: 10,
+      padding: 8,
+    },
+    logContainer: {
+      backgroundColor: '#F7F7F7',
+      borderRadius: 20,
+      padding: 20,
+      marginBottom: 15,
+      borderWidth: 1,
+      borderColor: 'rgba(0, 0, 0, 0.1)',
+      elevation: 2,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 5,
+    },
+    logHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      position: 'relative', // Needed for absolute positioning of icon
+    },
+    logDate: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginTop: 5,
+      color: '#000000',
+    },
+    logDayName: {
+      fontSize: 20,
+      fontWeight: '900',
+      color: '#000000',
+    },
+    icon: {
+      position: 'absolute', // Allow placement relative to logHeader
+      right: '5%', // Adjust placement from the right edge
+      top: '50%', // Center it vertically relative to the card
+      transform: [{ translateY: -10 }], // Adjust to align perfectly
+    },
+    logList: {
+      marginTop: 10,
+      paddingLeft: 10,
+    },
+    logItem: {
+      marginBottom: 10,
+    },
+    exerciseName: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: '#000000',
+    },
+    logDetail: {
+      fontSize: 14,
+      color: '#666666',
+    },
+    filterButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: '#000000',
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      marginBottom: 20,
+      alignSelf: 'center',
+    },
+    filterButtonText: {
+      color: '#FFFFFF',
+      fontSize: 16,
+      fontWeight: 'bold',
+      marginLeft: 10,
+    },
+    emptyText: {
+      textAlign: 'center',
+      fontSize: 16,
+      color: 'rgba(0, 0, 0, 0.5)',
+    },
+  });
+  
