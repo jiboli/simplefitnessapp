@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -155,6 +156,39 @@ export default function WeightLogDetail() {
     }
   };
 
+  const deleteDayLogs = async (dayName: string, workoutDate: number) => {
+    try {
+      await db.runAsync(
+        `DELETE FROM Weight_Log
+         WHERE workout_log_id IN (
+           SELECT workout_log_id 
+           FROM Workout_Log 
+           WHERE day_name = ? AND workout_date = ?
+         );`,
+        [dayName, workoutDate]
+      );
+      // Refresh days after deletion
+      fetchDays();
+    } catch (error) {
+      console.error('Error deleting logs for day:', error);
+    }
+  };
+
+  const confirmDeleteDay = (dayName: string, workoutDate: number) => {
+    Alert.alert(
+      'Delete Logs',
+      'Are you sure you want to delete all logs for this day? This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteDayLogs(dayName, workoutDate),
+        },
+      ]
+    );
+  };
+
   const renderDay = ({
     day_name,
     workout_date,
@@ -171,6 +205,7 @@ export default function WeightLogDetail() {
         <TouchableOpacity
           style={styles.logHeader}
           onPress={() => toggleDayExpansion(day_name, workout_date)}
+          onLongPress={() => confirmDeleteDay(day_name, workout_date)} // Handle long press for day deletion
         >
           <View>
             <Text style={styles.logDayName}>{day_name}</Text>
@@ -185,11 +220,8 @@ export default function WeightLogDetail() {
 
         {isExpanded && logs[key] && (
           <View style={styles.logList}>
-            {logs[key].map((log, index) => (
-              <View
-                key={`${log.exercise_name}_${log.set_number}`} // Ensure unique key for each log entry
-                style={styles.logItem}
-              >
+            {logs[key].map((log) => (
+              <View key={`${log.exercise_name}_${log.set_number}`} style={styles.logItem}>
                 <Text style={styles.exerciseName}>{log.exercise_name}</Text>
                 <Text style={styles.logDetail}>
                   Set {log.set_number}: {log.reps_logged} reps, {log.weight_logged} kg

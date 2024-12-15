@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   workoutText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#000000',
     textAlign: 'center',

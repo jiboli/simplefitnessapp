@@ -36,7 +36,14 @@ export default function LogWeights() {
          )
          ORDER BY workout_date DESC;`
       );
-      setWorkouts(result);
+
+      // Filter out future workouts
+      const today = new Date().getTime();
+      const filteredWorkouts = result.filter(
+        (workout) => workout.workout_date * 1000 <= today
+      );
+
+      setWorkouts(filteredWorkouts);
     } catch (error) {
       console.error('Error fetching workouts:', error);
     }
@@ -107,7 +114,42 @@ export default function LogWeights() {
       navigation.goBack(); // Navigate back to My Progress
     } catch (error) {
       console.error('Error logging weights:', error);
-      Alert.alert('Error','Failed to log weights.');
+      Alert.alert('Error', 'Failed to log weights.');
+    }
+  };
+
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp * 1000);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    const yesterday = new Date(today);
+
+    tomorrow.setDate(today.getDate() + 1);
+    yesterday.setDate(today.getDate() - 1);
+
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return 'Today';
+    } else if (
+      date.getDate() === tomorrow.getDate() &&
+      date.getMonth() === tomorrow.getMonth() &&
+      date.getFullYear() === tomorrow.getFullYear()
+    ) {
+      return 'Tomorrow';
+    } else if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return 'Yesterday';
+    } else {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`; // Default format
     }
   };
 
@@ -140,20 +182,18 @@ export default function LogWeights() {
                 }
               />
               <TextInput
-  style={styles.input}
-  placeholder="Weight"
-  keyboardType="decimal-pad"
-  value={weights[weightKey]}
-  onChangeText={(text) => {
-    // Allow only numbers, decimal points, and commas
-    const sanitizedText = text.replace(/[^0-9.,]/g, '');
-    setWeights((prev) => ({
-      ...prev,
-      [weightKey]: sanitizedText, // Save sanitized input
-    }));
-  }}
-/>
-
+                style={styles.input}
+                placeholder="Weight"
+                keyboardType="decimal-pad"
+                value={weights[weightKey]}
+                onChangeText={(text) => {
+                  const sanitizedText = text.replace(/[^0-9.,]/g, '');
+                  setWeights((prev) => ({
+                    ...prev,
+                    [weightKey]: sanitizedText,
+                  }));
+                }}
+              />
             </View>
           );
         })}
@@ -183,9 +223,7 @@ export default function LogWeights() {
             >
               <Text style={styles.workoutName}>{item.workout_name}</Text>
               <Text style={styles.dayName}>{item.day_name}</Text>
-              <Text style={styles.workoutDate}>
-                {new Date(item.workout_date * 1000).toLocaleDateString()}
-              </Text>
+              <Text style={styles.workoutDate}>{formatDate(item.workout_date)}</Text>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
