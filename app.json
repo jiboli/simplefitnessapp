@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "simplefitnessappbeta",
+    "name": "Simple Fitness App Beta",
     "slug": "simplefitnessappbeta",
     "version": "0.9.0",
     "orientation": "portrait",
@@ -16,6 +16,7 @@
       "supportsTablet": true
     },
     "android": {
+      "appName": "Simple Fitness App Beta",
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
