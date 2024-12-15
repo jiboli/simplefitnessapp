@@ -98,21 +98,26 @@ export default function MyProgress() {
 
       {/* List of Workouts with Logs */}
       <FlatList
-        data={workouts}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.workoutCard}
-            onPress={() => handleWorkoutPress(item)}
-            onLongPress={() => handleWorkoutLongPress(item)}
-          >
-            <Text style={styles.workoutText}>{item}</Text>
-          </TouchableOpacity>
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>No logged workouts available.</Text>
-        }
-      />
+  data={workouts}
+  keyExtractor={(item) => item}
+  renderItem={({ item }) => (
+    <TouchableOpacity
+      style={styles.workoutCard}
+      onPress={() => handleWorkoutPress(item)}
+      onLongPress={() => handleWorkoutLongPress(item)}
+    >
+      {/* Container to align the icon and text */}
+      <View style={styles.workoutCardContent}>
+        <Text style={styles.workoutText}>{item}</Text>
+        <Ionicons name="chevron-forward" size={20} color="gray" />
+      </View>
+    </TouchableOpacity>
+  )}
+  ListEmptyComponent={
+    <Text style={styles.emptyText}>No logged workouts available.</Text>
+  }
+/>
+
     </View>
   );
 }
@@ -140,6 +145,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
+    marginBottom:20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -154,23 +160,32 @@ const styles = StyleSheet.create({
   },
   workoutCard: {
     backgroundColor: '#F7F7F7',
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
-    elevation: 3,
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.8,
     shadowRadius: 5,
-    marginTop: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  workoutCardContent: {
+    flexDirection: 'row', // Align items in a row
+    paddingHorizontal: 16,
+    justifyContent: 'space-between', // Space between the text and the icon
+    alignItems: 'center', // Align vertically in the center
+    width: '100%', // Ensure content takes up the full width
   },
   workoutText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#000000',
-    textAlign: 'center',
   },
   emptyText: {
     textAlign: 'center',
