@@ -168,7 +168,6 @@ export default function CreateWorkout() {
 
     try {
       await createWorkout(db, workoutName, formattedDays);
-      Alert.alert('Success', 'Workout created successfully!');
       navigation.goBack();
       setWorkoutName('');
       setDays([]);

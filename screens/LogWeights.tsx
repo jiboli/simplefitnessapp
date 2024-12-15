@@ -147,7 +147,6 @@ export default function LogWeights() {
         }
       });
 
-      Alert.alert('Success', 'Weights logged successfully!');
       navigation.goBack();
     } catch (error) {
       console.error('Error logging weights:', error);

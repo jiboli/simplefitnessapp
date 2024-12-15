@@ -137,8 +137,6 @@ export default function LogWorkout() {
       );
 
       await Promise.all(insertExercisePromises);
-
-      Alert.alert('Success', 'Workout logged successfully!');
       navigation.goBack(); // Navigate back to the previous screen
     } catch (error) {
       console.error('Error logging workout:', error);
