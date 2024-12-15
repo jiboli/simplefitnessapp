@@ -13,6 +13,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { WorkoutLog, LoggedExercise } from '../types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
+
+
 export default function LogWeights() {
   const db = useSQLiteContext();
   const navigation = useNavigation();
@@ -79,7 +81,27 @@ export default function LogWeights() {
       console.error('Error fetching exercises:', error);
     }
   };
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp * 1000); // Convert UNIX timestamp to Date
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(today.getDate() - 1);
+  
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+  
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    }
+    if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    }
+  
+    return `${day}-${month}-${year}`; // Default format: dd-mm-yyyy
+  };
 
+  
   const addSet = (exerciseId: string) => {
     setExerciseSets((prev) => {
       const currentSets = prev[exerciseId] || [];
@@ -235,7 +257,8 @@ export default function LogWeights() {
             >
               <Text style={styles.workoutName}>{item.workout_name}</Text>
               <Text style={styles.dayName}>{item.day_name}</Text>
-              <Text style={styles.workoutDate}>{new Date(item.workout_date * 1000).toLocaleDateString()}</Text>
+              <Text style={styles.workoutDate}>{formatDate(item.workout_date)} </Text>
+
             </TouchableOpacity>
           )}
           ListEmptyComponent={
