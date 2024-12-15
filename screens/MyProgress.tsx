@@ -55,7 +55,7 @@ export default function MyProgress() {
         onPress={() => navigation.navigate('LogWeights')}
       >
         <Ionicons name="stats-chart" size={24} color="#FFFFFF" />
-        <Text style={styles.logWeightsButtonText}>Log Weights</Text>
+        <Text style={styles.logWeightsButtonText}>Track a Workout</Text>
       </TouchableOpacity>
 
       {/* List of Workouts with Logs */}

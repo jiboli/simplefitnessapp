@@ -213,7 +213,7 @@ export default function MyCalendar() {
       )}
 
       {/* Unlogged Past Workouts Section */}
-      <Text style={styles.sectionTitle}>Unlogged Past Workouts</Text>
+      <Text style={styles.sectionTitle}>Untracked Workouts</Text>
       {pastWorkouts.length > 0 ? (
         <FlatList
           data={pastWorkouts}
@@ -226,7 +226,7 @@ export default function MyCalendar() {
       )}
 
       {/* Future Workouts Section */}
-      <Text style={styles.sectionTitle}>Future Scheduled Workouts</Text>
+      <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
       {futureWorkouts.length > 0 ? (
         <FlatList
           data={futureWorkouts}

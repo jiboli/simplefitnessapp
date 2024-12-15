@@ -27,6 +27,7 @@ export default function LogWorkout() {
     fetchWorkouts();
   }, []);
 
+  // Fetch the list of available workouts
   const fetchWorkouts = async () => {
     try {
       const result = await db.getAllAsync<{ workout_id: number; workout_name: string }>(
@@ -38,6 +39,7 @@ export default function LogWorkout() {
     }
   };
 
+  // Fetch the days associated with the selected workout
   const fetchDays = async (workout_id: number) => {
     try {
       const result = await db.getAllAsync<{ day_id: number; day_name: string }>(
@@ -50,6 +52,12 @@ export default function LogWorkout() {
     }
   };
 
+  // Normalize the date to midnight
+  const normalizeDate = (date: Date): number => {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000; // Midnight timestamp
+  };
+
+  // Log the workout and prevent duplication
   const logWorkout = async () => {
     if (!selectedDate) {
       Alert.alert('Error', 'Please select a date.');
@@ -65,7 +73,10 @@ export default function LogWorkout() {
     }
 
     try {
-      const workoutDate = Math.floor(selectedDate.getTime() / 1000);
+      // Normalize the selected date to midnight
+      const workoutDate = normalizeDate(selectedDate);
+
+      // Find the day name of the selected day
       const selectedDayName = days.find((day) => day.day_id === selectedDay)?.day_name;
 
       if (!selectedDayName) {
@@ -73,6 +84,7 @@ export default function LogWorkout() {
         return;
       }
 
+      // Check for existing duplicate entries
       const existingLog = await db.getAllAsync<{ workout_log_id: number }>(
         `SELECT workout_log_id 
          FROM Workout_Log 
@@ -92,6 +104,7 @@ export default function LogWorkout() {
         return;
       }
 
+      // Fetch the workout name from the database
       const [workoutResult] = await db.getAllAsync<{ workout_name: string }>(
         'SELECT workout_name FROM Workouts WHERE workout_id = ?;',
         [selectedWorkout]
@@ -103,16 +116,19 @@ export default function LogWorkout() {
 
       const { workout_name } = workoutResult;
 
+      // Insert the workout log into the database
       const { lastInsertRowId: workoutLogId } = await db.runAsync(
         'INSERT INTO Workout_Log (workout_date, day_name, workout_name) VALUES (?, ?, ?);',
         [workoutDate, selectedDayName, workout_name]
       );
 
+      // Fetch all exercises associated with the selected day
       const exercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
         'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?;',
         [selectedDay]
       );
 
+      // Insert exercises into the Logged_Exercises table
       const insertExercisePromises = exercises.map((exercise) =>
         db.runAsync(
           'INSERT INTO Logged_Exercises (workout_log_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
@@ -123,13 +139,14 @@ export default function LogWorkout() {
       await Promise.all(insertExercisePromises);
 
       Alert.alert('Success', 'Workout logged successfully!');
-      navigation.goBack();
+      navigation.goBack(); // Navigate back to the previous screen
     } catch (error) {
       console.error('Error logging workout:', error);
       Alert.alert('Error', 'Failed to log workout.');
     }
   };
 
+  // Format the date for display
   const formatDate = (date: Date | null): string => {
     if (!date) return 'Select a date';
     const day = String(date.getDate()).padStart(2, '0');
@@ -140,9 +157,12 @@ export default function LogWorkout() {
 
   return (
     <View style={styles.container}>
+      {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </TouchableOpacity>
+
+      {/* Date Picker */}
       <Text style={styles.Title}>Select Date</Text>
       <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
         <Text style={styles.inputText}>{formatDate(selectedDate)}</Text>
@@ -160,6 +180,8 @@ export default function LogWorkout() {
           }}
         />
       )}
+
+      {/* Workouts List */}
       <Text style={styles.sectionTitle}>Select Workout</Text>
       <FlatList
         data={workouts}
@@ -189,6 +211,8 @@ export default function LogWorkout() {
         )}
         ListEmptyComponent={<Text style={styles.emptyText}>No workouts available.</Text>}
       />
+
+      {/* Days List */}
       {selectedWorkout && (
         <>
           <Text style={styles.sectionTitle}>Select Day</Text>
@@ -217,6 +241,8 @@ export default function LogWorkout() {
           />
         </>
       )}
+
+      {/* Save Button */}
       <TouchableOpacity style={styles.saveButton} onPress={logWorkout}>
         <Text style={styles.saveButtonText}>Schedule Workout</Text>
       </TouchableOpacity>
