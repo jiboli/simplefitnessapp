@@ -27,7 +27,9 @@ export default function WeightLogDetail() {
   const [expandedDays, setExpandedDays] = useState<{ [key: string]: boolean }>(
     {}
   );
-  const [logs, setLogs] = useState<{ [key: string]: any[] }>({});
+  const [logs, setLogs] = useState<{ [key: string]: { [key: string]: any[] } }>(
+    {}
+  );
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -82,9 +84,19 @@ export default function WeightLogDetail() {
         [dayName, workoutDate]
       );
 
+      // Group sets by exercise_name
+      const groupedLogs = result.reduce((acc, log) => {
+        const { exercise_name, ...setDetails } = log;
+        if (!acc[exercise_name]) {
+          acc[exercise_name] = [];
+        }
+        acc[exercise_name].push(setDetails);
+        return acc;
+      }, {} as { [exercise_name: string]: any[] });
+
       setLogs((prev) => ({
         ...prev,
-        [`${dayName}_${workoutDate}`]: result,
+        [`${dayName}_${workoutDate}`]: groupedLogs,
       }));
     } catch (error) {
       console.error('Error fetching logs for day:', error);
@@ -205,9 +217,9 @@ export default function WeightLogDetail() {
         <TouchableOpacity
   style={styles.logHeader}
   onPress={() => toggleDayExpansion(day_name, workout_date)}
-  onLongPress={() => confirmDeleteDay(day_name, workout_date)} // Handle long press for day deletion
+  onLongPress={() => confirmDeleteDay(day_name, workout_date)}
 >
-  <View>
+  <View style={styles.logHeaderContent}>
     <Text style={styles.logDayName}>{day_name}</Text>
     <Text style={styles.logDate}>{formattedDate}</Text>
   </View>
@@ -215,19 +227,20 @@ export default function WeightLogDetail() {
     name={isExpanded ? 'chevron-up' : 'chevron-down'}
     size={25}
     color="#000"
-    style={styles.icon} // Use the new icon style
   />
 </TouchableOpacity>
 
 
         {isExpanded && logs[key] && (
           <View style={styles.logList}>
-            {logs[key].map((log) => (
-              <View key={`${log.exercise_name}_${log.set_number}`} style={styles.logItem}>
-                <Text style={styles.exerciseName}>{log.exercise_name}</Text>
-                <Text style={styles.logDetail}>
-                  Set {log.set_number}: {log.reps_logged} reps, {log.weight_logged} kg
-                </Text>
+            {Object.entries(logs[key]).map(([exercise_name, sets]) => (
+              <View key={exercise_name} style={styles.logItem}>
+                <Text style={styles.exerciseName}>{exercise_name}</Text>
+                {sets.map((set, index) => (
+                  <Text key={index} style={styles.logDetail}>
+                    Set {set.set_number}: {set.reps_logged} reps, {set.weight_logged} kg
+                  </Text>
+                ))}
               </View>
             ))}
           </View>
@@ -315,21 +328,31 @@ const styles = StyleSheet.create({
       shadowRadius: 5,
     },
     logHeader: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      position: 'relative', // Needed for absolute positioning of icon
-    },
-    logDate: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginTop: 5,
-      color: '#000000',
-    },
-    logDayName: {
-      fontSize: 20,
-      fontWeight: '900',
-      color: '#000000',
-    },
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between', // Space between content and icon
+        paddingVertical: 10,
+      },
+      
+      logHeaderContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1, // Take up remaining space
+      },
+      
+      logDayName: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: '#000000',
+        marginRight: 10, // Space between day name and date
+      },
+      
+      logDate: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#000000',
+      },
+      
     icon: {
       position: 'absolute', // Allow placement relative to logHeader
       right: '5%', // Adjust placement from the right edge

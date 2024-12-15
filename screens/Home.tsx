@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   darkGrayText: {
-    color: '#404040',
+    color: 'white',
   },
   button: {
     borderRadius: 20,
@@ -123,6 +123,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   lightGrayText: {
-    color: '#bfbfbf',
+    color: 'white',
   },
 });
