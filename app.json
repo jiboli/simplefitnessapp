@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "simplefitnessapp",
-    "slug": "simplefitnessapp",
+    "name": "simplefitnessappbeta",
+    "slug": "simplefitnessappbeta",
     "version": "0.9.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,6 +24,11 @@
     },
     "web": {
       "favicon": "./assets/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1b72cc6b-8e1a-47b1-a7d3-8fcf199a3015"
+      }
     }
   }
 }

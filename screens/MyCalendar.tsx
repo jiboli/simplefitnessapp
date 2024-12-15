@@ -192,7 +192,10 @@ export default function MyCalendar() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.contentContainer}>
+    <ScrollView
+  style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+  contentContainerStyle={[styles.contentContainer, { paddingTop: 70 }]} // Adjust the top padding value as needed
+>
       <Text style={styles.title}>My Calendar</Text>
 
       {/* Schedule a Workout Button */}
