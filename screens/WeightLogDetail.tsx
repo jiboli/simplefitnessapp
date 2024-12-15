@@ -30,20 +30,27 @@ export default function WeightLogDetail() {
   const [logs, setLogs] = useState<{ [key: string]: { [key: string]: any[] } }>(
     {}
   );
-  const [datePickerVisible, setDatePickerVisible] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  const [datePickerVisible, setDatePickerVisible] = useState<{
+    start: boolean;
+    end: boolean;
+  }>({ start: false, end: false });
+  const [dateRange, setDateRange] = useState<{
+    start: Date | null;
+    end: Date | null;
+  }>({ start: null, end: null });
 
   useEffect(() => {
     fetchDays();
   }, []);
 
   useEffect(() => {
-    if (selectedDate) {
-      filterDaysByDate(selectedDate);
+    if (dateRange.start && dateRange.end) {
+      filterDaysByDateRange(dateRange.start, dateRange.end);
     } else {
-      setFilteredDays(days); // Reset filter when no date is selected
+      setFilteredDays(days); // Reset filter when no range is selected
     }
-  }, [selectedDate, days]);
+  }, [dateRange, days]);
 
   const fetchDays = async () => {
     try {
@@ -116,89 +123,31 @@ export default function WeightLogDetail() {
     }
   };
 
-  const filterDaysByDate = (date: Date) => {
-    const selectedDateTimestamp = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    ).getTime();
+  const filterDaysByDateRange = (start: Date, end: Date) => {
+    const startTimestamp = start.getTime();
+    const endTimestamp = end.getTime();
 
     const filtered = days.filter(
       (day) =>
-        new Date(day.workout_date * 1000).toDateString() ===
-        new Date(selectedDateTimestamp).toDateString()
+        day.workout_date * 1000 >= startTimestamp &&
+        day.workout_date * 1000 <= endTimestamp
     );
 
     setFilteredDays(filtered);
   };
 
+  const clearDateSelection = () => {
+    setDateRange({ start: null, end: null });
+    setFilteredDays(days); // Reset the filter
+  };
+
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp * 1000);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    const yesterday = new Date(today);
-
-    tomorrow.setDate(today.getDate() + 1);
-    yesterday.setDate(today.getDate() - 1);
-
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
 
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
-      return 'Today';
-    } else if (
-      date.getDate() === tomorrow.getDate() &&
-      date.getMonth() === tomorrow.getMonth() &&
-      date.getFullYear() === tomorrow.getFullYear()
-    ) {
-      return 'Tomorrow';
-    } else if (
-      date.getDate() === yesterday.getDate() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getFullYear() === yesterday.getFullYear()
-    ) {
-      return 'Yesterday';
-    } else {
-      return `${day}-${month}-${year}`; // Default format
-    }
-  };
-
-  const deleteDayLogs = async (dayName: string, workoutDate: number) => {
-    try {
-      await db.runAsync(
-        `DELETE FROM Weight_Log
-         WHERE workout_log_id IN (
-           SELECT workout_log_id 
-           FROM Workout_Log 
-           WHERE day_name = ? AND workout_date = ?
-         );`,
-        [dayName, workoutDate]
-      );
-      // Refresh days after deletion
-      fetchDays();
-    } catch (error) {
-      console.error('Error deleting logs for day:', error);
-    }
-  };
-
-  const confirmDeleteDay = (dayName: string, workoutDate: number) => {
-    Alert.alert(
-      'Delete Logs',
-      'Are you sure you want to delete all logs for this day? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: () => deleteDayLogs(dayName, workoutDate),
-        },
-      ]
-    );
+    return `${day}-${month}-${year}`;
   };
 
   const renderDay = ({
@@ -215,22 +164,17 @@ export default function WeightLogDetail() {
     return (
       <View key={key} style={styles.logContainer}>
         <TouchableOpacity
-  style={styles.logHeader}
-  onPress={() => toggleDayExpansion(day_name, workout_date)}
-  onLongPress={() => confirmDeleteDay(day_name, workout_date)}
->
-  <View style={styles.logHeaderContent}>
-    <Text style={styles.logDayName}>{day_name}</Text>
-    <Text style={styles.logDate}>{formattedDate}</Text>
-  </View>
-  <Ionicons
-    name={isExpanded ? 'chevron-up' : 'chevron-down'}
-    size={25}
-    color="#000"
-  />
-</TouchableOpacity>
-
-
+          style={styles.logHeader}
+          onPress={() => toggleDayExpansion(day_name, workout_date)}
+        >
+          <Text style={styles.logDayName}>{day_name}</Text>
+          <Text style={styles.logDate}>{formattedDate}</Text>
+          <Ionicons
+            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+            size={20}
+            color="#000"
+          />
+        </TouchableOpacity>
         {isExpanded && logs[key] && (
           <View style={styles.logList}>
             {Object.entries(logs[key]).map(([exercise_name, sets]) => (
@@ -249,13 +193,6 @@ export default function WeightLogDetail() {
     );
   };
 
-  const handleDateChange = (event: any, date?: Date) => {
-    setDatePickerVisible(false);
-    if (date) {
-      setSelectedDate(date);
-    }
-  };
-
   return (
     <View style={styles.container}>
       {/* Back Button */}
@@ -266,33 +203,73 @@ export default function WeightLogDetail() {
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </TouchableOpacity>
 
-      {/* Filter Button */}
-      <TouchableOpacity
-        style={styles.filterButton}
-        onPress={() => setDatePickerVisible(true)}
-      >
-        <Ionicons name="calendar-outline" size={20} color="#FFFFFF" />
-        <Text style={styles.filterButtonText}>Filter by Date</Text>
-      </TouchableOpacity>
+      {/* Filter Buttons */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setDatePickerVisible({ start: true, end: false })}
+        >
+          <Ionicons name="calendar-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.filterButtonText}>
+            {dateRange.start
+              ? `From: ${formatDate(dateRange.start.getTime() / 1000)}`
+              : 'Pick Start Date'}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.filterButton}
+          onPress={() => setDatePickerVisible({ start: false, end: true })}
+        >
+          <Ionicons name="calendar-outline" size={20} color="#FFFFFF" />
+          <Text style={styles.filterButtonText}>
+            {dateRange.end
+              ? `To: ${formatDate(dateRange.end.getTime() / 1000)}`
+              : 'Pick End Date'}
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      {/* Date Picker */}
-      {datePickerVisible && (
+      {dateRange.start && dateRange.end && (
+        <TouchableOpacity
+          style={styles.clearButton}
+          onPress={clearDateSelection}
+        >
+          <Text style={styles.clearButtonText}>Clear Selection</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Date Pickers */}
+      {datePickerVisible.start && (
         <DateTimePicker
-          value={selectedDate || new Date()}
+          value={dateRange.start || new Date()}
           mode="date"
           display="default"
-          onChange={handleDateChange}
+          onChange={(event, date) => {
+            setDatePickerVisible({ start: false, end: false });
+            if (date) setDateRange((prev) => ({ ...prev, start: date }));
+          }}
+        />
+      )}
+      {datePickerVisible.end && (
+        <DateTimePicker
+          value={dateRange.end || new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setDatePickerVisible({ start: false, end: false });
+            if (date) setDateRange((prev) => ({ ...prev, end: date }));
+          }}
         />
       )}
 
-      {/* FlatList */}
+      {/* Logs */}
       <FlatList
         data={filteredDays}
         keyExtractor={(item) => `${item.day_name}_${item.workout_date}`}
         renderItem={({ item }) => renderDay(item)}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
-            No logs available for this workout.
+            No logs available for the selected range.
           </Text>
         }
       />
@@ -301,100 +278,104 @@ export default function WeightLogDetail() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      paddingHorizontal: 20,
-      paddingTop: 40,
-      backgroundColor: '#FFFFFF',
-    },
-    backButton: {
-      position: 'absolute',
-      top: 10,
-      left: 10,
-      zIndex: 10,
-      padding: 8,
-    },
-    logContainer: {
-      backgroundColor: '#F7F7F7',
-      borderRadius: 20,
-      padding: 20,
-      marginBottom: 15,
-      borderWidth: 1,
-      borderColor: 'rgba(0, 0, 0, 0.1)',
-      elevation: 2,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 5,
-    },
-    logHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between', // Space between content and icon
-        paddingVertical: 10,
-      },
-      
-      logHeaderContent: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1, // Take up remaining space
-      },
-      
-      logDayName: {
-        fontSize: 20,
-        fontWeight: '900',
-        color: '#000000',
-        marginRight: 10, // Space between day name and date
-      },
-      
-      logDate: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#000000',
-      },
-      
-    icon: {
-      position: 'absolute', // Allow placement relative to logHeader
-      right: '5%', // Adjust placement from the right edge
-      top: '50%', // Center it vertically relative to the card
-      transform: [{ translateY: -10 }], // Adjust to align perfectly
-    },
-    logList: {
-      marginTop: 10,
-      paddingLeft: 10,
-    },
-    logItem: {
-      marginBottom: 10,
-    },
-    exerciseName: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: '#000000',
-    },
-    logDetail: {
-      fontSize: 14,
-      color: '#666666',
-    },
-    filterButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#000000',
-      borderRadius: 10,
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      marginBottom: 20,
-      alignSelf: 'center',
-    },
-    filterButtonText: {
-      color: '#FFFFFF',
-      fontSize: 16,
-      fontWeight: 'bold',
-      marginLeft: 10,
-    },
-    emptyText: {
-      textAlign: 'center',
-      fontSize: 16,
-      color: 'rgba(0, 0, 0, 0.5)',
-    },
-  });
-  
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    backgroundColor: '#FFFFFF',
+  },
+  filterContainer: {
+    flexDirection: 'column', // Stack buttons vertically
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 10,
+    alignSelf: 'center',
+  },
+  filterButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  clearButton: {
+    marginBottom: 20,
+    backgroundColor: '#000000',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginVertical: 0,
+  },
+  clearButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
+  },
+  logContainer: {
+    backgroundColor: '#F7F7F7',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+  logHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  logDayName: {
+    fontSize: 20,
+    fontWeight: '900',
+    color: '#000000',
+  },
+  logDate: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  logList: {
+    marginTop: 10,
+    paddingLeft: 10,
+  },
+  logItem: {
+    marginBottom: 10,
+  },
+  exerciseName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000000',
+  },
+  logDetail: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'rgba(0, 0, 0, 0.5)',
+  },
+});
