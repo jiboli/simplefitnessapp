@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -92,7 +92,7 @@ export default function MyCalendar() {
   onPress={() => navigation.navigate('LogWorkout')}
 >
   <Ionicons name="calendar" size={24} color="#FFFFFF" style={styles.icon} />
-  <Text style={styles.logWorkoutButtonText}>Log a Workout</Text>
+  <Text style={styles.logWorkoutButtonText}>Schedule a Workout</Text>
 </TouchableOpacity>
 
 

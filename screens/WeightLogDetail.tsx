@@ -6,27 +6,49 @@ import {
   FlatList,
   TouchableOpacity,
 } from 'react-native';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function WeightLogDetail() {
   const route = useRoute();
+  const navigation = useNavigation();
   const db = useSQLiteContext();
   const { workoutName } = route.params as { workoutName: string };
 
-  const [days, setDays] = useState<string[]>([]);
-  const [expandedDays, setExpandedDays] = useState<{ [key: string]: boolean }>({});
+  const [days, setDays] = useState<
+    { day_name: string; workout_date: number }[]
+  >([]);
+  const [filteredDays, setFilteredDays] = useState<
+    { day_name: string; workout_date: number }[]
+  >([]);
+  const [expandedDays, setExpandedDays] = useState<{ [key: string]: boolean }>(
+    {}
+  );
   const [logs, setLogs] = useState<{ [key: string]: any[] }>({});
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   useEffect(() => {
     fetchDays();
   }, []);
 
+  useEffect(() => {
+    if (selectedDate) {
+      filterDaysByDate(selectedDate);
+    } else {
+      setFilteredDays(days); // Reset filter when no date is selected
+    }
+  }, [selectedDate, days]);
+
   const fetchDays = async () => {
     try {
-      const result = await db.getAllAsync<{ day_name: string }>(
-        `SELECT DISTINCT Workout_Log.day_name 
+      const result = await db.getAllAsync<{
+        day_name: string;
+        workout_date: number;
+      }>(
+        `SELECT DISTINCT Workout_Log.day_name, Workout_Log.workout_date
          FROM Weight_Log
          INNER JOIN Workout_Log 
          ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
@@ -34,14 +56,14 @@ export default function WeightLogDetail() {
         [workoutName]
       );
 
-      const uniqueDays = result.map((row) => row.day_name);
-      setDays(uniqueDays);
+      setDays(result);
+      setFilteredDays(result); // Initially show all days
     } catch (error) {
       console.error('Error fetching days:', error);
     }
   };
 
-  const fetchLogsForDay = async (dayName: string) => {
+  const fetchLogsForDay = async (dayName: string, workoutDate: number) => {
     try {
       const result = await db.getAllAsync<{
         exercise_name: string;
@@ -54,38 +76,106 @@ export default function WeightLogDetail() {
          FROM Weight_Log
          INNER JOIN Workout_Log 
          ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
-         WHERE Workout_Log.day_name = ? AND Workout_Log.workout_name = ? 
+         WHERE Workout_Log.day_name = ? AND Workout_Log.workout_date = ? 
          ORDER BY Weight_Log.exercise_name, Weight_Log.set_number;`,
-        [dayName, workoutName]
+        [dayName, workoutDate]
       );
 
-      setLogs((prev) => ({ ...prev, [dayName]: result }));
+      setLogs((prev) => ({
+        ...prev,
+        [`${dayName}_${workoutDate}`]: result,
+      }));
     } catch (error) {
       console.error('Error fetching logs for day:', error);
     }
   };
 
-  const toggleDayExpansion = (dayName: string) => {
+  const toggleDayExpansion = (dayName: string, workoutDate: number) => {
+    const key = `${dayName}_${workoutDate}`;
     setExpandedDays((prev) => ({
       ...prev,
-      [dayName]: !prev[dayName],
+      [key]: !prev[key],
     }));
 
     // Fetch logs if the day is being expanded and hasn't been fetched yet
-    if (!logs[dayName]) {
-      fetchLogsForDay(dayName);
+    if (!logs[key]) {
+      fetchLogsForDay(dayName, workoutDate);
     }
   };
 
-  const renderDay = (dayName: string) => {
-    const isExpanded = expandedDays[dayName];
+  const filterDaysByDate = (date: Date) => {
+    const selectedDateTimestamp = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    ).getTime();
+
+    const filtered = days.filter(
+      (day) =>
+        new Date(day.workout_date * 1000).toDateString() ===
+        new Date(selectedDateTimestamp).toDateString()
+    );
+
+    setFilteredDays(filtered);
+  };
+
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp * 1000);
+    const today = new Date();
+    const tomorrow = new Date(today);
+    const yesterday = new Date(today);
+
+    tomorrow.setDate(today.getDate() + 1);
+    yesterday.setDate(today.getDate() - 1);
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return 'Today';
+    } else if (
+      date.getDate() === tomorrow.getDate() &&
+      date.getMonth() === tomorrow.getMonth() &&
+      date.getFullYear() === tomorrow.getFullYear()
+    ) {
+      return 'Tomorrow';
+    } else if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return 'Yesterday';
+    } else {
+      return `${day}-${month}-${year}`; // Default format
+    }
+  };
+
+  const renderDay = ({
+    day_name,
+    workout_date,
+  }: {
+    day_name: string;
+    workout_date: number;
+  }) => {
+    const key = `${day_name}_${workout_date}`;
+    const isExpanded = expandedDays[key];
+    const formattedDate = formatDate(workout_date);
+
     return (
-      <View key={dayName} style={styles.dayContainer}>
+      <View key={key} style={styles.logContainer}>
         <TouchableOpacity
-          style={styles.dayHeader}
-          onPress={() => toggleDayExpansion(dayName)}
+          style={styles.logHeader}
+          onPress={() => toggleDayExpansion(day_name, workout_date)}
         >
-          <Text style={styles.dayTitle}>{dayName}</Text>
+          <View>
+            <Text style={styles.logDayName}>{day_name}</Text>
+            <Text style={styles.logDate}>{formattedDate}</Text>
+          </View>
           <Ionicons
             name={isExpanded ? 'chevron-up' : 'chevron-down'}
             size={20}
@@ -93,13 +183,16 @@ export default function WeightLogDetail() {
           />
         </TouchableOpacity>
 
-        {isExpanded && logs[dayName] && (
+        {isExpanded && logs[key] && (
           <View style={styles.logList}>
-            {logs[dayName].map((log, index) => (
-              <View key={index} style={styles.logItem}>
+            {logs[key].map((log, index) => (
+              <View
+                key={`${log.exercise_name}_${log.set_number}`} // Ensure unique key for each log entry
+                style={styles.logItem}
+              >
                 <Text style={styles.exerciseName}>{log.exercise_name}</Text>
                 <Text style={styles.logDetail}>
-                  Set {log.set_number}: {log.reps_logged} reps, {log.weight_logged}
+                  Set {log.set_number}: {log.reps_logged} reps, {log.weight_logged} kg
                 </Text>
               </View>
             ))}
@@ -109,14 +202,51 @@ export default function WeightLogDetail() {
     );
   };
 
+  const handleDateChange = (event: any, date?: Date) => {
+    setDatePickerVisible(false);
+    if (date) {
+      setSelectedDate(date);
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={24} color="#000000" />
+      </TouchableOpacity>
+
+      {/* Filter Button */}
+      <TouchableOpacity
+        style={styles.filterButton}
+        onPress={() => setDatePickerVisible(true)}
+      >
+        <Ionicons name="calendar-outline" size={20} color="#FFFFFF" />
+        <Text style={styles.filterButtonText}>Filter by Date</Text>
+      </TouchableOpacity>
+
+      {/* Date Picker */}
+      {datePickerVisible && (
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
+      )}
+
+      {/* FlatList */}
       <FlatList
-        data={days}
-        keyExtractor={(item) => item}
+        data={filteredDays}
+        keyExtractor={(item) => `${item.day_name}_${item.workout_date}`}
         renderItem={({ item }) => renderDay(item)}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>No logs available for this workout.</Text>
+          <Text style={styles.emptyText}>
+            No logs available for this workout.
+          </Text>
         }
       />
     </View>
@@ -126,33 +256,49 @@ export default function WeightLogDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: 40,
     backgroundColor: '#FFFFFF',
   },
-  dayContainer: {
-    marginBottom: 20,
+  backButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
   },
-  dayHeader: {
+  logContainer: {
+    backgroundColor: '#F7F7F7',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+  },
+  logHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#F7F7F7',
-    padding: 15,
-    borderRadius: 10,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
   },
-  dayTitle: {
+  logDate: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginTop: 5,
+    color: '#000000',
+  },
+  logDayName: {
+    fontSize: 20,
+    fontWeight: '900',
     color: '#000000',
   },
   logList: {
     marginTop: 10,
-    paddingLeft: 15,
+    paddingLeft: 10,
   },
   logItem: {
     marginBottom: 10,
@@ -166,9 +312,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
   },
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#000000',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    alignSelf: 'center',
+  },
+  filterButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
   emptyText: {
     textAlign: 'center',
-    color: '#666666',
     fontSize: 16,
+    color: 'rgba(0, 0, 0, 0.5)',
   },
 });

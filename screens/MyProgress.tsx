@@ -5,6 +5,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WeightLogStackParamList } from '../App'; // Adjust the path to where WeightLogStackParamList is defined
 import { useSQLiteContext } from 'expo-sqlite';
+import { useFocusEffect } from '@react-navigation/native';
 
 type WeightLogNavigationProp = StackNavigationProp<
   WeightLogStackParamList,
@@ -17,9 +18,11 @@ export default function MyProgress() {
 
   const [workouts, setWorkouts] = useState<string[]>([]);
 
-  useEffect(() => {
-    fetchWorkoutsWithLogs();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchWorkoutsWithLogs();
+    }, [db])
+  );
 
   const fetchWorkoutsWithLogs = async () => {
     try {
