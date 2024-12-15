@@ -1,126 +1,242 @@
-import React, {useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
-import { WorkoutLog, WeightLog } from '../types';
-import { useFocusEffect } from '@react-navigation/native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WorkoutLogStackParamList } from '../App';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
-
 
 type MyCalendarNavigationProp = StackNavigationProp<WorkoutLogStackParamList, 'MyCalendar'>;
 
 export default function MyCalendar() {
   const db = useSQLiteContext();
   const navigation = useNavigation<MyCalendarNavigationProp>();
-  const [logs, setLogs] = useState<WorkoutLog[]>([]);
 
-  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const [todayWorkout, setTodayWorkout] = useState<
+    { workout_name: string; workout_date: number; day_name: string; workout_log_id: number } | null
+  >(null);
+  const [pastWorkouts, setPastWorkouts] = useState<
+    { workout_name: string; workout_date: number; day_name: string; workout_log_id: number }[]
+  >([]);
+  const [futureWorkouts, setFutureWorkouts] = useState<
+    { workout_name: string; workout_date: number; day_name: string; workout_log_id: number }[]
+  >([]);
+
+  const today = new Date();
+  const todayTimestamp = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  ).getTime() / 1000; // Start of today in seconds
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchWorkoutLogs();
+      fetchWorkouts();
     }, [db])
   );
 
-  const fetchWorkoutLogs = async () => {
+  const fetchWorkouts = async () => {
     try {
-      const result = await db.getAllAsync<WorkoutLog>(
-        `SELECT * FROM Workout_Log ORDER BY workout_date DESC;`
+      const startOfDayTimestamp = new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate()
+      ).getTime() / 1000; // Start of today in seconds
+
+      const endOfDayTimestamp = startOfDayTimestamp + 86400 - 1; // End of today in seconds
+
+      // Fetch today's workout
+      const todayResult = await db.getAllAsync<{
+        workout_name: string;
+        workout_date: number;
+        day_name: string;
+        workout_log_id: number;
+      }>(
+        `SELECT * FROM Workout_Log 
+         WHERE workout_date BETWEEN ? AND ?;`,
+        [startOfDayTimestamp, endOfDayTimestamp]
       );
-      setLogs(result);
+      setTodayWorkout(todayResult[0] || null);
+
+      // Fetch past workouts not logged in Weight_Log
+      const pastResult = await db.getAllAsync<{
+        workout_name: string;
+        workout_date: number;
+        day_name: string;
+        workout_log_id: number;
+      }>(
+        `SELECT * FROM Workout_Log 
+         WHERE workout_date < ? 
+           AND workout_log_id NOT IN (SELECT DISTINCT workout_log_id FROM Weight_Log)
+         ORDER BY workout_date DESC;`,
+        [startOfDayTimestamp]
+      );
+      setPastWorkouts(pastResult);
+
+      // Fetch future workouts
+      const futureResult = await db.getAllAsync<{
+        workout_name: string;
+        workout_date: number;
+        day_name: string;
+        workout_log_id: number;
+      }>(
+        `SELECT * FROM Workout_Log 
+         WHERE workout_date > ? 
+         ORDER BY workout_date ASC;`,
+        [endOfDayTimestamp]
+      );
+      setFutureWorkouts(futureResult);
     } catch (error) {
-      console.error('Error fetching workout logs:', error);
+      console.error('Error fetching workouts:', error);
     }
   };
 
-  const fetchLoggedWeights = async (workoutLogId: number) => {
+  const deleteWorkoutLog = async (workout_log_id: number) => {
     try {
-      const weights = await db.getAllAsync<WeightLog>(
-        `SELECT wl.*, le.exercise_name 
-         FROM Weight_Log wl
-         JOIN Logged_Exercises le ON wl.logged_exercise_id = le.logged_exercise_id
-         WHERE wl.workout_log_id = ?;`,
-        [workoutLogId]
-      );
-      console.log('Logged Weights:', weights);
+      // Delete the workout log and any associated data
+      await db.runAsync(`DELETE FROM Workout_Log WHERE workout_log_id = ?;`, [workout_log_id]);
+      await db.runAsync(`DELETE FROM Weight_Log WHERE workout_log_id = ?;`, [workout_log_id]);
+      await db.runAsync(`DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`, [workout_log_id]);
+
+      Alert.alert('Success', 'Workout log deleted successfully!');
+      fetchWorkouts(); // Refresh the list
     } catch (error) {
-      console.error('Error fetching logged weights:', error);
+      console.error('Error deleting workout log:', error);
+      Alert.alert('Error', 'Failed to delete workout log.');
     }
   };
 
-  const deleteWorkoutLog = (log_id: number) => {
+  const confirmDelete = (workout_log_id: number) => {
     Alert.alert(
-      'Delete Log',
-      'Are you sure you want to delete this workout log? Its progress is also going to be deleted.  ',
+      'Delete Workout',
+      'Are you sure you want to delete this workout log? This action cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await db.runAsync('DELETE FROM Workout_Log WHERE workout_log_id = ?;', [log_id]);
-              fetchWorkoutLogs();
-            } catch (error) {
-              console.error('Error deleting workout log:', error);
-            }
-          },
-        },
+        { text: 'Delete', style: 'destructive', onPress: () => deleteWorkoutLog(workout_log_id) },
       ]
     );
   };
 
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp * 1000);
-    const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure 2-digit month
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+    const today = new Date();
+    const yesterday = new Date();
+    const tomorrow = new Date();
+
+    yesterday.setDate(today.getDate() - 1);
+    tomorrow.setDate(today.getDate() + 1);
+
+    if (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    ) {
+      return 'Today';
+    } else if (
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear()
+    ) {
+      return 'Yesterday';
+    } else if (
+      date.getDate() === tomorrow.getDate() &&
+      date.getMonth() === tomorrow.getMonth() &&
+      date.getFullYear() === tomorrow.getFullYear()
+    ) {
+      return 'Tomorrow';
+    } else {
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}-${month}-${year}`;
+    }
+  };
+
+  const renderWorkoutCard = ({
+    workout_name,
+    workout_date,
+    day_name,
+    workout_log_id,
+  }: {
+    workout_name: string;
+    workout_date: number;
+    day_name: string;
+    workout_log_id: number;
+  }) => {
+    return (
+      <TouchableOpacity
+        style={styles.logContainer}
+        onLongPress={() => confirmDelete(workout_log_id)}
+      >
+        <Text style={styles.logDate}>{formatDate(workout_date)}</Text>
+        <Text style={styles.logWorkoutName}>{workout_name}</Text>
+        <Text style={styles.logDayName}>{day_name}</Text>
+      </TouchableOpacity>
+    );
   };
 
   return (
     <View style={styles.container}>
-
       <Text style={styles.title}>My Calendar</Text>
-      
 
+      {/* Schedule a Workout Button */}
       <TouchableOpacity
-  style={styles.logWorkoutButton}
-  onPress={() => navigation.navigate('LogWorkout')}
->
-  <Ionicons name="calendar" size={24} color="#FFFFFF" style={styles.icon} />
-  <Text style={styles.logWorkoutButtonText}>Schedule a Workout</Text>
-</TouchableOpacity>
+        style={styles.logWorkoutButton}
+        onPress={() => navigation.navigate('LogWorkout')}
+      >
+        <Ionicons name="calendar" size={24} color="#FFFFFF" style={styles.icon} />
+        <Text style={styles.logWorkoutButtonText}>Schedule a Workout</Text>
+      </TouchableOpacity>
 
+      {/* Today's Workout Section */}
+      <Text style={styles.sectionTitle}>Today's Workout</Text>
+      {todayWorkout ? (
+        <TouchableOpacity
+          style={styles.logContainer}
+          onLongPress={() => confirmDelete(todayWorkout.workout_log_id)}
+        >
+          <Text style={styles.logDate}>{formatDate(todayWorkout.workout_date)}</Text>
+          <Text style={styles.logWorkoutName}>{todayWorkout.workout_name}</Text>
+          <Text style={styles.logDayName}>{todayWorkout.day_name}</Text>
+        </TouchableOpacity>
+      ) : (
+        <View style={styles.logContainer}>
+          <Text style={styles.logWorkoutName}>No workout scheduled for today.</Text>
+        </View>
+      )}
 
+      {/* Unlogged Past Workouts Section */}
+      <Text style={styles.sectionTitle}>Unlogged Past Workouts</Text>
       <FlatList
-        data={logs}
-        keyExtractor={(item) => item.workout_log_id.toString()}
-        renderItem={({ item }) => {
-          const date = new Date(item.workout_date * 1000);
-          const dayOfWeek = daysOfWeek[date.getDay()];
-          return (
-            <TouchableOpacity
-              onLongPress={() => deleteWorkoutLog(item.workout_log_id)}
-              onPress={() => fetchLoggedWeights(item.workout_log_id)}
-              style={styles.logContainer}
-            >
-              <Text style={styles.logDate}>
-                {formatDate(item.workout_date)} ({dayOfWeek})
-              </Text>
-              <Text style={styles.logWorkoutName}>{item.workout_name}</Text>
-              <Text style={styles.logDayName}>{item.day_name}</Text>
-            </TouchableOpacity>
-          );
-        }}
-        ListEmptyComponent={<Text style={styles.emptyText}>No workout logs available.</Text>}
+        data={pastWorkouts}
+        keyExtractor={(item) => `${item.workout_log_id}`}
+        renderItem={({ item }) => renderWorkoutCard(item)}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No unlogged past workouts available.</Text>
+        }
+      />
+
+      {/* Future Workouts Section */}
+      <Text style={styles.sectionTitle}>Future Scheduled Workouts</Text>
+      <FlatList
+        data={futureWorkouts}
+        keyExtractor={(item) => `${item.workout_log_id}`}
+        renderItem={({ item }) => renderWorkoutCard(item)}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No future workouts scheduled.</Text>
+        }
       />
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -141,11 +257,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 15,
     paddingHorizontal: 20,
-    flexDirection: 'row', // Ensures icon and text are in a row
-    alignItems: 'center', // Vertically centers icon and text
-    justifyContent: 'center', // Centers icon and text horizontally
-    marginTop: 20,
-    marginBottom: 30, // Adds space between this button and the others below
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 30,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -153,18 +268,23 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   icon: {
-    marginRight: 10, // Adds space between the icon and text
+    marginRight: 10,
   },
   logWorkoutButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 18,
   },
-
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginBottom: 10,
+    color: '#000000',
+  },
   logContainer: {
     backgroundColor: '#F7F7F7',
     borderRadius: 20,
-    padding: 30,
+    padding: 20,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -177,7 +297,7 @@ const styles = StyleSheet.create({
   logDate: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 5,
     color: '#000000',
   },
   logWorkoutName: {
@@ -192,9 +312,9 @@ const styles = StyleSheet.create({
     color: '#000000',
   },
   emptyText: {
-    textAlign: 'center',
     fontSize: 16,
     color: 'rgba(0, 0, 0, 0.5)',
-    marginTop: 20,
+    textAlign: 'center',
+    marginVertical: 10,
   },
 });
