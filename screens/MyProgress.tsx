@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -44,6 +44,44 @@ export default function MyProgress() {
     navigation.navigate('WeightLogDetail', { workoutName });
   };
 
+  const deleteAssociatedDays = async (workoutName: string) => {
+    try {
+      // Get associated workout_log_ids for the given workout
+      const workoutLogs = await db.getAllAsync<{ workout_log_id: number }>(
+        `SELECT workout_log_id FROM Workout_Log WHERE workout_name = ?`,
+        [workoutName]
+      );
+
+      const workoutLogIds = workoutLogs.map((log) => log.workout_log_id);
+
+      if (workoutLogIds.length > 0) {
+        // Delete Weight_Log entries associated with these workout_log_ids
+        await db.runAsync(
+          `DELETE FROM Weight_Log WHERE workout_log_id IN (${workoutLogIds.join(',')});`
+        );
+        fetchWorkoutsWithLogs(); // Refresh the list after deletion
+      }
+    } catch (error) {
+      console.error('Error deleting associated days:', error);
+      Alert.alert('Error', 'Failed to delete associated days.');
+    }
+  };
+
+  const handleWorkoutLongPress = (workoutName: string) => {
+    Alert.alert(
+      'Delete Logs',
+      `Are you sure you want to delete all logs associated with ${workoutName}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteAssociatedDays(workoutName),
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Title */}
@@ -66,6 +104,7 @@ export default function MyProgress() {
           <TouchableOpacity
             style={styles.workoutCard}
             onPress={() => handleWorkoutPress(item)}
+            onLongPress={() => handleWorkoutLongPress(item)}
           >
             <Text style={styles.workoutText}>{item}</Text>
           </TouchableOpacity>

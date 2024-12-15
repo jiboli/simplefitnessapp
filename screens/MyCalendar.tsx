@@ -217,8 +217,6 @@ export default function MyCalendar() {
                       `DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`,
                       [workout_log_id]
                     );
-  
-                    Alert.alert('Success', 'Workout log deleted successfully!');
                     fetchWorkouts(); // Refresh the list
                   } catch (error) {
                     console.error('Error deleting workout log:', error);
