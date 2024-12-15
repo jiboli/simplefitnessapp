@@ -223,7 +223,7 @@ export default function MyCalendar() {
         {pastWorkouts.length > 0 ? (
           pastWorkouts.map((item) => renderWorkoutCard(item))
         ) : (
-          <Text style={styles.emptyText}>No unlogged past workouts available.</Text>
+          <Text style={styles.emptyText}>No untracked workouts found</Text>
         )}
       </View>
 
@@ -233,7 +233,7 @@ export default function MyCalendar() {
         {futureWorkouts.length > 0 ? (
           futureWorkouts.map((item) => renderWorkoutCard(item))
         ) : (
-          <Text style={styles.emptyText}>No future workouts scheduled.</Text>
+          <Text style={styles.emptyText}>No upcoming workouts scheduled.</Text>
         )}
       </View>
     </ScrollView>
