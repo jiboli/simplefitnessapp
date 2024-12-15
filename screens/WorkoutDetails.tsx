@@ -139,25 +139,13 @@ export default function WorkoutDetails() {
   };
 
   const deleteExercise = async (day_id: number, exercise_name: string) => {
-    Alert.alert(
-      'Delete Exercise',
-      `Are you sure you want to delete "${exercise_name}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await db.runAsync(
-              'DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;',
-              [day_id, exercise_name]
-            );
-            fetchWorkoutDetails();
-          },
-        },
-      ]
+    await db.runAsync(
+      'DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;',
+      [day_id, exercise_name]
     );
+    fetchWorkoutDetails(); // Refresh the data after deletion
   };
+  
 
   return (
     <View style={styles.container}>
@@ -188,22 +176,23 @@ export default function WorkoutDetails() {
           
               {/* Exercises */}
               {day.exercises.length > 0 ? (
-                day.exercises.map((exercise, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
-                    activeOpacity={0.8}
-                    style={styles.exerciseContainer}
-                  >
-                    <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
-                    <Text style={styles.exerciseDetails}>
-                      {exercise.sets} sets x {exercise.reps} reps
-                    </Text>
-                  </TouchableOpacity>
-                ))
-              ) : (
-                <Text style={styles.noExercisesText}>No exercises on this day</Text>
-              )}
+  day.exercises.map((exercise, index) => (
+    <TouchableOpacity
+      key={index}
+      onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
+      activeOpacity={0.8}
+      style={styles.exerciseContainer}
+    >
+      <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
+      <Text style={styles.exerciseDetails}>
+        {exercise.sets} sets x {exercise.reps} reps
+      </Text>
+    </TouchableOpacity>
+  ))
+) : (
+  <Text style={styles.noExercisesText}>No exercises on this day</Text>
+)}
+
             </TouchableOpacity>
           )}
           
