@@ -218,24 +218,33 @@ export default function MyCalendar() {
       </View>
 
       {/* Unlogged Past Workouts Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Untracked Workouts</Text>
-        {pastWorkouts.length > 0 ? (
-          pastWorkouts.map((item) => renderWorkoutCard(item))
-        ) : (
-          <Text style={styles.emptyText}>No untracked workouts found</Text>
-        )}
+<View style={styles.section}>
+  <Text style={styles.sectionTitle}>Untracked Workouts</Text>
+  {pastWorkouts.length > 0 ? (
+    pastWorkouts.map((item) => (
+      <View key={item.workout_log_id}>
+        {renderWorkoutCard(item)}
       </View>
+    ))
+  ) : (
+    <Text style={styles.emptyText}>No untracked workouts found</Text>
+  )}
+</View>
 
-      {/* Future Workouts Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
-        {futureWorkouts.length > 0 ? (
-          futureWorkouts.map((item) => renderWorkoutCard(item))
-        ) : (
-          <Text style={styles.emptyText}>No upcoming workouts scheduled.</Text>
-        )}
+{/* Future Workouts Section */}
+<View style={styles.section}>
+  <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
+  {futureWorkouts.length > 0 ? (
+    futureWorkouts.map((item) => (
+      <View key={item.workout_log_id}>
+        {renderWorkoutCard(item)}
       </View>
+    ))
+  ) : (
+    <Text style={styles.emptyText}>No upcoming workouts scheduled.</Text>
+  )}
+</View>
+
     </ScrollView>
   );
 }
@@ -287,13 +296,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   logContainer: {
-    backgroundColor: '#F7F7F7',
+    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
-    marginBottom: 15,
+    marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
-    alignItems: 'center', // Center content inside cards
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   logDate: {
     fontSize: 18,

@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderTopWidth: 0,
     elevation: 10,
-    height: 80, // Adjusted height for a larger tab bar
+    height: 60, // Adjusted height for a larger tab bar
     paddingVertical: 10, // Reduced padding to balance spacing
   },
   tabBarLabel: {

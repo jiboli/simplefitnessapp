@@ -22,6 +22,7 @@ export default function LogWeights() {
   const [exercises, setExercises] = useState<LoggedExercise[]>([]);
   const [weights, setWeights] = useState<{ [key: string]: string }>({});
   const [reps, setReps] = useState<{ [key: string]: string }>({});
+  const [exerciseSets, setExerciseSets] = useState<{ [key: string]: number[] }>({});
 
   useEffect(() => {
     fetchWorkouts();
@@ -37,7 +38,6 @@ export default function LogWeights() {
          ORDER BY workout_date DESC;`
       );
 
-      // Filter out future workouts
       const today = new Date().getTime();
       const filteredWorkouts = result.filter(
         (workout) => workout.workout_date * 1000 <= today
@@ -59,18 +59,55 @@ export default function LogWeights() {
 
       const initialWeights: { [key: string]: string } = {};
       const initialReps: { [key: string]: string } = {};
+      const initialSets: { [key: string]: number[] } = {};
+
       result.forEach((exercise) => {
-        for (let i = 1; i <= exercise.sets; i++) {
-          const key = `${exercise.logged_exercise_id}_${i}`;
+        const sets = Array.from({ length: exercise.sets }, (_, i) => i + 1); // Default set numbers
+        initialSets[exercise.logged_exercise_id] = sets;
+
+        sets.forEach((setNumber) => {
+          const key = `${exercise.logged_exercise_id}_${setNumber}`;
           initialWeights[key] = ''; // Empty default for user input
           initialReps[key] = exercise.reps.toString(); // Default reps as string
-        }
+        });
       });
+
       setWeights(initialWeights);
       setReps(initialReps);
+      setExerciseSets(initialSets); // Preload default sets
     } catch (error) {
       console.error('Error fetching exercises:', error);
     }
+  };
+
+  const addSet = (exerciseId: string) => {
+    setExerciseSets((prev) => {
+      const currentSets = prev[exerciseId] || [];
+      const newSetNumber = currentSets.length > 0 ? Math.max(...currentSets) + 1 : 1; // Add next set number
+      return {
+        ...prev,
+        [exerciseId]: [...currentSets, newSetNumber],
+      };
+    });
+  };
+
+  const deleteSet = (exerciseId: string, setNumber: number) => {
+    setExerciseSets((prev) => ({
+      ...prev,
+      [exerciseId]: prev[exerciseId].filter((set) => set !== setNumber),
+    }));
+
+    const key = `${exerciseId}_${setNumber}`;
+    setWeights((prev) => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
+    setReps((prev) => {
+      const updated = { ...prev };
+      delete updated[key];
+      return updated;
+    });
   };
 
   const logWeights = async () => {
@@ -82,12 +119,12 @@ export default function LogWeights() {
     try {
       await db.withTransactionAsync(async () => {
         for (const exercise of exercises) {
-          for (let i = 1; i <= exercise.sets; i++) {
-            const weightKey = `${exercise.logged_exercise_id}_${i}`;
-            const repsKey = `${exercise.logged_exercise_id}_${i}`;
+          for (const setNumber of exerciseSets[exercise.logged_exercise_id]) {
+            const weightKey = `${exercise.logged_exercise_id}_${setNumber}`;
+            const repsKey = `${exercise.logged_exercise_id}_${setNumber}`;
 
-            const weight = parseFloat(weights[weightKey].replace(',', '.')) || 0; // Convert to number
-            const repsCount = parseInt(reps[repsKey], 10) || 0;
+            const weight = parseFloat(weights[weightKey]?.replace(',', '.') || '0');
+            const repsCount = parseInt(reps[repsKey] || '0', 10);
 
             if (weight <= 0 || repsCount <= 0) {
               throw new Error('Weight and reps must be greater than 0.');
@@ -101,7 +138,7 @@ export default function LogWeights() {
                 selectedWorkout.workout_log_id,
                 exercise.logged_exercise_id,
                 exercise.exercise_name,
-                i,
+                setNumber,
                 weight,
                 repsCount,
               ]
@@ -111,45 +148,10 @@ export default function LogWeights() {
       });
 
       Alert.alert('Success', 'Weights logged successfully!');
-      navigation.goBack(); // Navigate back to My Progress
+      navigation.goBack();
     } catch (error) {
       console.error('Error logging weights:', error);
       Alert.alert('Error', 'Failed to log weights.');
-    }
-  };
-
-  const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp * 1000);
-    const today = new Date();
-    const tomorrow = new Date(today);
-    const yesterday = new Date(today);
-
-    tomorrow.setDate(today.getDate() + 1);
-    yesterday.setDate(today.getDate() - 1);
-
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
-      return 'Today';
-    } else if (
-      date.getDate() === tomorrow.getDate() &&
-      date.getMonth() === tomorrow.getMonth() &&
-      date.getFullYear() === tomorrow.getFullYear()
-    ) {
-      return 'Tomorrow';
-    } else if (
-      date.getDate() === yesterday.getDate() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getFullYear() === yesterday.getFullYear()
-    ) {
-      return 'Yesterday';
-    } else {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`; // Default format
     }
   };
 
@@ -161,13 +163,16 @@ export default function LogWeights() {
           <Text style={styles.label}>Reps</Text>
           <Text style={styles.label}>Weight (kg)</Text>
         </View>
-        {Array.from({ length: exercise.sets }).map((_, index) => {
-          const setNumber = index + 1;
+        {exerciseSets[exercise.logged_exercise_id]?.map((setNumber) => {
           const weightKey = `${exercise.logged_exercise_id}_${setNumber}`;
           const repsKey = `${exercise.logged_exercise_id}_${setNumber}`;
-
+  
           return (
-            <View key={setNumber} style={styles.setContainer}>
+            <TouchableOpacity
+              key={setNumber.toString()}
+              onLongPress={() => deleteSet(exercise.logged_exercise_id.toString(), setNumber)}
+              style={styles.setContainer}
+            >
               <Text style={styles.setText}>Set {setNumber}:</Text>
               <TextInput
                 style={styles.input}
@@ -177,7 +182,7 @@ export default function LogWeights() {
                 onChangeText={(text) =>
                   setReps((prev) => ({
                     ...prev,
-                    [repsKey]: text.replace(/[^0-9]/g, ''), // Only allow numbers
+                    [repsKey]: text.replace(/[^0-9]/g, ''),
                   }))
                 }
               />
@@ -194,12 +199,20 @@ export default function LogWeights() {
                   }));
                 }}
               />
-            </View>
+            </TouchableOpacity>
           );
         })}
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  <TouchableOpacity
+    onPress={() => addSet(exercise.logged_exercise_id.toString())}
+  >
+    <Ionicons name="add-circle" size={28} color="#000000" />
+  </TouchableOpacity>
+</View>
       </View>
     );
   };
+  
 
   return (
     <View style={styles.container}>
@@ -223,7 +236,7 @@ export default function LogWeights() {
             >
               <Text style={styles.workoutName}>{item.workout_name}</Text>
               <Text style={styles.dayName}>{item.day_name}</Text>
-              <Text style={styles.workoutDate}>{formatDate(item.workout_date)}</Text>
+              <Text style={styles.workoutDate}>{new Date(item.workout_date * 1000).toLocaleDateString()}</Text>
             </TouchableOpacity>
           )}
           ListEmptyComponent={
@@ -292,6 +305,10 @@ const styles = StyleSheet.create({
   },
   exerciseContainer: {
     marginBottom: 20,
+  },
+  addSetButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
   exerciseTitle: {
     fontSize: 22,
