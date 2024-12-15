@@ -6,6 +6,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Modal,
 } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -30,6 +31,13 @@ export default function MyCalendar() {
   >([]);
   const [futureWorkouts, setFutureWorkouts] = useState<
     { workout_name: string; workout_date: number; day_name: string; workout_log_id: number }[]
+  >([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<
+    { workout_name: string; workout_date: number; day_name: string; workout_log_id: number } | null
+  >(null);
+  const [exercises, setExercises] = useState<
+    { exercise_name: string; sets: number; reps: number }[]
   >([]);
 
   const today = new Date();
@@ -101,36 +109,32 @@ export default function MyCalendar() {
     }
   };
 
-  const deleteWorkoutLog = async (workout_log_id: number) => {
+  const fetchWorkoutDetails = async (workout_log_id: number) => {
     try {
-      await db.runAsync(`DELETE FROM Workout_Log WHERE workout_log_id = ?;`, [
-        workout_log_id,
-      ]);
-      await db.runAsync(`DELETE FROM Weight_Log WHERE workout_log_id = ?;`, [
-        workout_log_id,
-      ]);
-      await db.runAsync(
-        `DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`,
+      const result = await db.getAllAsync<{
+        exercise_name: string;
+        sets: number;
+        reps: number;
+      }>(
+        `SELECT exercise_name, sets, reps FROM Logged_Exercises 
+         WHERE workout_log_id = ?;`,
         [workout_log_id]
       );
-
-      Alert.alert('Success', 'Workout log deleted successfully!');
-      fetchWorkouts(); // Refresh the list
+      setExercises(result);
     } catch (error) {
-      console.error('Error deleting workout log:', error);
-      Alert.alert('Error', 'Failed to delete workout log.');
+      console.error('Error fetching workout details:', error);
     }
   };
 
-  const confirmDelete = (workout_log_id: number) => {
-    Alert.alert(
-      'Delete Workout',
-      'Are you sure you want to delete this workout log? This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Delete', style: 'destructive', onPress: () => deleteWorkoutLog(workout_log_id) },
-      ]
-    );
+  const handleWorkoutPress = (workout: {
+    workout_name: string;
+    workout_date: number;
+    day_name: string;
+    workout_log_id: number;
+  }) => {
+    setSelectedWorkout(workout);
+    fetchWorkoutDetails(workout.workout_log_id);
+    setModalVisible(true);
   };
 
   const formatDate = (timestamp: number): string => {
@@ -182,7 +186,49 @@ export default function MyCalendar() {
     return (
       <TouchableOpacity
         style={styles.logContainer}
-        onLongPress={() => confirmDelete(workout_log_id)}
+        onPress={() =>
+          handleWorkoutPress({
+            workout_name,
+            workout_date,
+            day_name,
+            workout_log_id,
+          })
+        }
+        onLongPress={() =>
+          Alert.alert(
+            'Delete Workout',
+            'Are you sure you want to delete this workout log? This action cannot be undone.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Delete',
+                style: 'destructive',
+                onPress: async () => {
+                  try {
+                    await db.runAsync(
+                      `DELETE FROM Workout_Log WHERE workout_log_id = ?;`,
+                      [workout_log_id]
+                    );
+                    await db.runAsync(
+                      `DELETE FROM Weight_Log WHERE workout_log_id = ?;`,
+                      [workout_log_id]
+                    );
+                    await db.runAsync(
+                      `DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`,
+                      [workout_log_id]
+                    );
+  
+                    Alert.alert('Success', 'Workout log deleted successfully!');
+                    fetchWorkouts(); // Refresh the list
+                  } catch (error) {
+                    console.error('Error deleting workout log:', error);
+                    Alert.alert('Error', 'Failed to delete workout log.');
+                  }
+                },
+              },
+            ]
+          )
+        }
       >
         <Text style={styles.logDate}>{formatDate(workout_date)}</Text>
         <Text style={styles.logWorkoutName}>{workout_name}</Text>
@@ -190,24 +236,15 @@ export default function MyCalendar() {
       </TouchableOpacity>
     );
   };
+  
 
   return (
     <ScrollView
-  style={{ flex: 1, backgroundColor: '#FFFFFF' }}
-  contentContainerStyle={[styles.contentContainer, { paddingTop: 70 }]} // Adjust the top padding value as needed
->
+      style={{ flex: 1, backgroundColor: '#FFFFFF' }}
+      contentContainerStyle={[styles.contentContainer, { paddingTop: 70 }]}
+    >
       <Text style={styles.title}>My Calendar</Text>
 
-      {/* Schedule a Workout Button */}
-      <TouchableOpacity
-        style={styles.logWorkoutButton}
-        onPress={() => navigation.navigate('LogWorkout')}
-      >
-        <Ionicons name="calendar" size={24} color="#FFFFFF" style={styles.icon} />
-        <Text style={styles.logWorkoutButtonText}>Schedule a Workout</Text>
-      </TouchableOpacity>
-
-      {/* Today's Workout Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Today's Workout</Text>
         {todayWorkout ? (
@@ -217,47 +254,77 @@ export default function MyCalendar() {
         )}
       </View>
 
-      {/* Unlogged Past Workouts Section */}
-<View style={styles.section}>
-  <Text style={styles.sectionTitle}>Untracked Workouts</Text>
-  {pastWorkouts.length > 0 ? (
-    pastWorkouts.map((item) => (
-      <View key={item.workout_log_id}>
-        {renderWorkoutCard(item)}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Untracked Workouts</Text>
+        {pastWorkouts.length > 0 ? (
+          pastWorkouts.map((item) => (
+            <View key={item.workout_log_id}>{renderWorkoutCard(item)}</View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>No untracked workouts found</Text>
+        )}
       </View>
-    ))
-  ) : (
-    <Text style={styles.emptyText}>No untracked workouts found</Text>
-  )}
-</View>
 
-{/* Future Workouts Section */}
-<View style={styles.section}>
-  <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
-  {futureWorkouts.length > 0 ? (
-    futureWorkouts.map((item) => (
-      <View key={item.workout_log_id}>
-        {renderWorkoutCard(item)}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
+        {futureWorkouts.length > 0 ? (
+          futureWorkouts.map((item) => (
+            <View key={item.workout_log_id}>{renderWorkoutCard(item)}</View>
+          ))
+        ) : (
+          <Text style={styles.emptyText}>No upcoming workouts scheduled.</Text>
+        )}
       </View>
-    ))
-  ) : (
-    <Text style={styles.emptyText}>No upcoming workouts scheduled.</Text>
-  )}
-</View>
 
+      {/* Modal for Workout Details */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+            {selectedWorkout && (
+              <>
+                <Text style={styles.modalTitle}>
+                  {selectedWorkout.workout_name}
+                </Text>
+                <Text style={styles.modalSubtitle}>
+                  {selectedWorkout.day_name} | {formatDate(selectedWorkout.workout_date)}
+                </Text>
+                {exercises.length > 0 ? (
+                  exercises.map((exercise, index) => (
+                    <View key={index} style={styles.modalExercise}>
+                      <Text style={styles.modalExerciseName}>
+                        {exercise.exercise_name}
+                      </Text>
+                      <Text style={styles.modalExerciseDetails}>
+                        {exercise.sets} sets x {exercise.reps} reps
+                      </Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={styles.emptyText}>No exercises logged.</Text>
+                )}
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  contentContainer: {
-    alignItems: 'center', // Center everything horizontally
-    paddingHorizontal: 20,
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  contentContainer: { alignItems: 'center', paddingHorizontal: 20 },
   title: {
     fontSize: 32,
     fontWeight: '900',
@@ -265,29 +332,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000000',
   },
-  logWorkoutButton: {
-    backgroundColor: '#000000',
-    borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  logWorkoutButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  section: {
-    width: '100%',
-    maxWidth: 400,
-    marginBottom: 20,
-  },
+  section: { width: '100%', maxWidth: 400, marginBottom: 20 },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '800',
@@ -315,23 +360,22 @@ const styles = StyleSheet.create({
     color: '#000000',
     textAlign: 'center',
   },
-  logWorkoutName: {
-    fontSize: 20,
-    fontWeight: '900',
-    marginBottom: 8,
-    color: '#000000',
-    textAlign: 'center',
+  logWorkoutName: { fontSize: 20, fontWeight: '900', marginBottom: 8, textAlign: 'center' },
+  logDayName: { fontSize: 18, fontWeight: '700', textAlign: 'center' },
+  emptyText: { fontSize: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.5)' },
+  modalContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+    alignItems: 'center',
   },
-  logDayName: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#000000',
-    textAlign: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: 'rgba(0, 0, 0, 0.5)',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
+  modalCloseButton: { position: 'absolute', top: 10, right: 10 },
+  modalTitle: { fontSize: 24, fontWeight: '900', marginBottom: 10, textAlign: 'center' },
+  modalSubtitle: { fontSize: 18, fontWeight: '700', marginBottom: 20, textAlign: 'center' },
+  modalExercise: { marginBottom: 15 },
+  modalExerciseName: { fontSize: 20, fontWeight: '800', textAlign: 'center' },
+  modalExerciseDetails: { fontSize: 16, textAlign: 'center', color: '#666' },
 });
