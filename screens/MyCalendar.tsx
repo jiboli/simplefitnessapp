@@ -3,7 +3,6 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   ScrollView,
   TouchableOpacity,
   Alert,
@@ -14,7 +13,10 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WorkoutLogStackParamList } from '../App';
 
-type MyCalendarNavigationProp = StackNavigationProp<WorkoutLogStackParamList, 'MyCalendar'>;
+type MyCalendarNavigationProp = StackNavigationProp<
+  WorkoutLogStackParamList,
+  'MyCalendar'
+>;
 
 export default function MyCalendar() {
   const db = useSQLiteContext();
@@ -101,9 +103,16 @@ export default function MyCalendar() {
 
   const deleteWorkoutLog = async (workout_log_id: number) => {
     try {
-      await db.runAsync(`DELETE FROM Workout_Log WHERE workout_log_id = ?;`, [workout_log_id]);
-      await db.runAsync(`DELETE FROM Weight_Log WHERE workout_log_id = ?;`, [workout_log_id]);
-      await db.runAsync(`DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`, [workout_log_id]);
+      await db.runAsync(`DELETE FROM Workout_Log WHERE workout_log_id = ?;`, [
+        workout_log_id,
+      ]);
+      await db.runAsync(`DELETE FROM Weight_Log WHERE workout_log_id = ?;`, [
+        workout_log_id,
+      ]);
+      await db.runAsync(
+        `DELETE FROM Logged_Exercises WHERE workout_log_id = ?;`,
+        [workout_log_id]
+      );
 
       Alert.alert('Success', 'Workout log deleted successfully!');
       fetchWorkouts(); // Refresh the list
@@ -127,8 +136,8 @@ export default function MyCalendar() {
   const formatDate = (timestamp: number): string => {
     const date = new Date(timestamp * 1000);
     const today = new Date();
-    const yesterday = new Date();
-    const tomorrow = new Date();
+    const yesterday = new Date(today);
+    const tomorrow = new Date(today);
 
     yesterday.setDate(today.getDate() - 1);
     tomorrow.setDate(today.getDate() + 1);
@@ -183,7 +192,7 @@ export default function MyCalendar() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.contentContainer}>
       <Text style={styles.title}>My Calendar</Text>
 
       {/* Schedule a Workout Button */}
@@ -196,47 +205,34 @@ export default function MyCalendar() {
       </TouchableOpacity>
 
       {/* Today's Workout Section */}
-      <Text style={styles.sectionTitle}>Today's Workout</Text>
-      {todayWorkout ? (
-        <TouchableOpacity
-          style={styles.logContainer}
-          onLongPress={() => confirmDelete(todayWorkout.workout_log_id)}
-        >
-          <Text style={styles.logDate}>{formatDate(todayWorkout.workout_date)}</Text>
-          <Text style={styles.logWorkoutName}>{todayWorkout.workout_name}</Text>
-          <Text style={styles.logDayName}>{todayWorkout.day_name}</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.logContainer}>
-          <Text style={styles.logWorkoutName}>No workout scheduled for today.</Text>
-        </View>
-      )}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Today's Workout</Text>
+        {todayWorkout ? (
+          renderWorkoutCard(todayWorkout)
+        ) : (
+          <Text style={styles.emptyText}>No workout scheduled for today.</Text>
+        )}
+      </View>
 
       {/* Unlogged Past Workouts Section */}
-      <Text style={styles.sectionTitle}>Untracked Workouts</Text>
-      {pastWorkouts.length > 0 ? (
-        <FlatList
-          data={pastWorkouts}
-          keyExtractor={(item) => `${item.workout_log_id}`}
-          renderItem={({ item }) => renderWorkoutCard(item)}
-          scrollEnabled={false}
-        />
-      ) : (
-        <Text style={styles.emptyText}>No unlogged past workouts available.</Text>
-      )}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Untracked Workouts</Text>
+        {pastWorkouts.length > 0 ? (
+          pastWorkouts.map((item) => renderWorkoutCard(item))
+        ) : (
+          <Text style={styles.emptyText}>No unlogged past workouts available.</Text>
+        )}
+      </View>
 
       {/* Future Workouts Section */}
-      <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
-      {futureWorkouts.length > 0 ? (
-        <FlatList
-          data={futureWorkouts}
-          keyExtractor={(item) => `${item.workout_log_id}`}
-          renderItem={({ item }) => renderWorkoutCard(item)}
-          scrollEnabled={false}
-        />
-      ) : (
-        <Text style={styles.emptyText}>No future workouts scheduled.</Text>
-      )}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Upcoming Workouts</Text>
+        {futureWorkouts.length > 0 ? (
+          futureWorkouts.map((item) => renderWorkoutCard(item))
+        ) : (
+          <Text style={styles.emptyText}>No future workouts scheduled.</Text>
+        )}
+      </View>
     </ScrollView>
   );
 }
@@ -244,8 +240,11 @@ export default function MyCalendar() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
+  },
+  contentContainer: {
+    alignItems: 'center', // Center everything horizontally
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 32,
@@ -272,11 +271,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 18,
   },
+  section: {
+    width: '100%',
+    maxWidth: 400,
+    marginBottom: 20,
+  },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '800',
     marginBottom: 10,
     color: '#000000',
+    textAlign: 'center',
   },
   logContainer: {
     backgroundColor: '#F7F7F7',
@@ -285,23 +290,27 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderWidth: 1,
     borderColor: 'rgba(0, 0, 0, 0.1)',
+    alignItems: 'center', // Center content inside cards
   },
   logDate: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 5,
     color: '#000000',
+    textAlign: 'center',
   },
   logWorkoutName: {
     fontSize: 20,
     fontWeight: '900',
     marginBottom: 8,
     color: '#000000',
+    textAlign: 'center',
   },
   logDayName: {
     fontSize: 18,
     fontWeight: '700',
     color: '#000000',
+    textAlign: 'center',
   },
   emptyText: {
     fontSize: 16,
