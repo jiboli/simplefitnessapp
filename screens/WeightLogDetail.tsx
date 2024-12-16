@@ -267,6 +267,9 @@ export default function WeightLogDetail() {
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </TouchableOpacity>
 
+      <Text style={styles.headerTitle}>{workoutName} Logs</Text>
+
+
       {/* Filter Buttons */}
       <View style={styles.filterContainer}>
         <TouchableOpacity
@@ -348,6 +351,14 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     backgroundColor: '#FFFFFF',
   },
+  headerTitle: {
+    fontSize: 30,
+    fontWeight: '900',
+    color: '#000000',
+    textAlign: 'center',
+    marginVertical: 20, // Adds spacing above and below the title
+  },
+  
   filterContainer: {
     flexDirection: 'column', // Stack buttons vertically
     alignItems: 'center',

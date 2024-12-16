@@ -3,6 +3,8 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextI
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
+import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
+
 
 type Day = {
   day_id: number;
@@ -176,22 +178,34 @@ export default function WorkoutDetails() {
           
               {/* Exercises */}
               {day.exercises.length > 0 ? (
-  day.exercises.map((exercise, index) => (
-    <TouchableOpacity
-      key={index}
-      onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
-      activeOpacity={0.8}
-      style={styles.exerciseContainer}
-    >
-      <Text style={styles.exerciseName}>{exercise.exercise_name}</Text>
-      <Text style={styles.exerciseDetails}>
-        {exercise.sets} sets x {exercise.reps} reps
-      </Text>
-    </TouchableOpacity>
-  ))
-) : (
-  <Text style={styles.noExercisesText}>No exercises on this day</Text>
-)}
+              day.exercises.map((exercise, index) => (
+                <TouchableOpacity
+                key={index}
+                onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
+                activeOpacity={0.8}
+                style={styles.exerciseContainer}
+              >
+                <AutoSizeText
+                  fontSize={18}
+                  numberOfLines={1}
+                  mode={ResizeTextMode.max_lines}
+                  style={styles.exerciseName}
+                >
+                  {exercise.exercise_name}
+                </AutoSizeText>
+                <AutoSizeText
+                  fontSize={16}
+                  numberOfLines={1}
+                  mode={ResizeTextMode.max_lines}
+                  style={styles.exerciseDetails}
+                >
+                  {exercise.sets} sets x {exercise.reps} reps
+                </AutoSizeText>
+              </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.noExercisesText}>No exercises on this day</Text>
+        )}
 
             </TouchableOpacity>
           )}
@@ -335,16 +349,19 @@ const styles = StyleSheet.create({
       marginBottom: 8,
       borderWidth: 1,
       borderColor: 'rgba(0, 0, 0, 0.1)',
+      maxWidth: '100%',  // Prevent overflow
     },
     exerciseName: {
-      fontSize: 18,
+      flex: 1,  // Allow text to use remaining space
       fontWeight: '700',
       color: '#000000',
     },
     exerciseDetails: {
       fontSize: 16,
       color: '#000000',
+      textAlign: 'right',
     },
+    
     noExercisesText: {
       textAlign: 'center',
       fontSize: 16,

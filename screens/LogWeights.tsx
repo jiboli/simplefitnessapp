@@ -267,7 +267,7 @@ export default function LogWeights() {
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </TouchableOpacity>
 
-      <Text style={styles.title}>Log Weights</Text>
+      <Text style={styles.title}>Track Weights</Text>
 
       {!selectedWorkout ? (
         <FlatList
@@ -288,7 +288,7 @@ export default function LogWeights() {
             </TouchableOpacity>
           )}
           ListEmptyComponent={
-            <Text style={styles.emptyText}>No workouts available to log.</Text>
+            <Text style={styles.emptyText}>No workouts available to Track.</Text>
           }
         />
       ) : (
@@ -297,12 +297,19 @@ export default function LogWeights() {
             data={exercises}
             keyExtractor={(item) => item.logged_exercise_id.toString()}
             renderItem={({ item }) => renderExercise(item)}
+            ListEmptyComponent={
+              
+                <Text style={styles.emptyText}>No exercises available.</Text>
+            }
+
+            
           />
           <TouchableOpacity style={styles.saveButton} onPress={logWeights}>
-            <Text style={styles.saveButtonText}>Log Weights</Text>
+            <Text style={styles.saveButtonText}>Track Weights</Text>
           </TouchableOpacity>
         </>
       )}
+      
     </View>
   );
 }
@@ -368,7 +375,8 @@ const styles = StyleSheet.create({
   exerciseTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 30,
+    marginBottom: 20,
+    marginTop: 40,
     textAlign: 'center',
   },
   labelsRow: {
@@ -388,7 +396,7 @@ const styles = StyleSheet.create({
   setContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
     justifyContent: 'space-between',
   },
   setText: {
