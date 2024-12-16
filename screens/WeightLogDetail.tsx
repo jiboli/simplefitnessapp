@@ -267,7 +267,7 @@ export default function WeightLogDetail() {
         <Ionicons name="arrow-back" size={24} color="#000000" />
       </TouchableOpacity>
 
-      <Text style={styles.headerTitle}>{workoutName} Logs</Text>
+      <Text style={styles.headerTitle}>{workoutName} logs</Text>
 
 
       {/* Filter Buttons */}
