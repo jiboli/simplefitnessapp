@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.simplefitnessapp"
+      "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp"
     },
     "android": {
       "appName": "Simple",
@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/simpleicon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.anonymous.simplefitnessapp"
+      "package": "tr.com.basarsubasi.simplefitnessapp"
     },
     "web": {
       "favicon": "./assets/simpleicon.png"

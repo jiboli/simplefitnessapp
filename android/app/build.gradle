@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.anonymous.simplefitnessapp'
+    namespace 'tr.com.basarsubasi.simplefitnessapp'
     defaultConfig {
-        applicationId 'com.anonymous.simplefitnessapp'
+        applicationId 'tr.com.basarsubasi.simplefitnessapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

@@ -302,7 +302,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.anonymous.simplefitnessapp";
+				PRODUCT_BUNDLE_IDENTIFIER = "tr.com.basarsubasi.simplefitnessapp";
 				PRODUCT_NAME = "Simple";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -329,7 +329,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = "com.anonymous.simplefitnessapp";
+				PRODUCT_BUNDLE_IDENTIFIER = "tr.com.basarsubasi.simplefitnessapp";
 				PRODUCT_NAME = "Simple";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
