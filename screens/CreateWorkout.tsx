@@ -233,27 +233,33 @@ export default function CreateWorkout() {
                   }}
                 />
                 <TextInput
-                  style={[styles.input, styles.smallInput]}
-                  placeholder="Sets"
-                  keyboardType="numeric"
-                  value={exercise.sets}
-                  onChangeText={(text) => {
-                    const sanitizedText = text.replace(/[^0-9]/g, '');
+                style={[styles.input, styles.smallInput]}
+                placeholder="Sets"
+                keyboardType="numeric"
+                value={exercise.sets}
+                onChangeText={(text) => {
+                  const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                  let value = parseInt(sanitizedText || '0'); // Convert to integer
+                  if (value > 0 && value <= 100) { // Ensure value is > 0 and <= 100
                     const updatedDays = [...days];
-                    updatedDays[index].exercises[exerciseIndex].sets = sanitizedText;
+                    updatedDays[index].exercises[exerciseIndex].sets = value.toString();
                     setDays(updatedDays);
-                  }}
-                />
+                  }
+                }}
+              />
                 <TextInput
                   style={[styles.input, styles.smallInput]}
                   placeholder="Reps"
                   keyboardType="numeric"
                   value={exercise.reps}
                   onChangeText={(text) => {
-                    const sanitizedText = text.replace(/[^0-9]/g, '');
-                    const updatedDays = [...days];
-                    updatedDays[index].exercises[exerciseIndex].reps = sanitizedText;
-                    setDays(updatedDays);
+                    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                    let value = parseInt(sanitizedText || '0'); // Convert to integer
+                    if (value > 0 && value <= 10000) { // Ensure value is > 0 and <= 10,000
+                      const updatedDays = [...days];
+                      updatedDays[index].exercises[exerciseIndex].reps = value.toString();
+                      setDays(updatedDays);
+                    }
                   }}
                 />
               </TouchableOpacity>

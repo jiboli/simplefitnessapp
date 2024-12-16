@@ -236,19 +236,36 @@ export default function WorkoutDetails() {
               onChangeText={setExerciseName}
             />
             <TextInput
-              style={styles.input}
-              placeholder="Sets (e.g., 3)"
-              keyboardType="numeric"
-              value={exerciseSets}
-              onChangeText={(text) => setExerciseSets(text.replace(/[^0-9]/g, ''))}
-            />
-            <TextInput
-              style={styles.input}
-              placeholder="Reps (e.g., 10)"
-              keyboardType="numeric"
-              value={exerciseReps}
-              onChangeText={(text) => setExerciseReps(text.replace(/[^0-9]/g, ''))}
-            />
+  style={styles.input}
+  placeholder="Sets (e.g., 3)"
+  keyboardType="numeric"
+  value={exerciseSets}
+  onChangeText={(text) => {
+    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    let value = parseInt(sanitizedText || '0'); // Convert to integer
+    if (value > 0 && value <= 100) {
+      setExerciseSets(value.toString()); // Update state if valid
+    } else if (value === 0) {
+      setExerciseSets(''); // Prevent 0 from being displayed
+    }
+  }}
+/>
+<TextInput
+  style={styles.input}
+  placeholder="Reps (e.g., 10)"
+  keyboardType="numeric"
+  value={exerciseReps}
+  onChangeText={(text) => {
+    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+    let value = parseInt(sanitizedText || '0'); // Convert to integer
+    if (value > 0 && value <= 10000) {
+      setExerciseReps(value.toString()); // Update state if valid
+    } else if (value === 0) {
+      setExerciseReps(''); // Prevent 0 from being displayed
+    }
+  }}
+/>
+
             <TouchableOpacity style={styles.saveButton} onPress={addExercise}>
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>

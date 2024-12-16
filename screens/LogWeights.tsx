@@ -216,13 +216,23 @@ export default function LogWeights() {
                 placeholder="Reps"
                 keyboardType="numeric"
                 value={reps[repsKey]}
-                onChangeText={(text) =>
-                  setReps((prev) => ({
-                    ...prev,
-                    [repsKey]: text.replace(/[^0-9]/g, ''),
-                  }))
-                }
+                onChangeText={(text) => {
+                  const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                  let value = parseInt(sanitizedText || '0'); // Convert to integer
+                  if (value > 0 && value <= 10000) {
+                    setReps((prev) => ({
+                      ...prev,
+                      [repsKey]: value.toString(), // Update state with valid input
+                    }));
+                  } else if (value === 0) {
+                    setReps((prev) => ({
+                      ...prev,
+                      [repsKey]: '', // Prevent 0 from being displayed
+                    }));
+                  }
+                }}
               />
+
               <TextInput
                 style={styles.input}
                 placeholder={weightFormat}

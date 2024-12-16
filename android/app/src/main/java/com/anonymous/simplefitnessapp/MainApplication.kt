@@ -1,4 +1,4 @@
-package com.anonymous.simple
+package com.anonymous.simplefitnessapp
 
 import android.app.Application
 import android.content.res.Configuration

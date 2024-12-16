@@ -1,30 +1,31 @@
 {
   "expo": {
-    "name": "Simple Fitness App Beta",
-    "slug": "simplefitnessappbeta",
-    "version": "0.9.0",
+    "name": "Simple",
+    "slug": "simplefitnessapp",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/SimpleIcon.png",
+    "icon": "./assets/simpleicon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/SimpleIcon.png",
+      "image": "./assets/simpleicon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.simplefitnessapp"
     },
     "android": {
-      "appName": "Simple Fitness App Beta",
+      "appName": "Simple",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/SimpleIcon.png",
+        "foregroundImage": "./assets/simpleicon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.simplefitnessapp"
     },
     "web": {
-      "favicon": "./assets/SimpleIcon.png"
+      "favicon": "./assets/simpleicon.png"
     },
     "extra": {
       "eas": {
