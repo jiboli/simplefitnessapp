@@ -4,11 +4,11 @@
     "slug": "simplefitnessappbeta",
     "version": "0.9.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/SimpleIcon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/icon.png",
+      "image": "./assets/SimpleIcon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -18,13 +18,13 @@
     "android": {
       "appName": "Simple Fitness App Beta",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/SimpleIcon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.anonymous.simplefitnessapp"
     },
     "web": {
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/SimpleIcon.png"
     },
     "extra": {
       "eas": {

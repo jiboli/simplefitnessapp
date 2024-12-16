@@ -11,7 +11,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { useSettings } from '../context/SettingsContext';
 export default function LogWorkout() {
   const db = useSQLiteContext();
   const navigation = useNavigation();
@@ -22,7 +22,7 @@ export default function LogWorkout() {
   const [selectedWorkout, setSelectedWorkout] = useState<number | null>(null);
   const [days, setDays] = useState<{ day_id: number; day_name: string }[]>([]);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
-
+  const { dateFormat } = useSettings();
   useEffect(() => {
     fetchWorkouts();
   }, []);
@@ -144,15 +144,40 @@ export default function LogWorkout() {
     }
   };
 
-  // Format the date for display
-  const formatDate = (date: Date | null): string => {
-    if (!date) return 'Select a date';
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp * 1000); // Convert timestamp to Date object
+    const today = new Date();
+    const yesterday = new Date();
+    const tomorrow = new Date();
+  
+    yesterday.setDate(today.getDate() - 1); // Yesterday's date
+    tomorrow.setDate(today.getDate() + 1); // Tomorrow's date
+  
+    // Helper to compare dates without time
+    const isSameDay = (d1: Date, d2: Date) =>
+      d1.getDate() === d2.getDate() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getFullYear() === d2.getFullYear();
+  
+    // Check if the date matches today, yesterday, or tomorrow
+    if (isSameDay(date, today)) {
+      return 'Today';
+    } else if (isSameDay(date, yesterday)) {
+      return 'Yesterday';
+    } else if (isSameDay(date, tomorrow)) {
+      return 'Tomorrow';
+    }
+  
+    // Default date formatting based on user-selected format
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
+  
+    return dateFormat === 'mm-dd-yyyy'
+      ? `${month}-${day}-${year}`
+      : `${day}-${month}-${year}`;
   };
-
+  
   return (
     <View style={styles.container}>
       {/* Back Button */}
@@ -163,7 +188,8 @@ export default function LogWorkout() {
       {/* Date Picker */}
       <Text style={styles.Title}>Select Date</Text>
       <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-        <Text style={styles.inputText}>{formatDate(selectedDate)}</Text>
+      <Text style={styles.inputText}>
+  {selectedDate ? formatDate(normalizeDate(selectedDate)) : 'Select a date'} </Text>
       </TouchableOpacity>
       {showDatePicker && (
         <DateTimePicker

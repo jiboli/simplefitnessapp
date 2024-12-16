@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect,useState } from 'react';
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WorkoutLogStackParamList } from '../App';
+import { useSettings } from '../context/SettingsContext';
 
 type MyCalendarNavigationProp = StackNavigationProp<
   WorkoutLogStackParamList,
@@ -106,6 +107,7 @@ export default function MyCalendar() {
       console.error('Error fetching workouts:', error);
     }
   };
+  const { dateFormat } = useSettings();
 
   const fetchWorkoutDetails = async (workout_log_id: number) => {
     try {
@@ -136,38 +138,37 @@ export default function MyCalendar() {
   };
 
   const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp * 1000);
+    const date = new Date(timestamp * 1000); // Convert timestamp to Date object
     const today = new Date();
-    const yesterday = new Date(today);
-    const tomorrow = new Date(today);
-
-    yesterday.setDate(today.getDate() - 1);
-    tomorrow.setDate(today.getDate() + 1);
-
-    if (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    ) {
+    const yesterday = new Date();
+    const tomorrow = new Date();
+  
+    yesterday.setDate(today.getDate() - 1); // Yesterday's date
+    tomorrow.setDate(today.getDate() + 1); // Tomorrow's date
+  
+    // Helper to compare dates without time
+    const isSameDay = (d1: Date, d2: Date) =>
+      d1.getDate() === d2.getDate() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getFullYear() === d2.getFullYear();
+  
+    // Check if the date matches today, yesterday, or tomorrow
+    if (isSameDay(date, today)) {
       return 'Today';
-    } else if (
-      date.getDate() === yesterday.getDate() &&
-      date.getMonth() === yesterday.getMonth() &&
-      date.getFullYear() === yesterday.getFullYear()
-    ) {
+    } else if (isSameDay(date, yesterday)) {
       return 'Yesterday';
-    } else if (
-      date.getDate() === tomorrow.getDate() &&
-      date.getMonth() === tomorrow.getMonth() &&
-      date.getFullYear() === tomorrow.getFullYear()
-    ) {
+    } else if (isSameDay(date, tomorrow)) {
       return 'Tomorrow';
-    } else {
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}-${month}-${year}`;
     }
+  
+    // Default date formatting based on user-selected format
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+  
+    return dateFormat === 'mm-dd-yyyy'
+      ? `${month}-${day}-${year}`
+      : `${day}-${month}-${year}`;
   };
 
   const renderWorkoutCard = ({

@@ -12,6 +12,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { WorkoutLog, LoggedExercise } from '../types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useSettings } from '../context/SettingsContext';
 
 
 
@@ -25,7 +26,7 @@ export default function LogWeights() {
   const [weights, setWeights] = useState<{ [key: string]: string }>({});
   const [reps, setReps] = useState<{ [key: string]: string }>({});
   const [exerciseSets, setExerciseSets] = useState<{ [key: string]: number[] }>({});
-
+  const { weightFormat, dateFormat } = useSettings();
   useEffect(() => {
     fetchWorkouts();
   }, []);
@@ -82,24 +83,39 @@ export default function LogWeights() {
     }
   };
   const formatDate = (timestamp: number): string => {
-    const date = new Date(timestamp * 1000); // Convert UNIX timestamp to Date
+    const date = new Date(timestamp * 1000); // Convert timestamp to Date object
     const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
+    const yesterday = new Date();
+    const tomorrow = new Date();
   
+    yesterday.setDate(today.getDate() - 1); // Yesterday's date
+    tomorrow.setDate(today.getDate() + 1); // Tomorrow's date
+  
+    // Helper to compare dates without time
+    const isSameDay = (d1: Date, d2: Date) =>
+      d1.getDate() === d2.getDate() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getFullYear() === d2.getFullYear();
+  
+    // Check if the date matches today, yesterday, or tomorrow
+    if (isSameDay(date, today)) {
+      return 'Today';
+    } else if (isSameDay(date, yesterday)) {
+      return 'Yesterday';
+    } else if (isSameDay(date, tomorrow)) {
+      return 'Tomorrow';
+    }
+  
+    // Default date formatting based on user-selected format
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
   
-    if (date.toDateString() === today.toDateString()) {
-      return 'Today';
-    }
-    if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
-    }
-  
-    return `${day}-${month}-${year}`; // Default format: dd-mm-yyyy
+    return dateFormat === 'mm-dd-yyyy'
+      ? `${month}-${day}-${year}`
+      : `${day}-${month}-${year}`;
   };
+  
 
   
   const addSet = (exerciseId: string) => {
@@ -182,7 +198,7 @@ export default function LogWeights() {
         <Text style={styles.exerciseTitle}>{exercise.exercise_name}</Text>
         <View style={styles.labelsRow}>
           <Text style={styles.label}>Reps</Text>
-          <Text style={styles.label}>Weight (kg)</Text>
+          <Text style={styles.label}>Weight ({weightFormat})</Text>
         </View>
         {exerciseSets[exercise.logged_exercise_id]?.map((setNumber) => {
           const weightKey = `${exercise.logged_exercise_id}_${setNumber}`;
@@ -209,7 +225,7 @@ export default function LogWeights() {
               />
               <TextInput
                 style={styles.input}
-                placeholder="Weight"
+                placeholder={weightFormat}
                 keyboardType="decimal-pad"
                 value={weights[weightKey]}
                 onChangeText={(text) => {
