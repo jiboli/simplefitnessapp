@@ -1,5 +1,5 @@
 // App.tsx
-import React, { useEffect, useState } from 'react';
+import React, {useState } from 'react';
 import { View,Text, ActivityIndicator, StatusBar, StyleSheet, Pressable } from 'react-native'; // Import Pressable here
 import * as FileSystem from 'expo-file-system';
 import { SQLiteProvider } from 'expo-sqlite';
@@ -18,6 +18,8 @@ import LogWorkout from './screens/LogWorkout';
 import MyProgress from './screens/MyProgress';
 import LogWeights from './screens/LogWeights';
 import WeightLogDetail from './screens/WeightLogDetail';
+import Settings from './screens/Settings';
+import { SettingsProvider } from './context/SettingsContext';
 
 
 
@@ -204,6 +206,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView>
+      <SettingsProvider>
       <NavigationContainer>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <React.Suspense
@@ -265,9 +268,22 @@ export default function App() {
                 tabBarLabel: 'My Progress',
               }}
             />
+
+<Bottom.Screen
+  name="Settings"
+  component={Settings}
+  options={{
+    tabBarButton: (props) => (
+      <TabButton {...props} iconName="settings-sharp" />
+    ),
+    tabBarLabel: 'Settings',
+  }}
+/>
+
           </Bottom.Navigator>
         </SQLiteProvider>
       </NavigationContainer>
+      </SettingsProvider>
       </GestureHandlerRootView>
   );
 }

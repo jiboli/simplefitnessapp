@@ -1,5 +1,3 @@
-// screens/Home.tsx
-
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 
@@ -8,8 +6,12 @@ const { height } = Dimensions.get('window'); // Get screen height for dynamic si
 export default function Home({ navigation }: any) {
   return (
     <View style={styles.container}>
-      {/* App Title */}
-      <Text style={styles.title}>Simple.</Text>
+      <View style={styles.headerContainer}>
+  {/* App Title */}
+  <Text style={styles.title}>Simple.</Text>
+
+
+</View>
 
       {/* Create a Workout Section */}
       <View style={[styles.card, styles.blackCard]}>
@@ -58,39 +60,43 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
-    paddingTop: 30, // Reduced spacing above the title
+    paddingTop: 30,
+  },
+  headerContainer: {
+    position: 'relative', // Base container for title and icon
+    marginBottom: 20,
   },
   title: {
     fontSize: 44,
     fontWeight: '900',
-    marginBottom: 20, // Compact spacing between title and first card
-    textAlign: 'center',
+    textAlign: 'center', // Center the title horizontally
     color: '#000000',
   },
+  
   card: {
     borderRadius: 15,
     padding: 20,
-    marginBottom: 10, // Compact spacing between cards
+    marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   blackCard: {
     backgroundColor: '#000000',
-    height: height * 0.25, // Adjusted to 25% of screen height
+    height: height * 0.25,
   },
   grayCard: {
     backgroundColor: '#808080',
-    height: height * 0.22, // Slightly smaller than the first card
+    height: height * 0.22,
   },
   lightGrayCard: {
     backgroundColor: '#D3D3D3',
-    height: height * 0.22, // Matches the gray card
+    height: height * 0.22,
   },
   cardTitle: {
     fontSize: 24,
     fontWeight: '800',
     textAlign: 'center',
-    lineHeight: 30, // Add line spacing for better readability
+    lineHeight: 30,
   },
   whiteText: {
     color: '#FFFFFF',
@@ -105,11 +111,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 18,
-    marginTop: 10, // Space between text and button
+    marginTop: 10,
     alignSelf: 'center',
   },
   whiteButton: {
-    marginTop:20,
+    marginTop: 20,
     backgroundColor: '#FFFFFF',
   },
   blackButton: {
