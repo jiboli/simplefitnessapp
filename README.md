@@ -44,6 +44,11 @@ An easy to use fitness app that lets you create, schedule and track your workout
 
 
 
+## ⬇️ **Installation Methods**
+
+Soon on Google Play Store, App Store and F-Droid.
+
+In the meantime, you can use the apk file under the Releases tab.
 
 
 
