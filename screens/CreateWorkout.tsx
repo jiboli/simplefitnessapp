@@ -274,15 +274,16 @@ export default function CreateWorkout() {
           </TouchableOpacity>
         )}
         ListFooterComponent={
-          <TouchableOpacity style={styles.addButton} onPress={addDay}>
-            <Text style={styles.addButtonText}>+ Add Day</Text>
-          </TouchableOpacity>
+          <View>
+            <TouchableOpacity style={styles.addButton} onPress={addDay}>
+              <Text style={styles.addButtonText}>+ Add Day</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveButton} onPress={handleSaveWorkout}>
+              <Text style={styles.saveButtonText}>Save Workout</Text>
+            </TouchableOpacity>
+          </View>
         }
       />
-
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveWorkout}>
-        <Text style={styles.saveButtonText}>Save Workout</Text>
-      </TouchableOpacity>
     </View>
   );
 }
