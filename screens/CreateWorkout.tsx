@@ -178,113 +178,120 @@ export default function CreateWorkout() {
   };
 
   return (
-    <View style={styles.container}>
+<View style={styles.container}>
+  <FlatList
+    data={days}
+    keyExtractor={(item, index) => index.toString()}
+    ListHeaderComponent={
+      <>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="arrow-back" size={40} color="#000000" />
+        </TouchableOpacity>
+
+        {/* Title */}
+        <Text style={styles.title}>Create a New Workout</Text>
+
+        {/* Workout Name Input */}
+        <TextInput
+          style={styles.input}
+          placeholder="Workout Name"
+          value={workoutName}
+          onChangeText={setWorkoutName}
+        />
+      </>
+    }
+    renderItem={({ item, index }) => (
       <TouchableOpacity
-       style={styles.backButton}
-       onPress={() => navigation.goBack()}
-      > 
-      <Ionicons name="arrow-back" size={40} color="#000000" />
-      </TouchableOpacity>
+        onLongPress={() => deleteDay(index)}
+        activeOpacity={0.8}
+        style={styles.dayContainer}
+      >
+        <TextInput
+          style={styles.input}
+          placeholder={`Day ${index + 1} Name`}
+          value={item.dayName}
+          onChangeText={(text) => {
+            const updatedDays = [...days];
+            updatedDays[index].dayName = text;
+            setDays(updatedDays);
+          }}
+        />
 
-      <Text style={styles.title}>Create a New Workout</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Workout Name"
-        value={workoutName}
-        onChangeText={setWorkoutName}
-      />
-
-      <FlatList
-        data={days}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item, index }) => (
+        {item.exercises.map((exercise, exerciseIndex) => (
           <TouchableOpacity
-            onLongPress={() => deleteDay(index)}
+            key={exerciseIndex}
+            onLongPress={() => deleteExercise(index, exerciseIndex)}
             activeOpacity={0.8}
-            style={styles.dayContainer}
+            style={styles.exerciseContainer}
           >
             <TextInput
-              style={styles.input}
-              placeholder={`Day ${index + 1} Name`}
-              value={item.dayName}
+              style={[styles.input, styles.exerciseInput]}
+              placeholder="Exercise Name"
+              value={exercise.exerciseName}
               onChangeText={(text) => {
                 const updatedDays = [...days];
-                updatedDays[index].dayName = text;
+                updatedDays[index].exercises[exerciseIndex].exerciseName = text;
                 setDays(updatedDays);
               }}
             />
-
-            {item.exercises.map((exercise, exerciseIndex) => (
-              <TouchableOpacity
-                key={exerciseIndex}
-                onLongPress={() => deleteExercise(index, exerciseIndex)}
-                activeOpacity={0.8}
-                style={styles.exerciseContainer}
-              >
-                <TextInput
-                  style={[styles.input, styles.exerciseInput]}
-                  placeholder="Exercise Name"
-                  value={exercise.exerciseName}
-                  onChangeText={(text) => {
-                    const updatedDays = [...days];
-                    updatedDays[index].exercises[exerciseIndex].exerciseName = text;
-                    setDays(updatedDays);
-                  }}
-                />
-                <TextInput
-                style={[styles.input, styles.smallInput]}
-                placeholder="Sets"
-                keyboardType="numeric"
-                value={exercise.sets}
-                onChangeText={(text) => {
-                  const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-                  let value = parseInt(sanitizedText || '0'); // Convert to integer
-                  if (value > 0 && value <= 100) { // Ensure value is > 0 and <= 100
-                    const updatedDays = [...days];
-                    updatedDays[index].exercises[exerciseIndex].sets = value.toString();
-                    setDays(updatedDays);
-                  }
-                }}
-              />
-                <TextInput
-                  style={[styles.input, styles.smallInput]}
-                  placeholder="Reps"
-                  keyboardType="numeric"
-                  value={exercise.reps}
-                  onChangeText={(text) => {
-                    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-                    let value = parseInt(sanitizedText || '0'); // Convert to integer
-                    if (value > 0 && value <= 10000) { // Ensure value is > 0 and <= 10,000
-                      const updatedDays = [...days];
-                      updatedDays[index].exercises[exerciseIndex].reps = value.toString();
-                      setDays(updatedDays);
-                    }
-                  }}
-                />
-              </TouchableOpacity>
-            ))}
-
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => addExercise(index)}
-            >
-              <Text style={styles.addButtonText}>+ Add Exercise</Text>
-            </TouchableOpacity>
+            <TextInput
+              style={[styles.input, styles.smallInput]}
+              placeholder="Sets"
+              keyboardType="numeric"
+              value={exercise.sets}
+              onChangeText={(text) => {
+                const sanitizedText = text.replace(/[^0-9]/g, '');
+                let value = parseInt(sanitizedText || '0');
+                if (value > 0 && value <= 100) {
+                  const updatedDays = [...days];
+                  updatedDays[index].exercises[exerciseIndex].sets = value.toString();
+                  setDays(updatedDays);
+                }
+              }}
+            />
+            <TextInput
+              style={[styles.input, styles.smallInput]}
+              placeholder="Reps"
+              keyboardType="numeric"
+              value={exercise.reps}
+              onChangeText={(text) => {
+                const sanitizedText = text.replace(/[^0-9]/g, '');
+                let value = parseInt(sanitizedText || '0');
+                if (value > 0 && value <= 10000) {
+                  const updatedDays = [...days];
+                  updatedDays[index].exercises[exerciseIndex].reps = value.toString();
+                  setDays(updatedDays);
+                }
+              }}
+            />
           </TouchableOpacity>
-        )}
-        ListFooterComponent={
-          <View>
-            <TouchableOpacity style={styles.addButton} onPress={addDay}>
-              <Text style={styles.addButtonText}>+ Add Day</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSaveWorkout}>
-              <Text style={styles.saveButtonText}>Save Workout</Text>
-            </TouchableOpacity>
-          </View>
-        }
-      />
-    </View>
+        ))}
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => addExercise(index)}
+        >
+          <Text style={styles.addButtonText}>+ Add Exercise</Text>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    )}
+    ListFooterComponent={
+      <View>
+        <TouchableOpacity style={styles.addButton} onPress={addDay}>
+          <Text style={styles.addButtonText}>+ Add Day</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.saveButton} onPress={handleSaveWorkout}>
+          <Text style={styles.saveButtonText}>Save Workout</Text>
+        </TouchableOpacity>
+      </View>
+    }
+  />
+</View>
+
   );
 }
 

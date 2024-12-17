@@ -33,7 +33,7 @@ export default function Workouts() {
   async function deleteWorkout(workout_id: number, workout_name: string) {
     Alert.alert(
       `Deleting ${workout_name}`,
-      `Are you sure you want to delete "${workout_name}"?`,
+      `Are you sure you want to delete "${workout_name}"? This action won't effect existing logs`,
       [
         {
           text: 'No',
