@@ -1,4 +1,6 @@
 {
+ 
+
   "expo": {
     "name": "Simple",
     "slug": "simplefitnessappbeta",
@@ -17,10 +19,16 @@
       "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp"
     },
     "android": {
+
+      "config": {
+        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
+      },
+
       "plugins": ["react-native-iap", {
         "paymentProvider": "Play Store"
-      }],
-      "appName": "Simple",
+      }
+  ], 
+
       "adaptiveIcon": {
         "foregroundImage": "./assets/simpleicon.png",
         "backgroundColor": "#ffffff"
@@ -36,4 +44,7 @@
       }
     }
   }
+
+  
+  
 }

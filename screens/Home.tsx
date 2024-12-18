@@ -1,17 +1,16 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 
 const { height } = Dimensions.get('window'); // Get screen height for dynamic sizing
 
 export default function Home({ navigation }: any) {
   return (
     <View style={styles.container}>
+      {/* Header Section */}
       <View style={styles.headerContainer}>
-  {/* App Title */}
-  <Text style={styles.title}>Simple.</Text>
-
-
-</View>
+        <Text style={styles.title}>Simple.</Text>
+      </View>
 
       {/* Create a Workout Section */}
       <View style={[styles.card, styles.blackCard]}>
@@ -51,6 +50,11 @@ export default function Home({ navigation }: any) {
           <Text style={[styles.buttonText, styles.whiteText]}>Go to My Progress &gt;</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Banner Ad Section */}
+      <View style={styles.adContainer}>
+        <BannerAdComponent />
+      </View>
     </View>
   );
 }
@@ -63,16 +67,14 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   headerContainer: {
-    position: 'relative', // Base container for title and icon
     marginBottom: 20,
   },
   title: {
     fontSize: 44,
     fontWeight: '900',
-    textAlign: 'center', // Center the title horizontally
+    textAlign: 'center',
     color: '#000000',
   },
-  
   card: {
     borderRadius: 15,
     padding: 20,
@@ -130,5 +132,9 @@ const styles = StyleSheet.create({
   },
   lightGrayText: {
     color: 'white',
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginBottom:30,
   },
 });
