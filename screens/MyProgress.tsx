@@ -6,6 +6,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { WeightLogStackParamList } from '../App'; // Adjust the path to where WeightLogStackParamList is defined
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from '@react-navigation/native';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+
 
 type WeightLogNavigationProp = StackNavigationProp<
   WeightLogStackParamList,
@@ -118,7 +120,11 @@ export default function MyProgress() {
   }
 />
 
-    </View>
+<View style={styles.adContainer}>
+   <BannerAdComponent />
+  </View>
+
+ </View>
   );
 }
 
@@ -192,5 +198,9 @@ const styles = StyleSheet.create({
     color: '#666666',
     fontSize: 16,
     marginTop: 20,
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginBottom:10,
   },
 });

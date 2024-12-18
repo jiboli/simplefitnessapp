@@ -13,6 +13,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { WorkoutLog, LoggedExercise } from '../types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+
 
 
 
@@ -191,6 +193,8 @@ export default function LogWeights() {
       Alert.alert('Error', 'Failed to log weights.');
     }
   };
+  const [adHeight, setAdHeight] = useState(50);
+
 
   const renderExercise = (exercise: LoggedExercise) => {
     return (
@@ -263,11 +267,20 @@ export default function LogWeights() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#000000" />
-      </TouchableOpacity>
+          <View style={styles.adContainer}  onLayout={(event) => setAdHeight(event.nativeEvent.layout.height)}>
+        <BannerAdComponent />
+      </View>
+   
 
       <Text style={styles.title}>Track Weights</Text>
+
+      <TouchableOpacity
+        style={[styles.backButton, { top: adHeight + 20 }]} // Adjust dynamically
+        onPress={() => navigation.goBack()}
+      >
+        <Ionicons name="arrow-back" size={24} color="#000000" />
+      </TouchableOpacity>
+      
 
       {!selectedWorkout ? (
         <FlatList
@@ -290,6 +303,8 @@ export default function LogWeights() {
           ListEmptyComponent={
             <Text style={styles.emptyText}>No workouts available to Track.</Text>
           }
+
+          
         />
       ) : (
         <>
@@ -307,9 +322,11 @@ export default function LogWeights() {
           <TouchableOpacity style={styles.saveButton} onPress={logWeights}>
             <Text style={styles.saveButtonText}>Track Weights</Text>
           </TouchableOpacity>
+          
         </>
+        
       )}
-      
+   
     </View>
   );
 }
@@ -319,6 +336,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     backgroundColor: '#FFFFFF',
+  },
+  adContainer: {
+  alignItems : 'center',
   },
   backButton: {
     position: 'absolute',
@@ -420,7 +440,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 5,
   },
   saveButtonText: {
     color: '#FFFFFF',

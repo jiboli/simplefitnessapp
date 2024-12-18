@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 20,
   },
   headerContainer: {
     marginBottom: 20,
@@ -135,6 +135,5 @@ const styles = StyleSheet.create({
   },
   adContainer: {
     alignItems: 'center',
-    marginBottom:30,
   },
 });

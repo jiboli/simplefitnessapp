@@ -4,6 +4,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
 import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 
 
 type Day = {
@@ -289,6 +290,10 @@ export default function WorkoutDetails() {
           </View>
         </View>
       </Modal>
+             {/* Banner Ad Section */}
+             <View style={styles.adContainer}>
+        <BannerAdComponent />
+      </View>
     </View>
   );
 }
@@ -300,6 +305,9 @@ const styles = StyleSheet.create({
       paddingHorizontal: 20,
       paddingTop: 60,
       backgroundColor: '#FFFFFF',
+    },
+    adContainer: {
+      alignItems: 'center',
     },
     backButton: {
       position: 'absolute',
@@ -375,7 +383,7 @@ const styles = StyleSheet.create({
       backgroundColor: '#000000',
       borderRadius: 20,
       padding: 12,
-      marginTop: 20,
+      marginTop: 1,
       justifyContent: 'center',
     },
     addDayButtonText: {

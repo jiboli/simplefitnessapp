@@ -12,6 +12,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from '../context/SettingsContext';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 
 
 export default function WeightLogDetail() {
@@ -253,6 +254,7 @@ export default function WeightLogDetail() {
             ))}
           </View>
         )}
+        
       </View>
     );
   };
@@ -340,6 +342,10 @@ export default function WeightLogDetail() {
           </Text>
         }
       />
+             {/* Banner Ad Section */}
+             <View style={styles.adContainer}>
+        <BannerAdComponent />
+      </View>
     </View>
   );
 }
@@ -350,6 +356,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 40,
     backgroundColor: '#FFFFFF',
+  },
+  adContainer: {
+    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 30,

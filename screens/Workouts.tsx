@@ -7,6 +7,9 @@ import WorkoutList from '../components/WorkoutList';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+
+
 
 export default function Workouts() {
   const [workouts, setWorkouts] = React.useState<Workout[]>([]);
@@ -59,7 +62,12 @@ export default function Workouts() {
   return (
     <View style={styles.container}>
       <WorkoutList workouts={workouts} deleteWorkout={deleteWorkout} />
+       {/* Banner Ad Section */}
+       <View style={styles.adContainer}>
+        <BannerAdComponent />
+      </View>
     </View>
+    
   );
 }
 
@@ -67,5 +75,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  adContainer: {
+    alignItems: 'center',
+    marginBottom:10,
   },
 });

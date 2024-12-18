@@ -14,6 +14,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { WorkoutLogStackParamList } from '../App';
 import { useSettings } from '../context/SettingsContext';
+import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+
 
 type MyCalendarNavigationProp = StackNavigationProp<
   WorkoutLogStackParamList,
@@ -325,6 +327,9 @@ export default function MyCalendar() {
           </View>
         </View>
       </Modal>
+      <View style={styles.adContainer}>
+        <BannerAdComponent />
+      </View>
     </ScrollView>
   );
 }
@@ -358,6 +363,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 30,
+  },
+  adContainer: {
+    alignItems: 'center',
+    position: 'absolute',
+    marginBottom:10,
   },
   icon: {
     marginRight: 10,
