@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
-import * as FileSystem from 'expo-file-system';
+import { useAdContext } from '../context/AdContext';
 
 interface BannerAdProps {
   adUnitId?: string;
@@ -10,16 +10,7 @@ interface BannerAdProps {
 const BannerAdComponent: React.FC<BannerAdProps> = ({
   adUnitId = TestIds.BANNER, // Use TestIds for testing
 }) => {
-  const [adsRemoved, setAdsRemoved] = useState(false);
-
-  useEffect(() => {
-    const checkAdsStatus = async () => {
-      const path = `${FileSystem.documentDirectory}ads_removed.json`;
-      const fileExists = await FileSystem.getInfoAsync(path);
-      if (fileExists.exists) setAdsRemoved(true);
-    };
-    checkAdsStatus();
-  }, []);
+  const { adsRemoved } = useAdContext(); // Access adsRemoved from context
 
   if (adsRemoved) return null; // Do not render ads if user paid to remove them
 

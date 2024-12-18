@@ -20,6 +20,9 @@ import LogWeights from './screens/LogWeights';
 import WeightLogDetail from './screens/WeightLogDetail';
 import Settings from './screens/Settings';
 import { SettingsProvider } from './context/SettingsContext';
+import { AdProvider } from './context/AdContext';
+
+
 
 
 
@@ -29,6 +32,9 @@ const Bottom = createBottomTabNavigator();
 const WorkoutStackScreen = createNativeStackNavigator<WorkoutStackParamList>();
 const WorkoutLogStackScreen= createNativeStackNavigator<WorkoutLogStackParamList>();
 const WeightLogStackScreen= createNativeStackNavigator<WeightLogStackParamList>();
+
+
+
 
 const resetDatabase = async () => {
   try {
@@ -182,8 +188,10 @@ function WeightLogStack() {
 
 
 export default function App() {
-  const [dbLoaded, setDbLoaded] = useState<boolean>(false);
 
+  const [dbLoaded, setDbLoaded] = useState<boolean>(false);
+  
+  
   React.useEffect(() => {
     (async () => {
       try {
@@ -203,10 +211,14 @@ export default function App() {
       </View>
     );
   }
+  
+
+
 
   return (
     <GestureHandlerRootView>
       <SettingsProvider>
+       <AdProvider>
       <NavigationContainer>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <React.Suspense
@@ -283,6 +295,7 @@ export default function App() {
           </Bottom.Navigator>
         </SQLiteProvider>
       </NavigationContainer>
+      </AdProvider>
       </SettingsProvider>
       </GestureHandlerRootView>
   );
