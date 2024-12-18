@@ -17,6 +17,9 @@
       "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp"
     },
     "android": {
+      "plugins": ["react-native-iap", {
+        "paymentProvider": "Play Store"
+      }],
       "appName": "Simple",
       "adaptiveIcon": {
         "foregroundImage": "./assets/simpleicon.png",
