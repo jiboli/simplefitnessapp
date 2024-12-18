@@ -13,13 +13,16 @@ const BannerAdComponent: React.FC<BannerAdProps> = ({
   const { adsRemoved } = useAdContext(); // Access adsRemoved from context
 
   if (adsRemoved) return null; // Do not render ads if user paid to remove them
+ const requestOptions = {requestNonPersonalizedAdsOnly: true,};
+
 
   return (
     <View style={styles.container}>
-      <BannerAd unitId={adUnitId} size={BannerAdSize.BANNER} />
+      <BannerAd unitId={adUnitId} size={BannerAdSize.BANNER} requestOptions={requestOptions} />
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useNavigation } from '@react-navigation/native';
+import RemoveAdsButton from '../components/RemoveAdsButton';
 
 export default function Settings() {
   const navigation = useNavigation();
@@ -54,6 +55,17 @@ export default function Settings() {
           {renderButton('lbs', weightFormat, () => setWeightFormat('lbs'))}
         </View>
       </View>
+
+        {/* Weight Format Section */}
+        <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Remove Ads</Text>
+        <View style={styles.buttonGroup}> 
+          <RemoveAdsButton />
+        </View>
+      </View>
+
+
+
     </View>
   );
 }

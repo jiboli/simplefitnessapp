@@ -3,6 +3,7 @@ import { View, Button, Alert } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { useAdContext } from '../context/AdContext'; // Import the context
 import { requestPurchase } from 'react-native-iap';
+import { TouchableOpacity, Text, StyleSheet } from 'react-native'; // Add these imports
 
 const RemoveAdsButton = () => {
   const { adsRemoved, setAdsRemoved } = useAdContext(); // Access context state
@@ -25,10 +26,31 @@ const RemoveAdsButton = () => {
   if (adsRemoved) return null; // Hide button if ads are already removed
 
   return (
-    <View>
-      <Button title="Remove Ads for $1" onPress={handlePurchase} />
-    </View>
+<TouchableOpacity style={styles.button} onPress={handlePurchase}>
+  <Text style={styles.buttonText}>Remove Ads for $1</Text>
+</TouchableOpacity>
   );
+
+  
 };
+
+
+const styles = StyleSheet.create({
+  button: {
+    borderWidth: 1,
+    borderColor: '#000000',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#000000',
+    alignItems: 'center', // Center the text
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+});
+
 
 export default RemoveAdsButton;
