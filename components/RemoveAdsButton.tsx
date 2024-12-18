@@ -10,7 +10,7 @@ const RemoveAdsButton = () => {
 
   const handlePurchase = async () => {
     try {
-      await requestPurchase({ sku: 'remove_ads' }); // Replace with your real product ID
+      await requestPurchase({ sku: 'remove_ads' }); // Replace with your real product ID REPLACE WITH REMOVEAD PRODUCT ID ID AFTER YOU GET IT
       const path = `${FileSystem.documentDirectory}ads_removed.json`;
       await FileSystem.writeAsStringAsync(
         path,

@@ -8,7 +8,7 @@ interface BannerAdProps {
 }
 
 const BannerAdComponent: React.FC<BannerAdProps> = ({
-  adUnitId = TestIds.BANNER, // Use TestIds for testing
+  adUnitId = TestIds.BANNER, // Use TestIds for testing REPLACE WITH AD ID AFTER YOU GET IT
 }) => {
   const { adsRemoved } = useAdContext(); // Access adsRemoved from context
 
