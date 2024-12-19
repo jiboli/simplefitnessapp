@@ -16,16 +16,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp",
-
-      "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
-      }
+      "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp"
     },
     "android": {
 
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
+        "googleMobileAdsAppId": "ca-app-pub-9707948896132362~7260721577"
       },
 
       "plugins": ["react-native-iap", {
