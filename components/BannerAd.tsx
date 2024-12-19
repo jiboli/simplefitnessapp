@@ -8,7 +8,7 @@ interface BannerAdProps {
 }
 
 const BannerAdComponent: React.FC<BannerAdProps> = ({
-  adUnitId = "ca-app-pub-9707948896132362/8972963349",
+  adUnitId = 'ca-app-pub-9707948896132362/8972963349',
 }) => {
   const { adsRemoved } = useAdContext(); // Access adsRemoved from context
 
