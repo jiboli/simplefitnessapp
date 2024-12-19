@@ -294,6 +294,8 @@ export default function WorkoutDetails() {
 }
 
 
+// WorkoutDetails.tsx
+
 const styles = StyleSheet.create({
     container: {
       flex: 1,

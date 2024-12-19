@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useNavigation } from '@react-navigation/native';
-
+import { useTheme } from '../context/ThemeContext'; 
 export default function Settings() {
   const navigation = useNavigation();
   const { language, setLanguage, dateFormat, setDateFormat, weightFormat, setWeightFormat } = useSettings();
-
+  const { theme, toggleTheme } = useTheme();
   const renderButton = (label: string, current: string, onPress: () => void) => (
     <TouchableOpacity
       style={[styles.button, current === label && styles.activeButton]}
@@ -54,9 +54,37 @@ export default function Settings() {
           {renderButton('lbs', weightFormat, () => setWeightFormat('lbs'))}
         </View>
       </View>
+
+
+       {/* Theme Section */}
+       <View style={styles.section}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Theme</Text>
+        <View style={styles.buttonGroup}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              theme.background === '#FFFFFF' && styles.activeButton,
+            ]}
+            onPress={toggleTheme}
+          >
+            <Text
+              style={[
+                styles.buttonText,
+                theme.background === '#FFFFFF' && styles.activeButtonText,
+              ]}
+            >
+              {theme.background === '#FFFFFF' ? 'Switch to Dark' : 'Switch to Light'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+
     </View>
   );
 }
+
+// Settings.tsx
 
 const styles = StyleSheet.create({
   container: {

@@ -63,6 +63,8 @@ export default function Workouts() {
   );
 }
 
+// Workouts.tsx
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

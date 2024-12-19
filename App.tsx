@@ -20,7 +20,7 @@ import LogWeights from './screens/LogWeights';
 import WeightLogDetail from './screens/WeightLogDetail';
 import Settings from './screens/Settings';
 import { SettingsProvider } from './context/SettingsContext';
-
+import { ThemeProvider } from './context/ThemeContext';
 
 
 
@@ -207,6 +207,7 @@ export default function App() {
   return (
     <GestureHandlerRootView>
       <SettingsProvider>
+      <ThemeProvider>
       <NavigationContainer>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <React.Suspense
@@ -283,6 +284,7 @@ export default function App() {
           </Bottom.Navigator>
         </SQLiteProvider>
       </NavigationContainer>
+      </ThemeProvider>
       </SettingsProvider>
       </GestureHandlerRootView>
   );

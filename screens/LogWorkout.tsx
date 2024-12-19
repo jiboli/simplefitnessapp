@@ -274,6 +274,9 @@ export default function LogWorkout() {
   );
 }
 
+
+// LogWorkout.tsx
+
 const styles = StyleSheet.create({
     container: {
       flex: 1,
