@@ -18,8 +18,13 @@
       "supportsTablet": true,
       "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp",
 
+      "plugins": ["react-native-iap", {
+        "paymentProvider": "Play Store"
+      }
+      ], 
+
       "config": {
-        "googleMobileAdsAppId": "ca-app-pub-3940256099942544~3347511713"
+        "googleMobileAdsAppId": "ca-app-pub-9707948896132362~7468309982"
       }
     },
     "android": {

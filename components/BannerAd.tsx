@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { BannerAd, BannerAdSize} from 'react-native-google-mobile-ads';
 import { useAdContext } from '../context/AdContext';
 
 interface BannerAdProps {
@@ -8,7 +8,7 @@ interface BannerAdProps {
 }
 
 const BannerAdComponent: React.FC<BannerAdProps> = ({
-  adUnitId = TestIds.BANNER, // Use TestIds for testing REPLACE WITH AD ID AFTER YOU GET IT
+  adUnitId ='ca-app-pub-9707948896132362/7348056335', // Use TestIds for testing REPLACE WITH AD ID AFTER YOU GET IT
 }) => {
   const { adsRemoved } = useAdContext(); // Access adsRemoved from context
 
