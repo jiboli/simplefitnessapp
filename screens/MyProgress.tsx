@@ -6,6 +6,8 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { WeightLogStackParamList } from '../App'; // Adjust the path to where WeightLogStackParamList is defined
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../context/ThemeContext';
+
 
 type WeightLogNavigationProp = StackNavigationProp<
   WeightLogStackParamList,
@@ -15,6 +17,8 @@ type WeightLogNavigationProp = StackNavigationProp<
 export default function MyProgress() {
   const navigation = useNavigation<WeightLogNavigationProp>();
   const db = useSQLiteContext();
+
+  const { theme } = useTheme(); // Add the theme hook here
 
   const [workouts, setWorkouts] = useState<string[]>([]);
 
@@ -83,42 +87,46 @@ export default function MyProgress() {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Title */}
-      <Text style={styles.title}>My Progress</Text>
+<View style={[styles.container, { backgroundColor: theme.background }]}>
+  {/* Title */}
+  <Text style={[styles.title, { color: theme.text }]}>My Progress</Text>
 
-      {/* Log Weights Button */}
+  {/* Log Weights Button */}
+  <TouchableOpacity
+    style={[styles.logWeightsButton, { backgroundColor: theme.buttonBackground }]}
+    onPress={() => navigation.navigate('LogWeights')}
+  >
+    <Ionicons name="stats-chart" size={24} color={theme.buttonText} />
+    <Text style={[styles.logWeightsButtonText, { color: theme.buttonText }]}>
+      Track a Workout
+    </Text>
+  </TouchableOpacity>
+
+  {/* List of Workouts with Logs */}
+  <FlatList
+    data={workouts}
+    keyExtractor={(item) => item}
+    renderItem={({ item }) => (
       <TouchableOpacity
-        style={styles.logWeightsButton}
-        onPress={() => navigation.navigate('LogWeights')}
+        style={[styles.workoutCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+        onPress={() => handleWorkoutPress(item)}
+        onLongPress={() => handleWorkoutLongPress(item)}
       >
-        <Ionicons name="stats-chart" size={24} color="#FFFFFF" />
-        <Text style={styles.logWeightsButtonText}>Track a Workout</Text>
+        {/* Container to align the icon and text */}
+        <View style={styles.workoutCardContent}>
+          <Text style={[styles.workoutText, { color: theme.text }]}>{item}</Text>
+          <Ionicons name="chevron-forward" size={20} color={theme.text} />
+        </View>
       </TouchableOpacity>
+    )}
+    ListEmptyComponent={
+      <Text style={[styles.emptyText, { color: theme.text }]}>
+        No logged workouts available.
+      </Text>
+    }
+  />
+</View>
 
-      {/* List of Workouts with Logs */}
-      <FlatList
-  data={workouts}
-  keyExtractor={(item) => item}
-  renderItem={({ item }) => (
-    <TouchableOpacity
-      style={styles.workoutCard}
-      onPress={() => handleWorkoutPress(item)}
-      onLongPress={() => handleWorkoutLongPress(item)}
-    >
-      {/* Container to align the icon and text */}
-      <View style={styles.workoutCardContent}>
-        <Text style={styles.workoutText}>{item}</Text>
-        <Ionicons name="chevron-forward" size={20} color="gray" />
-      </View>
-    </TouchableOpacity>
-  )}
-  ListEmptyComponent={
-    <Text style={styles.emptyText}>No logged workouts available.</Text>
-  }
-/>
-
-    </View>
   );
 }
 
