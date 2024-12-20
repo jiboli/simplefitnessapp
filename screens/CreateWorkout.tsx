@@ -13,11 +13,10 @@ import {
 import { WorkoutStackParamList } from '../App'; // Adjust path to where WorkoutStackParamList is defined
 import { StackNavigationProp } from '@react-navigation/stack';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { useTheme } from '../context/ThemeContext'; // Import theme context
 
 type WorkoutListNavigationProp = StackNavigationProp<WorkoutStackParamList, 'WorkoutsList'>;
 
-// Modify this function to accept db as a parameter
 async function createWorkout(
   db: any, // Pass the database context
   workoutName: string,
@@ -72,11 +71,11 @@ async function createWorkout(
 
 export default function CreateWorkout() {
   const db = useSQLiteContext();
+  const { theme } = useTheme(); // Get the current theme
   const [workoutName, setWorkoutName] = useState('');
   const [days, setDays] = useState<
     { dayName: string; exercises: { exerciseName: string; sets: string; reps: string }[] }[]
   >([]);
-
   const navigation = useNavigation<WorkoutListNavigationProp>();
 
   const addDay = () => {
@@ -178,123 +177,138 @@ export default function CreateWorkout() {
   };
 
   return (
-<View style={styles.container}>
-  <FlatList
-    data={days}
-    keyExtractor={(item, index) => index.toString()}
-    ListHeaderComponent={
-      <>
-        {/* Back Button */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={40} color="#000000" />
-        </TouchableOpacity>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <FlatList
+        data={days}
+        keyExtractor={(item, index) => index.toString()}
+        ListHeaderComponent={
+          <>
+            {/* Back Button */}
+            <TouchableOpacity
+              style={styles.backButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Ionicons name="arrow-back" size={40} color={theme.text} />
+            </TouchableOpacity>
 
-        {/* Title */}
-        <Text style={styles.title}>Create a New Workout</Text>
+            {/* Title */}
+            <Text style={[styles.title, { color: theme.text }]}>Create a New Workout</Text>
 
-        {/* Workout Name Input */}
-        <TextInput
-          style={styles.input}
-          placeholder="Workout Name"
-          value={workoutName}
-          onChangeText={setWorkoutName}
-        />
-      </>
-    }
-    renderItem={({ item, index }) => (
-      <TouchableOpacity
-        onLongPress={() => deleteDay(index)}
-        activeOpacity={0.8}
-        style={styles.dayContainer}
-      >
-        <TextInput
-          style={styles.input}
-          placeholder={`Day ${index + 1} Name`}
-          value={item.dayName}
-          onChangeText={(text) => {
-            const updatedDays = [...days];
-            updatedDays[index].dayName = text;
-            setDays(updatedDays);
-          }}
-        />
-
-        {item.exercises.map((exercise, exerciseIndex) => (
+            {/* Workout Name Input */}
+            <TextInput
+              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+              placeholder="Workout Name"
+              placeholderTextColor={theme.text}
+              value={workoutName}
+              onChangeText={setWorkoutName}
+            />
+          </>
+        }
+        renderItem={({ item, index }) => (
           <TouchableOpacity
-            key={exerciseIndex}
-            onLongPress={() => deleteExercise(index, exerciseIndex)}
+            onLongPress={() => deleteDay(index)}
             activeOpacity={0.8}
-            style={styles.exerciseContainer}
+            style={[
+              styles.dayContainer,
+              { backgroundColor: theme.card, borderColor: theme.border },
+            ]}
           >
             <TextInput
-              style={[styles.input, styles.exerciseInput]}
-              placeholder="Exercise Name"
-              value={exercise.exerciseName}
+              style={[styles.input, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+              placeholder={`Day ${index + 1} Name`}
+              placeholderTextColor={theme.text}
+              value={item.dayName}
               onChangeText={(text) => {
                 const updatedDays = [...days];
-                updatedDays[index].exercises[exerciseIndex].exerciseName = text;
+                updatedDays[index].dayName = text;
                 setDays(updatedDays);
               }}
             />
-            <TextInput
-              style={[styles.input, styles.smallInput]}
-              placeholder="Sets"
-              keyboardType="numeric"
-              value={exercise.sets}
-              onChangeText={(text) => {
-                const sanitizedText = text.replace(/[^0-9]/g, '');
-                let value = parseInt(sanitizedText || '0');
-                if (value > 0 && value <= 100) {
-                  const updatedDays = [...days];
-                  updatedDays[index].exercises[exerciseIndex].sets = value.toString();
-                  setDays(updatedDays);
-                }
-              }}
-            />
-            <TextInput
-              style={[styles.input, styles.smallInput]}
-              placeholder="Reps"
-              keyboardType="numeric"
-              value={exercise.reps}
-              onChangeText={(text) => {
-                const sanitizedText = text.replace(/[^0-9]/g, '');
-                let value = parseInt(sanitizedText || '0');
-                if (value > 0 && value <= 10000) {
-                  const updatedDays = [...days];
-                  updatedDays[index].exercises[exerciseIndex].reps = value.toString();
-                  setDays(updatedDays);
-                }
-              }}
-            />
+
+            {item.exercises.map((exercise, exerciseIndex) => (
+              <TouchableOpacity
+                key={exerciseIndex}
+                onLongPress={() => deleteExercise(index, exerciseIndex)}
+                activeOpacity={0.8}
+                style={[
+                  styles.exerciseContainer,
+                  { backgroundColor: theme.card, borderColor: theme.border },
+                ]}
+              >
+                <TextInput
+                  style={[styles.exerciseInput, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+                  placeholder="Exercise Name"
+                  placeholderTextColor={theme.text}
+                  value={exercise.exerciseName}
+                  onChangeText={(text) => {
+                    const updatedDays = [...days];
+                    updatedDays[index].exercises[exerciseIndex].exerciseName = text;
+                    setDays(updatedDays);
+                  }}
+                />
+                <TextInput
+                  style={[styles.smallInput, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+                  placeholder="Sets"
+                  placeholderTextColor={theme.text}
+                  keyboardType="numeric"
+                  value={exercise.sets}
+                  onChangeText={(text) => {
+                    const sanitizedText = text.replace(/[^0-9]/g, '');
+                    let value = parseInt(sanitizedText || '0');
+                    if (value > 0 && value <= 100) {
+                      const updatedDays = [...days];
+                      updatedDays[index].exercises[exerciseIndex].sets = value.toString();
+                      setDays(updatedDays);
+                    }
+                  }}
+                />
+                <TextInput
+                  style={[styles.smallInput, { backgroundColor: theme.card, color: theme.text, borderColor: theme.border }]}
+                  placeholder="Reps"
+                  placeholderTextColor={theme.text}
+                  keyboardType="numeric"
+                  value={exercise.reps}
+                  onChangeText={(text) => {
+                    const sanitizedText = text.replace(/[^0-9]/g, '');
+                    let value = parseInt(sanitizedText || '0');
+                    if (value > 0 && value <= 10000) {
+                      const updatedDays = [...days];
+                      updatedDays[index].exercises[exerciseIndex].reps = value.toString();
+                      setDays(updatedDays);
+                    }
+                  }}
+                />
+              </TouchableOpacity>
+            ))}
+
+            <TouchableOpacity
+              style={[styles.addButton, { backgroundColor: theme.buttonBackground }]}
+              onPress={() => addExercise(index)}
+            >
+              <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+ Add Exercise</Text>
+            </TouchableOpacity>
           </TouchableOpacity>
-        ))}
-
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => addExercise(index)}
-        >
-          <Text style={styles.addButtonText}>+ Add Exercise</Text>
-        </TouchableOpacity>
-      </TouchableOpacity>
-    )}
-    ListFooterComponent={
-      <View>
-        <TouchableOpacity style={styles.addButton} onPress={addDay}>
-          <Text style={styles.addButtonText}>+ Add Day</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSaveWorkout}>
-          <Text style={styles.saveButtonText}>Save Workout</Text>
-        </TouchableOpacity>
-      </View>
-    }
-  />
-</View>
-
+        )}
+        ListFooterComponent={
+          <View>
+            <TouchableOpacity
+              style={[styles.addButton, { backgroundColor: theme.buttonBackground }]}
+              onPress={addDay}
+            >
+              <Text style={[styles.addButtonText, { color: theme.buttonText }]}>+ Add Day</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]}
+              onPress={handleSaveWorkout}
+            >
+              <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Save Workout</Text>
+            </TouchableOpacity>
+          </View>
+        }
+      />
+    </View>
   );
 }
-
 
 // CreateWorkout.tsx
 
@@ -303,63 +317,41 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 30,
-    backgroundColor: '#FFFFFF',
   },
   title: {
     fontSize: 44,
     fontWeight: '900',
     textAlign: 'center',
     marginBottom: 30,
-    color: '#000000',
   },
   input: {
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.2)', // Subtle border
-    borderRadius: 20, // Softer corners
+    borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    backgroundColor: '#FFFFFF',
     fontSize: 16,
-    color: '#000000',
   },
   dayContainer: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.2)', // Subtle border
-  },
-  dayInput: {
-    borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.2)', // Subtle border
-    borderRadius: 15,
-    padding: 12,
-    marginBottom: 12,
-    backgroundColor: '#FFFFFF',
-    fontSize: 16,
-    color: '#000000',
   },
   exerciseContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-    backgroundColor: '#FFFFFF',
     borderRadius: 15,
     padding: 12,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.2)', // Subtle border
   },
   exerciseInput: {
     flex: 2,
     marginRight: 10,
     borderRadius: 15,
     padding: 12,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.2)', // Subtle border
     fontSize: 14,
-    color: '#000000',
   },
   smallInput: {
     flex: 1,
@@ -367,23 +359,18 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     marginRight: 10,
     padding: 12,
-    backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.2)', // Subtle border
     fontSize: 14,
-    color: '#000000',
   },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000',
     paddingVertical: 12,
     borderRadius: 15,
     marginTop: 10,
   },
   addButtonText: {
-    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 16,
     marginLeft: 8,
@@ -392,24 +379,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#000000',
     paddingVertical: 16,
     borderRadius: 20,
     marginTop: 30,
   },
   saveButtonText: {
-    color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 18,
     marginLeft: 8,
   },
   backButton: {
     position: 'absolute',
-    top: 33, // A little spacing from the top for tidy alignment
-    left: 5, // Align neatly with the left edge
+    top: 33,
+    left: 5,
     zIndex: 10,
-    padding: 8, // Smaller padding for a tighter look
+    padding: 8,
   },
-  
-  
 });

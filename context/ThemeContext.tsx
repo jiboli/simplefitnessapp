@@ -10,15 +10,37 @@ const LightTheme = {
   border: 'rgba(0, 0, 0, 0.2)',
   buttonBackground: '#000000',
   buttonText: '#FFFFFF',
+  homeCardColor1: '#000000',
+  homeCardColor2:'#D3D3D3',
+  homeCardColor3:'#808080',
+  homeButtonColor1:'#FFFFFF',
+  homeButtonColor2:'#505050',
+  homeButtonColor3:'#000000',
+  homeButtonText1: '#000000',
+  homeButtonText2:'#FFFFFF',
+  homeButtonText3:'#FFFFFF',
+  homeCardText1: 'white',
+  homeCardText2: 'white'
 };
 
 const DarkTheme = {
   background: '#121212',
-  text: '#E0E0E0',
+  text: 'white',
   card: '#1E1E1E',
   border: 'rgba(255, 255, 255, 0.2)',
-  buttonBackground: '#505050',
+  buttonBackground: '#303030',
   buttonText: '#FFFFFF',
+  homeCardColor1: '#000000',
+  homeCardColor2:'#000000',
+  homeCardColor3:'#000000',
+  homeButtonColor1:'#FFFFFF',
+  homeButtonColor2:'#FFFFFF',
+  homeButtonColor3:'#FFFFFF',
+  homeButtonText1: '#000000',
+  homeButtonText2:'#000000',
+  homeButtonText3:'#000000',
+    homeCardText1: 'white',
+  homeCardText2: 'white'
 };
 
 // Context for theme management
