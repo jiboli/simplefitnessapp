@@ -4,6 +4,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext'; 
+
+
 export default function Settings() {
   const navigation = useNavigation();
   const { language, setLanguage, dateFormat, setDateFormat, weightFormat, setWeightFormat } = useSettings();
@@ -20,67 +22,65 @@ export default function Settings() {
   );
 
   return (
-    <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#000000" />
-      </TouchableOpacity>
-
-      {/* Title */}
-      <Text style={styles.title}>Settings</Text>
-
-      {/* Language Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Language</Text>
-        <View style={styles.buttonGroup}>
-          {renderButton('English', language, () => setLanguage('English'))}
-        </View>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    {/* Back Button */}
+    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+      <Ionicons name="arrow-back" size={24} color={theme.text} />
+    </TouchableOpacity>
+  
+    {/* Title */}
+    <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
+  
+    {/* Language Section */}
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Language</Text>
+      <View style={styles.buttonGroup}>
+        {renderButton('English', language, () => setLanguage('English'))}
       </View>
-
-      {/* Date Format Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Date Format</Text>
-        <View style={styles.buttonGroup}>
-          {renderButton('dd-mm-yyyy', dateFormat, () => setDateFormat('dd-mm-yyyy'))}
-          {renderButton('mm-dd-yyyy', dateFormat, () => setDateFormat('mm-dd-yyyy'))}
-        </View>
-      </View>
-
-      {/* Weight Format Section */}
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Weight Format</Text>
-        <View style={styles.buttonGroup}>
-          {renderButton('kg', weightFormat, () => setWeightFormat('kg'))}
-          {renderButton('lbs', weightFormat, () => setWeightFormat('lbs'))}
-        </View>
-      </View>
-
-
-       {/* Theme Section */}
-       <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Theme</Text>
-        <View style={styles.buttonGroup}>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              theme.background === '#FFFFFF' && styles.activeButton,
-            ]}
-            onPress={toggleTheme}
-          >
-            <Text
-              style={[
-                styles.buttonText,
-                theme.background === '#FFFFFF' && styles.activeButtonText,
-              ]}
-            >
-              {theme.background === '#FFFFFF' ? 'Switch to Dark' : 'Switch to Light'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-
     </View>
+  
+    {/* Date Format Section */}
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Date Format</Text>
+      <View style={styles.buttonGroup}>
+        {renderButton('dd-mm-yyyy', dateFormat, () => setDateFormat('dd-mm-yyyy'))}
+        {renderButton('mm-dd-yyyy', dateFormat, () => setDateFormat('mm-dd-yyyy'))}
+      </View>
+    </View>
+  
+    {/* Weight Format Section */}
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Weight Format</Text>
+      <View style={styles.buttonGroup}>
+        {renderButton('kg', weightFormat, () => setWeightFormat('kg'))}
+        {renderButton('lbs', weightFormat, () => setWeightFormat('lbs'))}
+      </View>
+    </View>
+  
+    {/* Theme Section */}
+    <View style={styles.section}>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Theme</Text>
+      <View style={styles.buttonGroup}>
+        <TouchableOpacity
+          style={[
+            styles.button,
+            theme.background === '#FFFFFF' && styles.activeButton,
+          ]}
+          onPress={toggleTheme}
+        >
+          <Text
+            style={[
+              styles.buttonText,
+              theme.background === '#FFFFFF' && styles.activeButtonText,
+            ]}
+          >
+            {theme.background === '#FFFFFF' ? 'Switch to Dark' : 'Switch to Light'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </View>
+  
   );
 }
 
@@ -123,14 +123,14 @@ const styles = StyleSheet.create({
   },
   button: {
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: 'black',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
   },
   activeButton: {
-    backgroundColor: '#000000',
+    backgroundColor: '#121212',
   },
   buttonText: {
     fontSize: 18,
