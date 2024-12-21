@@ -4,9 +4,12 @@ import * as FileSystem from 'expo-file-system';
 import { useAdContext } from '../context/AdContext'; // Import the context
 import { requestPurchase } from 'react-native-iap';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native'; // Add these imports
+import { useTheme } from '../context/ThemeContext';
+
 
 const RemoveAdsButton = () => {
   const { adsRemoved, setAdsRemoved } = useAdContext(); // Access context state
+  const  {theme} = useTheme();
 
   const handlePurchase = async () => {
     try {
@@ -26,8 +29,8 @@ const RemoveAdsButton = () => {
   if (adsRemoved) return null; // Hide button if ads are already removed
 
   return (
-<TouchableOpacity style={styles.button} onPress={handlePurchase}>
-  <Text style={styles.buttonText}>Remove Ads for $1</Text>
+<TouchableOpacity style= {[styles.button, { backgroundColor: theme.buttonBackground }]} onPress={handlePurchase}>
+  <Text style={[styles.buttonText, { color: theme.buttonText }]}>Remove Ads for $1</Text>
 </TouchableOpacity>
   );
 
