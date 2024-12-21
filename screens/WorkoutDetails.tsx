@@ -5,6 +5,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
 import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
 import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+import { useTheme } from '../context/ThemeContext';
+
 
 
 type Day = {
@@ -17,6 +19,9 @@ export default function WorkoutDetails() {
   const db = useSQLiteContext();
   const route = useRoute();
   const navigation = useNavigation();
+
+  const { theme } = useTheme();
+  
   const { workout_id } = route.params as { workout_id: number };
 
   const [workoutName, setWorkoutName] = useState('');
@@ -151,153 +156,162 @@ export default function WorkoutDetails() {
   
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#000000" />
-      </TouchableOpacity>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+  <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+    <Ionicons name="arrow-back" size={24} color={theme.text} />
+  </TouchableOpacity>
 
-      <Text style={styles.title}>{workoutName}</Text>
+  <Text style={[styles.title, { color: theme.text }]}>{workoutName}</Text>
 
-      <FlatList
-        data={days}
-        keyExtractor={(item) => item.day_id.toString()}
-        renderItem={({ item: day }) => (
+  <FlatList
+    data={days}
+    keyExtractor={(item) => item.day_id.toString()}
+    renderItem={({ item: day }) => (
+      <TouchableOpacity
+        onLongPress={() => deleteDay(day.day_id)} // Long press triggers day deletion
+        activeOpacity={0.8}
+        style={[styles.dayContainer, { backgroundColor: theme.card, borderColor: theme.border }]} // Entire day card is now pressable
+      >
+        {/* Day Header */}
+        <View style={styles.dayHeader}>
+          <Text style={[styles.dayTitle, { color: theme.text }]}>{day.day_name}</Text>
+          {/* Add Exercise Button */}
+          <TouchableOpacity onPress={() => openAddExerciseModal(day.day_id)}>
+            <Ionicons name="add-circle" size={28} color={theme.text} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Exercises */}
+        {day.exercises.length > 0 ? (
+          day.exercises.map((exercise, index) => (
             <TouchableOpacity
-              onLongPress={() => deleteDay(day.day_id)} // Long press triggers day deletion
+              key={index}
+              onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
               activeOpacity={0.8}
-              style={styles.dayContainer} // Entire day card is now pressable
+              style={[styles.exerciseContainer, { backgroundColor: theme.border }]}
             >
-              {/* Day Header */}
-              <View style={styles.dayHeader}>
-                <Text style={styles.dayTitle}>{day.day_name}</Text>
-          
-                {/* Add Exercise Button */}
-                <TouchableOpacity onPress={() => openAddExerciseModal(day.day_id)}>
-                  <Ionicons name="add-circle" size={28} color="#000000" />
-                </TouchableOpacity>
-              </View>
-          
-              {/* Exercises */}
-              {day.exercises.length > 0 ? (
-              day.exercises.map((exercise, index) => (
-                <TouchableOpacity
-                key={index}
-                onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
-                activeOpacity={0.8}
-                style={styles.exerciseContainer}
+              <AutoSizeText
+                fontSize={18}
+                numberOfLines={1}
+                mode={ResizeTextMode.max_lines}
+                style={[styles.exerciseName, { color: theme.text }]}
               >
-                <AutoSizeText
-                  fontSize={18}
-                  numberOfLines={1}
-                  mode={ResizeTextMode.max_lines}
-                  style={styles.exerciseName}
-                >
-                  {exercise.exercise_name}
-                </AutoSizeText>
-                <AutoSizeText
-                  fontSize={16}
-                  numberOfLines={1}
-                  mode={ResizeTextMode.max_lines}
-                  style={styles.exerciseDetails}
-                >
-                  {exercise.sets} sets x {exercise.reps} reps
-                </AutoSizeText>
-              </TouchableOpacity>
+                {exercise.exercise_name}
+              </AutoSizeText>
+              <AutoSizeText
+                fontSize={16}
+                numberOfLines={1}
+                mode={ResizeTextMode.max_lines}
+                style={[styles.exerciseDetails, { color: theme.text }]}
+              >
+                {exercise.sets} sets x {exercise.reps} reps
+              </AutoSizeText>
+            </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.noExercisesText}>No exercises on this day</Text>
+          <Text style={[styles.noExercisesText, { color: theme.text }]}>No exercises on this day</Text>
         )}
-
-            </TouchableOpacity>
-          )}
-          
-        ListFooterComponent={
-          <TouchableOpacity style={styles.addDayButton} onPress={openAddDayModal}>
-            <Ionicons name="add-circle" size={28} color="#FFFFFF" />
-            <Text style={styles.addDayButtonText}>Add Day</Text>
-          </TouchableOpacity>
-        }
-        ListEmptyComponent={<Text style={styles.emptyText}>No days or exercises available for this workout.</Text>}
-      />
-
-      <Modal visible={showDayModal} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Day</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Day Name"
-              value={dayName}
-              onChangeText={setDayName}
-            />
-            <TouchableOpacity style={styles.saveButton} onPress={addDay}>
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={closeAddDayModal}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal visible={showExerciseModal} animationType="slide" transparent>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add Exercise</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Exercise Name"
-              value={exerciseName}
-              onChangeText={setExerciseName}
-            />
-            <TextInput
-  style={styles.input}
-  placeholder="Sets (e.g., 3)"
-  keyboardType="numeric"
-  value={exerciseSets}
-  onChangeText={(text) => {
-    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    let value = parseInt(sanitizedText || '0'); // Convert to integer
-    if (value > 0 && value <= 100) {
-      setExerciseSets(value.toString()); // Update state if valid
-    } else if (value === 0) {
-      setExerciseSets(''); // Prevent 0 from being displayed
+      </TouchableOpacity>
+    )}
+    ListFooterComponent={
+      <TouchableOpacity
+        style={[styles.addDayButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={openAddDayModal}
+      >
+        <Ionicons name="add-circle" size={28} color={theme.buttonText} />
+        <Text style={[styles.addDayButtonText, { color: theme.buttonText }]}>Add Day</Text>
+      </TouchableOpacity>
     }
-  }}
-/>
-<TextInput
-  style={styles.input}
-  placeholder="Reps (e.g., 10)"
-  keyboardType="numeric"
-  value={exerciseReps}
-  onChangeText={(text) => {
-    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-    let value = parseInt(sanitizedText || '0'); // Convert to integer
-    if (value > 0 && value <= 10000) {
-      setExerciseReps(value.toString()); // Update state if valid
-    } else if (value === 0) {
-      setExerciseReps(''); // Prevent 0 from being displayed
+    ListEmptyComponent={
+      <Text style={[styles.emptyText, { color: theme.text }]}>
+        No days or exercises available for this workout.
+      </Text>
     }
-  }}
-/>
+  />
 
-            <TouchableOpacity style={styles.saveButton} onPress={addExercise}>
-              <Text style={styles.saveButtonText}>Save</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cancelButton} onPress={closeAddExerciseModal}>
-              <Text style={styles.cancelButtonText}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+  <Modal visible={showDayModal} animationType="slide" transparent>
+    <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+      <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+        <Text style={[styles.modalTitle, { color: theme.text }]}>Add Day</Text>
+        <TextInput
+          style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+          placeholder="Day Name"
+          placeholderTextColor={theme.text}
+          value={dayName}
+          onChangeText={setDayName}
+        />
+        <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={addDay}>
+          <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.cancelButton, { backgroundColor: theme.card }]} onPress={closeAddDayModal}>
+          <Text style={[styles.cancelButtonText, { color: theme.text }]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
+
+  <Modal visible={showExerciseModal} animationType="slide" transparent>
+    <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
+      <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+        <Text style={[styles.modalTitle, { color: theme.text }]}>Add Exercise</Text>
+        <TextInput
+          style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+          placeholder="Exercise Name"
+          placeholderTextColor={theme.text}
+          value={exerciseName}
+          onChangeText={setExerciseName}
+        />
+        <TextInput
+          style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+          placeholder="Sets (e.g., 3)"
+          placeholderTextColor={theme.text}
+          keyboardType="numeric"
+          value={exerciseSets}
+          onChangeText={(text) => {
+            const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+            let value = parseInt(sanitizedText || '0'); // Convert to integer
+            if (value > 0 && value <= 100) {
+              setExerciseSets(value.toString()); // Update state if valid
+            } else if (value === 0) {
+              setExerciseSets(''); // Prevent 0 from being displayed
+            }
+          }}
+        />
+        <TextInput
+          style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+          placeholder="Reps (e.g., 10)"
+          placeholderTextColor={theme.text}
+          keyboardType="numeric"
+          value={exerciseReps}
+          onChangeText={(text) => {
+            const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+            let value = parseInt(sanitizedText || '0'); // Convert to integer
+            if (value > 0 && value <= 10000) {
+              setExerciseReps(value.toString()); // Update state if valid
+            } else if (value === 0) {
+              setExerciseReps(''); // Prevent 0 from being displayed
+            }
+          }}
+        />
+        <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={addExercise}>
+          <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Save</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.cancelButton, { backgroundColor: theme.card }]} onPress={closeAddExerciseModal}>
+          <Text style={[styles.cancelButtonText, { color: theme.text }]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
       </Modal>
-             {/* Banner Ad Section */}
-             <View style={styles.adContainer}>
+       {/* Banner Ad Section */}
+       <View style={styles.adContainer}>
         <BannerAdComponent />
       </View>
     </View>
   );
 }
 
+
+// WorkoutDetails.tsx
 
 const styles = StyleSheet.create({
     container: {

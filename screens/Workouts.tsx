@@ -10,10 +10,13 @@ import { useFocusEffect } from '@react-navigation/native';
 import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 
 
+import { useTheme } from '../context/ThemeContext';
+
 
 export default function Workouts() {
   const [workouts, setWorkouts] = React.useState<Workout[]>([]);
   const db = useSQLiteContext();
+    const { theme } = useTheme();
 
   React.useEffect(() => {
     db.withTransactionAsync(async () => {
@@ -60,7 +63,7 @@ export default function Workouts() {
   
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <WorkoutList workouts={workouts} deleteWorkout={deleteWorkout} />
        {/* Banner Ad Section */}
        <View style={styles.adContainer}>
@@ -70,6 +73,8 @@ export default function Workouts() {
     
   );
 }
+
+// Workouts.tsx
 
 const styles = StyleSheet.create({
   container: {

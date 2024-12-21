@@ -13,11 +13,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from '../context/SettingsContext';
 import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+import { useTheme } from '../context/ThemeContext'; 
 
 
 export default function WeightLogDetail() {
   const route = useRoute();
+  
   const navigation = useNavigation();
+  const { theme } = useTheme();
   const db = useSQLiteContext();
   const { workoutName } = route.params as { workoutName: string };
   const { weightFormat, dateFormat } = useSettings();
@@ -226,36 +229,37 @@ export default function WeightLogDetail() {
     };
   
     return (
-      <View key={key} style={styles.logContainer}>
-        <TouchableOpacity
-          style={styles.logHeader}
-          onPress={() => toggleDayExpansion(day_name, workout_date)}
-          onLongPress={confirmDeleteDay} // Add this line for long press functionality
-        >
-          <Text style={styles.logDayName}>{day_name}</Text>
-          <Text style={styles.logDate}>{formattedDate}</Text>
-          <Ionicons
-            name={isExpanded ? 'chevron-up' : 'chevron-down'}
-            size={20}
-            color="#000"
-          />
-        </TouchableOpacity>
-        {isExpanded && logs[key] && (
-          <View style={styles.logList}>
-            {Object.entries(logs[key]).map(([exercise_name, sets]) => (
-              <View key={exercise_name} style={styles.logItem}>
-                <Text style={styles.exerciseName}>{exercise_name}</Text>
-                {sets.map((set, index) => (
-                  <Text key={index} style={styles.logDetail}>
-                    Set {set.set_number}: {set.reps_logged} reps, {set.weight_logged} {weightFormat}
-                  </Text>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
+<View key={key} style={[styles.logContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+  <TouchableOpacity
+    style={styles.logHeader}
+    onPress={() => toggleDayExpansion(day_name, workout_date)}
+    onLongPress={confirmDeleteDay} // Add this line for long press functionality
+  >
+    <Text style={[styles.logDayName, { color: theme.text }]}>{day_name}</Text>
+    <Text style={[styles.logDate, { color: theme.text }]}>{formattedDate}</Text>
+    <Ionicons
+      name={isExpanded ? 'chevron-up' : 'chevron-down'}
+      size={20}
+      color={theme.text}
+    />
+  </TouchableOpacity>
+  {isExpanded && logs[key] && (
+    <View style={styles.logList}>
+      {Object.entries(logs[key]).map(([exercise_name, sets]) => (
+        <View key={exercise_name} style={styles.logItem}>
+          <Text style={[styles.exerciseName, { color: theme.text }]}>{exercise_name}</Text>
+          {sets.map((set, index) => (
+            <Text key={index} style={[styles.logDetail, { color: theme.text }]}>
+              Set {set.set_number}: {set.reps_logged} reps, {set.weight_logged} {weightFormat}
+            </Text>
+          ))}
+        </View>
+      ))}
+    </View>
+  )}
         
-      </View>
+</View>
+
     );
   };
   
@@ -342,13 +346,16 @@ export default function WeightLogDetail() {
           </Text>
         }
       />
-             {/* Banner Ad Section */}
-             <View style={styles.adContainer}>
+                   {/* Banner Ad Section */}
+                   <View style={styles.adContainer}>
         <BannerAdComponent />
       </View>
     </View>
   );
 }
+
+
+// WeightLogDetail.tsx
 
 const styles = StyleSheet.create({
   container: {
