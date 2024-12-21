@@ -1,53 +1,56 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
+import { useTheme } from '../context/ThemeContext';
 
 const { height } = Dimensions.get('window'); // Get screen height for dynamic sizing
 
 export default function Home({ navigation }: any) {
+  const { theme } = useTheme(); // Get the current theme
+
   return (
-    <View style={styles.container}>
-      {/* Header Section */}
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>Simple.</Text>
+        {/* App Title */}
+        <Text style={[styles.title, { color: theme.text }]}>Simple.</Text>
       </View>
 
       {/* Create a Workout Section */}
-      <View style={[styles.card, styles.blackCard]}>
-        <Text style={[styles.cardTitle, styles.whiteText]}>
+      <View style={[styles.card, { backgroundColor: theme.homeCardColor1 }]}>
+        <Text style={[styles.cardTitle, { color: theme.homeCardText1 }]}>
           Create a{"\n"}workout.
         </Text>
         <TouchableOpacity
-          style={[styles.button, styles.whiteButton]}
+          style={[styles.button, { backgroundColor: theme.homeButtonColor1 }]}
           onPress={() => navigation.navigate('My Workouts')}
         >
-          <Text style={[styles.buttonText, styles.blackText]}>Go to My Workouts &gt;</Text>
+          <Text style={[styles.buttonText, { color: theme.homeButtonText1 }]}>Go to My Workouts &gt;</Text>
         </TouchableOpacity>
       </View>
 
       {/* Schedule Your Workout Section */}
-      <View style={[styles.card, styles.grayCard]}>
-        <Text style={[styles.cardTitle, styles.darkGrayText]}>
+      <View style={[styles.card, { backgroundColor: theme.homeCardColor3 }]}>
+        <Text style={[styles.cardTitle, { color: theme.homeCardText2 }]}>
           Schedule{"\n"}your{"\n"}workout.
         </Text>
         <TouchableOpacity
-          style={[styles.button, styles.darkGrayButton]}
+          style={[styles.button, { backgroundColor: theme.homeButtonColor2 }]}
           onPress={() => navigation.navigate('My Calendar')}
         >
-          <Text style={[styles.buttonText, styles.lightGrayText]}>Go to My Calendar &gt;</Text>
+          <Text style={[styles.buttonText, { color: theme.homeButtonText2 }]}>Go to My Calendar &gt;</Text>
         </TouchableOpacity>
       </View>
 
       {/* Track Your Progress Section */}
-      <View style={[styles.card, styles.lightGrayCard]}>
-        <Text style={[styles.cardTitle, styles.blackText]}>
+      <View style={[styles.card, { backgroundColor: theme.homeCardColor2 }]}>
+        <Text style={[styles.cardTitle, { color: theme.text }]}>
           Track{"\n"}your{"\n"}progress.
         </Text>
         <TouchableOpacity
-          style={[styles.button, styles.blackButton]}
+          style={[styles.button, { backgroundColor: theme.homeButtonColor3 }]}
           onPress={() => navigation.navigate('My Progress')}
         >
-          <Text style={[styles.buttonText, styles.whiteText]}>Go to My Progress &gt;</Text>
+          <Text style={[styles.buttonText, { color: theme.homeButtonText3 }]}>Go to My Progress &gt;</Text>
         </TouchableOpacity>
       </View>
 
@@ -59,10 +62,11 @@ export default function Home({ navigation }: any) {
   );
 }
 
+// Home.tsx
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
     paddingHorizontal: 20,
     paddingTop: 20,
   },
@@ -72,8 +76,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 44,
     fontWeight: '900',
-    textAlign: 'center',
-    color: '#000000',
+    textAlign: 'center', // Center the title horizontally
   },
   card: {
     borderRadius: 15,
@@ -81,17 +84,6 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  blackCard: {
-    backgroundColor: '#000000',
-    height: height * 0.25,
-  },
-  grayCard: {
-    backgroundColor: '#808080',
-    height: height * 0.22,
-  },
-  lightGrayCard: {
-    backgroundColor: '#D3D3D3',
     height: height * 0.22,
   },
   cardTitle: {
@@ -100,31 +92,12 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 30,
   },
-  whiteText: {
-    color: '#FFFFFF',
-  },
-  blackText: {
-    color: '#000000',
-  },
-  darkGrayText: {
-    color: 'white',
-  },
   button: {
     borderRadius: 20,
     paddingVertical: 8,
     paddingHorizontal: 18,
     marginTop: 10,
     alignSelf: 'center',
-  },
-  whiteButton: {
-    marginTop: 20,
-    backgroundColor: '#FFFFFF',
-  },
-  blackButton: {
-    backgroundColor: '#000000',
-  },
-  darkGrayButton: {
-    backgroundColor: '#505050',
   },
   buttonText: {
     fontSize: 16,

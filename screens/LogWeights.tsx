@@ -8,20 +8,24 @@ import {
   Alert,
   TextInput,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation} from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import { WorkoutLog, LoggedExercise } from '../types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 
+import { useTheme } from '../context/ThemeContext';
+
 
 
 
 export default function LogWeights() {
   const db = useSQLiteContext();
+  
   const navigation = useNavigation();
 
+  const { theme } = useTheme(); // Add the theme hook here
   const [workouts, setWorkouts] = useState<WorkoutLog[]>([]);
   const [selectedWorkout, setSelectedWorkout] = useState<WorkoutLog | null>(null);
   const [exercises, setExercises] = useState<LoggedExercise[]>([]);
@@ -72,7 +76,7 @@ export default function LogWeights() {
 
         sets.forEach((setNumber) => {
           const key = `${exercise.logged_exercise_id}_${setNumber}`;
-          initialWeights[key] = ''; // Empty default for user input
+          initialWeights[key] = '0'; // Empty default for user input
           initialReps[key] = exercise.reps.toString(); // Default reps as string
         });
       });
@@ -198,138 +202,134 @@ export default function LogWeights() {
 
   const renderExercise = (exercise: LoggedExercise) => {
     return (
-      <View style={styles.exerciseContainer}>
-        <Text style={styles.exerciseTitle}>{exercise.exercise_name}</Text>
-        <View style={styles.labelsRow}>
-          <Text style={styles.label}>Reps</Text>
-          <Text style={styles.label}>Weight ({weightFormat})</Text>
-        </View>
-        {exerciseSets[exercise.logged_exercise_id]?.map((setNumber) => {
-          const weightKey = `${exercise.logged_exercise_id}_${setNumber}`;
-          const repsKey = `${exercise.logged_exercise_id}_${setNumber}`;
-  
-          return (
-            <TouchableOpacity
-              key={setNumber.toString()}
-              onLongPress={() => deleteSet(exercise.logged_exercise_id.toString(), setNumber)}
-              style={styles.setContainer}
-            >
-              <Text style={styles.setText}>Set {setNumber}:</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Reps"
-                keyboardType="numeric"
-                value={reps[repsKey]}
-                onChangeText={(text) => {
-                  const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
-                  let value = parseInt(sanitizedText || '0'); // Convert to integer
-                  if (value > 0 && value <= 10000) {
-                    setReps((prev) => ({
-                      ...prev,
-                      [repsKey]: value.toString(), // Update state with valid input
-                    }));
-                  } else if (value === 0) {
-                    setReps((prev) => ({
-                      ...prev,
-                      [repsKey]: '', // Prevent 0 from being displayed
-                    }));
-                  }
-                }}
-              />
-
-              <TextInput
-                style={styles.input}
-                placeholder={weightFormat}
-                keyboardType="decimal-pad"
-                value={weights[weightKey]}
-                onChangeText={(text) => {
-                  const sanitizedText = text.replace(/[^0-9.,]/g, '');
-                  setWeights((prev) => ({
-                    ...prev,
-                    [weightKey]: sanitizedText,
-                  }));
-                }}
-              />
-            </TouchableOpacity>
-          );
-        })}
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-  <TouchableOpacity
-    onPress={() => addSet(exercise.logged_exercise_id.toString())}
-  >
-    <Ionicons name="add-circle" size={28} color="#000000" />
-  </TouchableOpacity>
-</View>
+      <View style={[styles.exerciseContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
+      <Text style={[styles.exerciseTitle, { color: theme.text }]}>{exercise.exercise_name}</Text>
+      <View style={styles.labelsRow}>
+        <Text style={[styles.label, { color: theme.text }]}>Reps</Text>
+        <Text style={[styles.label, { color: theme.text }]}>Weight ({weightFormat})</Text>
       </View>
+      {exerciseSets[exercise.logged_exercise_id]?.map((setNumber) => {
+        const weightKey = `${exercise.logged_exercise_id}_${setNumber}`;
+        const repsKey = `${exercise.logged_exercise_id}_${setNumber}`;
+    
+        return (
+          <TouchableOpacity
+            key={setNumber.toString()}
+            onLongPress={() => deleteSet(exercise.logged_exercise_id.toString(), setNumber)}
+            style={[styles.setContainer, { backgroundColor: theme.background, borderColor: theme.logborder }]}
+          >
+            <Text style={[styles.setText, { color: theme.text }]}>Set {setNumber}:</Text>
+            <TextInput
+              style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.logborder }]}
+              placeholder="Reps"
+              placeholderTextColor={theme.logborder}
+              keyboardType="numeric"
+              value={reps[repsKey]}
+              onChangeText={(text) => {
+                const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                let value = parseInt(sanitizedText || '0'); // Convert to integer
+                if (value > 0 && value <= 10000) {
+                  setReps((prev) => ({
+                    ...prev,
+                    [repsKey]: value.toString(), // Update state with valid input
+                  }));
+                } else if (value === 0) {
+                  setReps((prev) => ({
+                    ...prev,
+                    [repsKey]: '', // Prevent 0 from being displayed
+                  }));
+                }
+              }}
+            />
+    
+            <TextInput
+              style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.logborder }]}
+              placeholder={weightFormat}
+              placeholderTextColor={theme.logborder}
+              keyboardType="decimal-pad"
+              value={weights[weightKey]}
+              onChangeText={(text) => {
+                const sanitizedText = text.replace(/[^0-9.,]/g, '');
+                setWeights((prev) => ({
+                  ...prev,
+                  [weightKey]: sanitizedText,
+                }));
+              }}
+            />
+          </TouchableOpacity>
+        );
+      })}
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <TouchableOpacity onPress={() => addSet(exercise.logged_exercise_id.toString())}>
+          <Ionicons name="add-circle" size={28} color={theme.text} />
+        </TouchableOpacity>
+      </View>
+    </View>
+    
     );
   };
   
 
   return (
-    <View style={styles.container}>
-          <View style={styles.adContainer}  onLayout={(event) => setAdHeight(event.nativeEvent.layout.height)}>
+<View style={[styles.container, { backgroundColor: theme.background }]}>
+  
+    <View style={styles.adContainer}  onLayout={(event) => setAdHeight(event.nativeEvent.layout.height)}>
         <BannerAdComponent />
       </View>
    
 
-      <Text style={styles.title}>Track Weights</Text>
+      <Text style={[styles.title, { color: theme.text }]}>Track Weights</Text>
 
       <TouchableOpacity
         style={[styles.backButton, { top: adHeight + 20 }]} // Adjust dynamically
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={24} color="#000000" />
+        <Ionicons name="arrow-back" size={24} color={theme.text} />
       </TouchableOpacity>
       
 
-      {!selectedWorkout ? (
-        <FlatList
-          data={workouts}
-          keyExtractor={(item) => item.workout_log_id.toString()}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.workoutContainer}
-              onPress={() => {
-                setSelectedWorkout(item);
-                fetchExercises(item.workout_log_id);
-              }}
-            >
-              <Text style={styles.workoutName}>{item.workout_name}</Text>
-              <Text style={styles.dayName}>{item.day_name}</Text>
-              <Text style={styles.workoutDate}>{formatDate(item.workout_date)} </Text>
-
-            </TouchableOpacity>
-          )}
-          ListEmptyComponent={
-            <Text style={styles.emptyText}>No workouts available to Track.</Text>
-          }
-
-          
-        />
-      ) : (
-        <>
-          <FlatList
-            data={exercises}
-            keyExtractor={(item) => item.logged_exercise_id.toString()}
-            renderItem={({ item }) => renderExercise(item)}
-            ListEmptyComponent={
-              
-                <Text style={styles.emptyText}>No exercises available.</Text>
-            }
-
-            
-          />
-          <TouchableOpacity style={styles.saveButton} onPress={logWeights}>
-            <Text style={styles.saveButtonText}>Track Weights</Text>
-          </TouchableOpacity>
-          
-        </>
-        
+  {!selectedWorkout ? (
+    <FlatList
+      data={workouts}
+      keyExtractor={(item) => item.workout_log_id.toString()}
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          style={[styles.workoutContainer, { backgroundColor: theme.card, borderColor: theme.border }]}
+          onPress={() => {
+            setSelectedWorkout(item);
+            fetchExercises(item.workout_log_id);
+          }}
+        >
+          <Text style={[styles.workoutName, { color: theme.text }]}>{item.workout_name}</Text>
+          <Text style={[styles.dayName, { color: theme.text }]}>{item.day_name}</Text>
+          <Text style={[styles.workoutDate, { color: theme.text }]}>{formatDate(item.workout_date)} </Text>
+        </TouchableOpacity>
       )}
-   
-    </View>
+      ListEmptyComponent={
+        <Text style={[styles.emptyText, { color: theme.text }]}>No workouts available to Track.</Text>
+      }
+    />
+  ) : (
+    <>
+      <FlatList
+        data={exercises}
+        keyExtractor={(item) => item.logged_exercise_id.toString()}
+        renderItem={({ item }) => renderExercise(item)}
+        ListEmptyComponent={
+          <Text style={[styles.emptyText, { color: theme.text }]}>No exercises available.</Text>
+        }
+      />
+      <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={logWeights}>
+        <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Track Weights</Text>
+      </TouchableOpacity>
+    </>
+  )}
+</View>
+
   );
 }
+
+// LogWeights.tsx
 
 const styles = StyleSheet.create({
   container: {

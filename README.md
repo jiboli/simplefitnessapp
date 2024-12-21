@@ -53,7 +53,7 @@ In the meantime, you can use the apk file under the Releases tab.
 
 
 
-Thank you for using **Simple** ❤️
+Thank you for using **Simple.** ❤️
 
 
 

@@ -4,11 +4,13 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useNavigation } from '@react-navigation/native';
 import RemoveAdsButton from '../components/RemoveAdsButton';
+import { useTheme } from '../context/ThemeContext'; 
+
 
 export default function Settings() {
   const navigation = useNavigation();
   const { language, setLanguage, dateFormat, setDateFormat, weightFormat, setWeightFormat } = useSettings();
-
+  const { theme, toggleTheme } = useTheme();
   const renderButton = (label: string, current: string, onPress: () => void) => (
     <TouchableOpacity
       style={[styles.button, current === label && styles.activeButton]}
@@ -21,18 +23,18 @@ export default function Settings() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#000000" />
+        <Ionicons name="arrow-back" size={24} color={theme.text} />
       </TouchableOpacity>
 
       {/* Title */}
-      <Text style={styles.title}>Settings</Text>
+      <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
 
       {/* Language Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Language</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Language</Text>
         <View style={styles.buttonGroup}>
           {renderButton('English', language, () => setLanguage('English'))}
         </View>
@@ -40,7 +42,7 @@ export default function Settings() {
 
       {/* Date Format Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Date Format</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Date Format</Text>
         <View style={styles.buttonGroup}>
           {renderButton('dd-mm-yyyy', dateFormat, () => setDateFormat('dd-mm-yyyy'))}
           {renderButton('mm-dd-yyyy', dateFormat, () => setDateFormat('mm-dd-yyyy'))}
@@ -49,7 +51,7 @@ export default function Settings() {
 
       {/* Weight Format Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Weight Format</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Weight Format</Text>
         <View style={styles.buttonGroup}>
           {renderButton('kg', weightFormat, () => setWeightFormat('kg'))}
           {renderButton('lbs', weightFormat, () => setWeightFormat('lbs'))}
@@ -58,17 +60,17 @@ export default function Settings() {
 
         {/* Weight Format Section */}
         <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Remove Ads</Text>
+        <Text style={[styles.sectionTitle,{ color: theme.text }]}>Remove Ads</Text>
         <View style={styles.buttonGroup}> 
           <RemoveAdsButton />
         </View>
       </View>
-
-
-
     </View>
+  
   );
 }
+
+// Settings.tsx
 
 const styles = StyleSheet.create({
   container: {
@@ -107,14 +109,14 @@ const styles = StyleSheet.create({
   },
   button: {
     borderWidth: 1,
-    borderColor: '#000000',
+    borderColor: 'black',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
   },
   activeButton: {
-    backgroundColor: '#000000',
+    backgroundColor: '#121212',
   },
   buttonText: {
     fontSize: 18,

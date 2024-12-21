@@ -12,10 +12,13 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
+import { useTheme } from '../context/ThemeContext';
+
+
 export default function LogWorkout() {
   const db = useSQLiteContext();
   const navigation = useNavigation();
-
+  const { theme } = useTheme(); 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [workouts, setWorkouts] = useState<{ workout_id: number; workout_name: string }[]>([]);
@@ -179,100 +182,109 @@ export default function LogWorkout() {
   };
   
   return (
-    <View style={styles.container}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#000000" />
-      </TouchableOpacity>
+<View style={[styles.container, { backgroundColor: theme.background }]}>
+  {/* Back Button */}
+  <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+    <Ionicons name="arrow-back" size={24} color={theme.text} />
+  </TouchableOpacity>
 
-      {/* Date Picker */}
-      <Text style={styles.Title}>Select Date</Text>
-      <TouchableOpacity style={styles.input} onPress={() => setShowDatePicker(true)}>
-      <Text style={styles.inputText}>
-  {selectedDate ? formatDate(normalizeDate(selectedDate)) : 'Select a date'} </Text>
-      </TouchableOpacity>
-      {showDatePicker && (
-        <DateTimePicker
-          value={selectedDate || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            setShowDatePicker(false);
-            if (date) {
-              setSelectedDate(date);
-            }
-          }}
-        />
-      )}
+  {/* Date Picker */}
+  <Text style={[styles.Title, { color: theme.text }]}>Select Date</Text>
+  <TouchableOpacity style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border }]} onPress={() => setShowDatePicker(true)}>
+    <Text style={[styles.inputText, { color: theme.text }]}>
+      {selectedDate ? formatDate(normalizeDate(selectedDate)) : 'Select a date'}
+    </Text>
+  </TouchableOpacity>
+  {showDatePicker && (
+    <DateTimePicker
+      value={selectedDate || new Date()}
+      mode="date"
+      display="default"
+      onChange={(event, date) => {
+        setShowDatePicker(false);
+        if (date) {
+          setSelectedDate(date);
+        }
+      }}
+    />
+  )}
 
-      {/* Workouts List */}
-      <Text style={styles.sectionTitle}>Select Workout</Text>
+  {/* Workouts List */}
+  <Text style={[styles.sectionTitle, { color: theme.text }]}>Select Workout</Text>
+  <FlatList
+    data={workouts}
+    keyExtractor={(item) => item.workout_id.toString()}
+    renderItem={({ item }) => (
+      <TouchableOpacity
+        style={[
+          styles.listItem,
+          { backgroundColor: theme.card, borderColor: theme.border },
+          selectedWorkout === item.workout_id && { backgroundColor: theme.buttonBackground },
+        ]}
+        onPress={() => {
+          setSelectedWorkout(item.workout_id);
+          setDays([]);
+          setSelectedDay(null);
+          fetchDays(item.workout_id);
+        }}
+      >
+        <Text
+          style={[
+            styles.listItemText,
+            { color: theme.text },
+            selectedWorkout === item.workout_id && { color: theme.buttonText },
+          ]}
+        >
+          {item.workout_name}
+        </Text>
+      </TouchableOpacity>
+    )}
+    ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.text }]}>No workouts available.</Text>}
+  />
+
+  {/* Days List */}
+  {selectedWorkout && (
+    <>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>Select Day</Text>
       <FlatList
-        data={workouts}
-        keyExtractor={(item) => item.workout_id.toString()}
+        data={days}
+        keyExtractor={(item) => item.day_id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
               styles.listItem,
-              selectedWorkout === item.workout_id && styles.selectedItem,
+              { backgroundColor: theme.card, borderColor: theme.border },
+              selectedDay === item.day_id && { backgroundColor: theme.buttonBackground },
             ]}
-            onPress={() => {
-              setSelectedWorkout(item.workout_id);
-              setDays([]);
-              setSelectedDay(null);
-              fetchDays(item.workout_id);
-            }}
+            onPress={() => setSelectedDay(item.day_id)}
           >
             <Text
               style={[
                 styles.listItemText,
-                selectedWorkout === item.workout_id && styles.selectedItemText,
+                { color: theme.text },
+                selectedDay === item.day_id && { color: theme.buttonText },
               ]}
             >
-              {item.workout_name}
+              {item.day_name}
             </Text>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={styles.emptyText}>No workouts available.</Text>}
+        ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.text }]}>No days available for this workout.</Text>}
       />
+    </>
+  )}
 
-      {/* Days List */}
-      {selectedWorkout && (
-        <>
-          <Text style={styles.sectionTitle}>Select Day</Text>
-          <FlatList
-            data={days}
-            keyExtractor={(item) => item.day_id.toString()}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.listItem,
-                  selectedDay === item.day_id && styles.selectedItem,
-                ]}
-                onPress={() => setSelectedDay(item.day_id)}
-              >
-                <Text
-                  style={[
-                    styles.listItemText,
-                    selectedDay === item.day_id && styles.selectedItemText,
-                  ]}
-                >
-                  {item.day_name}
-                </Text>
-              </TouchableOpacity>
-            )}
-            ListEmptyComponent={<Text style={styles.emptyText}>No days available for this workout.</Text>}
-          />
-        </>
-      )}
+  {/* Save Button */}
+  <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={logWorkout}>
+    <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Schedule Workout</Text>
+  </TouchableOpacity>
+</View>
 
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={logWorkout}>
-        <Text style={styles.saveButtonText}>Schedule Workout</Text>
-      </TouchableOpacity>
-    </View>
   );
 }
+
+
+// LogWorkout.tsx
 
 const styles = StyleSheet.create({
     container: {
