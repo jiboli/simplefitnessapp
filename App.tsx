@@ -22,7 +22,7 @@
   import { SettingsProvider } from './context/SettingsContext';
   import { ThemeProvider, useTheme } from './context/ThemeContext';
   import { AdProvider } from './context/AdContext';
-
+  
 
 
 
@@ -31,9 +31,6 @@
   const WorkoutStackScreen = createNativeStackNavigator<WorkoutStackParamList>();
   const WorkoutLogStackScreen= createNativeStackNavigator<WorkoutLogStackParamList>();
   const WeightLogStackScreen= createNativeStackNavigator<WeightLogStackParamList>();
-
-
-
 
   const resetDatabase = async () => {
     try {
@@ -187,44 +184,6 @@
 // Define AppContent here
 const AppContent = () => {
   const { theme } = useTheme(); // Access the theme context
-<WeightLogStackScreen.Screen
-        name="WeightLogDetail"
-        component={WeightLogDetail}
-        options={{ headerShown: false }} // No header for MyCalendar screen
-      />
-    
-    </WeightLogStackScreen.Navigator>
-  );
-}
-
-
-export default function App() {
-
-  const [dbLoaded, setDbLoaded] = useState<boolean>(false);
-  
-  
-  React.useEffect(() => {
-    (async () => {
-      try {
-        //await resetDatabase();
-        await loadDatabase();
-        setDbLoaded(true);
-      } catch (e) {
-        console.error("Database loading error:", e);
-      }
-    })();
-  }, []);
-  
-  if (!dbLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="black" />
-      </View>
-    );
-  }
-  
-
-
 
   return (
     <>
@@ -236,19 +195,6 @@ export default function App() {
               </View>
             }
             />
-    <GestureHandlerRootView>
-      <SettingsProvider>
-       <AdProvider>
-      <NavigationContainer>
-        <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-        <React.Suspense
-          fallback={
-            <View style={{ flex:1}}>
-              <ActivityIndicator size={'large'}/>
-              <Text> Loading Database...</Text>
-            </View>
-          }
-          />
 
           <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
             <Bottom.Navigator
@@ -350,10 +296,11 @@ export default function App() {
       <GestureHandlerRootView>
         <NavigationContainer>
           <SettingsProvider>
+          <AdProvider>
           <AppContent/> {/* Use AppContent here */}
+          </AdProvider>
           </SettingsProvider>
         </NavigationContainer>
-      </AdProvider>
         
       </GestureHandlerRootView>
     </ThemeProvider>
