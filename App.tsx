@@ -199,7 +199,7 @@ const AppContent = () => {
                 screenOptions={{
                   headerShown: false,
                   tabBarStyle: {
-                    backgroundColor: theme.card, // Dynamically set based on theme
+                    backgroundColor: theme.background, // Dynamically set based on theme
                     borderTopWidth: 0, // Removes the top border of the tab bar
                     elevation: 0, // Removes shadow on Android
                     shadowOpacity: 0, // Removes shadow on iOS
