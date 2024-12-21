@@ -200,8 +200,9 @@ const AppContent = () => {
                   headerShown: false,
                   tabBarStyle: {
                     backgroundColor: theme.card, // Dynamically set based on theme
-                    borderTopColor: theme.border, // Dynamically set border color
-                    elevation: 10,
+                    borderTopWidth: 0, // Removes the top border of the tab bar
+                    elevation: 0, // Removes shadow on Android
+                    shadowOpacity: 0, // Removes shadow on iOS
                     height: 60,
                     paddingVertical: 10,
                   },
@@ -322,13 +323,10 @@ const AppContent = () => {
   const styles = StyleSheet.create({
     tabBar: {
       backgroundColor: '#ffffff',
-      borderTopWidth: 0,
+      borderTopWidth: 2,
       elevation: 10,
       height: 60, // Adjusted height for a larger tab bar
       paddingVertical: 10, // Reduced padding to balance spacing
-    },
-    tabBarLabel: {
-      fontSize: 12,
     },
     tabButton: {
       flex: 1,
