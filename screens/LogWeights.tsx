@@ -74,7 +74,7 @@ export default function LogWeights() {
 
         sets.forEach((setNumber) => {
           const key = `${exercise.logged_exercise_id}_${setNumber}`;
-          initialWeights[key] = ''; // Empty default for user input
+          initialWeights[key] = '0'; // Empty default for user input
           initialReps[key] = exercise.reps.toString(); // Default reps as string
         });
       });
@@ -212,13 +212,13 @@ export default function LogWeights() {
           <TouchableOpacity
             key={setNumber.toString()}
             onLongPress={() => deleteSet(exercise.logged_exercise_id.toString(), setNumber)}
-            style={[styles.setContainer, { backgroundColor: theme.background, borderColor: theme.border }]}
+            style={[styles.setContainer, { backgroundColor: theme.background, borderColor: theme.logborder }]}
           >
             <Text style={[styles.setText, { color: theme.text }]}>Set {setNumber}:</Text>
             <TextInput
-              style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+              style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.logborder }]}
               placeholder="Reps"
-              placeholderTextColor={theme.border}
+              placeholderTextColor={theme.logborder}
               keyboardType="numeric"
               value={reps[repsKey]}
               onChangeText={(text) => {
@@ -239,9 +239,9 @@ export default function LogWeights() {
             />
     
             <TextInput
-              style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
+              style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.logborder }]}
               placeholder={weightFormat}
-              placeholderTextColor={theme.border}
+              placeholderTextColor={theme.logborder}
               keyboardType="decimal-pad"
               value={weights[weightKey]}
               onChangeText={(text) => {

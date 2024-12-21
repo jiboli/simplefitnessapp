@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system';
 
 // Define the themes
 const LightTheme = {
+  type: 'light',
   background: '#FFFFFF',
   text: '#000000',
   card: '#F7F7F7',
@@ -20,10 +21,13 @@ const LightTheme = {
   homeButtonText2:'#FFFFFF',
   homeButtonText3:'#FFFFFF',
   homeCardText1: 'white',
-  homeCardText2: 'white'
+  homeCardText2: 'white',
+  inactivetint: 'rgba(0, 0, 0, 0.2)',
+  logborder:'rgba(0, 0, 0, 0.2)'
 };
 
 const DarkTheme = {
+  type: 'dark',
   background: '#121212',
   text: 'white',
   card: '#1E1E1E',
@@ -39,8 +43,10 @@ const DarkTheme = {
   homeButtonText1: '#000000',
   homeButtonText2:'#000000',
   homeButtonText3:'#000000',
-    homeCardText1: 'white',
-  homeCardText2: 'white'
+  homeCardText1: 'white',
+  homeCardText2: 'white',
+  inactivetint: 'rgba(245, 245, 245, 0.1)',
+  logborder:'rgba(245, 245, 245, 0.1)'
 };
 
 // Context for theme management
