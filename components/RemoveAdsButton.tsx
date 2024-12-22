@@ -30,7 +30,7 @@ const RemoveAdsButton = () => {
 
   return (
 <TouchableOpacity style= {[styles.button, { backgroundColor: theme.buttonBackground }]} onPress={handlePurchase}>
-  <Text style={[styles.buttonText, { color: theme.buttonText }]}>Remove Ads for $1</Text>
+  <Text style={[styles.buttonText, { color: theme.buttonText }]}>Remove Ads</Text>
 </TouchableOpacity>
   );
 
