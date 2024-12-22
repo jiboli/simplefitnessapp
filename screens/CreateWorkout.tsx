@@ -9,6 +9,7 @@ import {
   StyleSheet,
   FlatList,
   Alert,
+  KeyboardAvoidingView
 } from 'react-native';
 import { WorkoutStackParamList } from '../App'; // Adjust path to where WorkoutStackParamList is defined
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -182,9 +183,15 @@ export default function CreateWorkout() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+       <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior="height" // Android-specific behavior
+      >
+
       <FlatList
         data={days}
         keyExtractor={(item, index) => index.toString()}
+        keyboardShouldPersistTaps="handled"
         ListHeaderComponent={
           <>
             {/* Back Button */}
@@ -304,6 +311,7 @@ export default function CreateWorkout() {
           </View>
         }
       />
+      </KeyboardAvoidingView>
     </View>
   );
 }

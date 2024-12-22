@@ -3,12 +3,9 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
   Alert,
   TextInput,
-  ScrollView,
-  KeyboardAvoidingView,
 } from 'react-native';
 import { useNavigation} from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -16,6 +13,7 @@ import { WorkoutLog, LoggedExercise } from '../types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
+import { KeyboardAwareFlatList, KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 
@@ -200,14 +198,7 @@ export default function LogWeights() {
 
   const renderExercise = (exercise: LoggedExercise) => {
     return (
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior="height" // Android-specific behavior
-        >
-          <ScrollView
-            contentContainerStyle={{ flexGrow: 1 }} 
-            keyboardShouldPersistTaps="handled"
-          >
+
       
       <View style={[styles.exerciseContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
       <Text style={[styles.exerciseTitle, { color: theme.text }]}>{exercise.exercise_name}</Text>
@@ -220,6 +211,8 @@ export default function LogWeights() {
         const repsKey = `${exercise.logged_exercise_id}_${setNumber}`;
     
         return (
+
+          
 
           <TouchableOpacity
             key={setNumber.toString()}
@@ -273,15 +266,19 @@ export default function LogWeights() {
         </TouchableOpacity>
       </View>
     </View>
-    </ScrollView>
-    </KeyboardAvoidingView>
     
     );
   };
   
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+
+    <KeyboardAwareScrollView
+      style={{ flex: 1, backgroundColor: theme.background }}
+      contentContainerStyle={{ flexGrow: 1, padding: 20 }}
+      enableOnAndroid={true}
+    >
+
   <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
     <Ionicons name="arrow-back" size={24} color={theme.text} />
   </TouchableOpacity>
@@ -289,7 +286,7 @@ export default function LogWeights() {
   <Text style={[styles.title, { color: theme.text }]}>Track Weights</Text>
 
   {!selectedWorkout ? (
-    <FlatList
+    <KeyboardAwareFlatList
       data={workouts}
       keyExtractor={(item) => item.workout_log_id.toString()}
       renderItem={({ item }) => (
@@ -311,7 +308,7 @@ export default function LogWeights() {
     />
   ) : (
     <>
-      <FlatList
+      <KeyboardAwareFlatList
         data={exercises}
         keyExtractor={(item) => item.logged_exercise_id.toString()}
         renderItem={({ item }) => renderExercise(item)}
@@ -324,7 +321,7 @@ export default function LogWeights() {
       </TouchableOpacity>
     </>
   )}
-</View>
+    </KeyboardAwareScrollView>
 
   );
 }
@@ -399,7 +396,7 @@ const styles = StyleSheet.create({
   labelsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginLeft: 100,
+    marginLeft: 70,
     marginBottom: 5,
     paddingHorizontal: 10,
   },
@@ -428,7 +425,7 @@ const styles = StyleSheet.create({
     borderColor: '#CCCCCC',
     borderRadius: 5,
     padding: 8,
-    marginHorizontal: 5,
+    marginHorizontal: 25,
     textAlign: 'center',
     fontSize: 16,
   },
