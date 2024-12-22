@@ -148,7 +148,11 @@ export default function CreateWorkout() {
       days.some((day) =>
         day.exercises.some(
           (exercise) =>
-            !exercise.exerciseName.trim() || !exercise.sets || !exercise.reps
+          !exercise.exerciseName.trim() || // Exercise name must not be empty
+          !exercise.sets || // Sets field must not be empty
+          !exercise.reps || // Reps field must not be empty
+          parseInt(exercise.sets, 10) === 0 || // Sets must not be zero
+          parseInt(exercise.reps, 10) === 0 // Reps must not be zero
         )
       )
     ) {
@@ -253,13 +257,10 @@ export default function CreateWorkout() {
                   keyboardType="numeric"
                   value={exercise.sets}
                   onChangeText={(text) => {
-                    const sanitizedText = text.replace(/[^0-9]/g, '');
-                    let value = parseInt(sanitizedText || '0');
-                    if (value > 0 && value <= 100) {
-                      const updatedDays = [...days];
-                      updatedDays[index].exercises[exerciseIndex].sets = value.toString();
-                      setDays(updatedDays);
-                    }
+                    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                    const updatedDays = [...days];
+                    updatedDays[index].exercises[exerciseIndex].sets = sanitizedText; // Allow empty string
+                    setDays(updatedDays);
                   }}
                 />
                 <TextInput
@@ -269,13 +270,10 @@ export default function CreateWorkout() {
                   keyboardType="numeric"
                   value={exercise.reps}
                   onChangeText={(text) => {
-                    const sanitizedText = text.replace(/[^0-9]/g, '');
-                    let value = parseInt(sanitizedText || '0');
-                    if (value > 0 && value <= 10000) {
-                      const updatedDays = [...days];
-                      updatedDays[index].exercises[exerciseIndex].reps = value.toString();
-                      setDays(updatedDays);
-                    }
+                    const sanitizedText = text.replace(/[^0-9]/g, ''); // Remove non-numeric characters
+                    const updatedDays = [...days];
+                    updatedDays[index].exercises[exerciseIndex].reps = sanitizedText; // Allow empty string
+                    setDays(updatedDays);
                   }}
                 />
               </TouchableOpacity>

@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  ScrollView,
+  KeyboardAvoidingView,
 } from 'react-native';
 import { useNavigation} from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -74,7 +76,7 @@ export default function LogWeights() {
 
         sets.forEach((setNumber) => {
           const key = `${exercise.logged_exercise_id}_${setNumber}`;
-          initialWeights[key] = '0'; // Empty default for user input
+          initialWeights[key] = ''; // Empty default for user input
           initialReps[key] = exercise.reps.toString(); // Default reps as string
         });
       });
@@ -198,6 +200,15 @@ export default function LogWeights() {
 
   const renderExercise = (exercise: LoggedExercise) => {
     return (
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior="height" // Android-specific behavior
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }} 
+            keyboardShouldPersistTaps="handled"
+          >
+      
       <View style={[styles.exerciseContainer, { backgroundColor: theme.background, borderColor: theme.border }]}>
       <Text style={[styles.exerciseTitle, { color: theme.text }]}>{exercise.exercise_name}</Text>
       <View style={styles.labelsRow}>
@@ -209,6 +220,7 @@ export default function LogWeights() {
         const repsKey = `${exercise.logged_exercise_id}_${setNumber}`;
     
         return (
+
           <TouchableOpacity
             key={setNumber.toString()}
             onLongPress={() => deleteSet(exercise.logged_exercise_id.toString(), setNumber)}
@@ -261,6 +273,8 @@ export default function LogWeights() {
         </TouchableOpacity>
       </View>
     </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
     
     );
   };
