@@ -81,6 +81,14 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
 def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
+
+        dependenciesInfo {
+            includeInApk = false
+          includeInBundle = false
+    }
+
+
+
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -92,7 +100,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 2
-        versionName "1.1.1"
+        versionName "1.1.2"
         missingDimensionStrategy "store", "play"
     }
     signingConfigs {
