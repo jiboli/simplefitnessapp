@@ -82,10 +82,6 @@ def jscFlavor = 'org.webkit:android-jsc:+'
 
 android {
 
-        dependenciesInfo {
-            includeInApk = false
-          includeInBundle = false
-    }
 
 
 
