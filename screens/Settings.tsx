@@ -92,7 +92,6 @@ export default function Settings() {
 
         {/* RemoveAds */}
         <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Remove Ads</Text>
         <View style={styles.buttonGroup}> 
           <RemoveAdsButton />
         </View>
