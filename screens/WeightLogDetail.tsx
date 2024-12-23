@@ -12,9 +12,8 @@ import { useSQLiteContext } from 'expo-sqlite';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from '../context/SettingsContext';
-import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 import { useTheme } from '../context/ThemeContext'; 
-
+import BannerAdComponent from '../components/BannerAd';
 
 export default function WeightLogDetail() {
   const route = useRoute();
@@ -257,95 +256,93 @@ export default function WeightLogDetail() {
       ))}
     </View>
   )}
-        
 </View>
 
     );
   };
   
   return (
-    <View style={styles.container}>
-      {/* Back Button */}
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    {/* Back Button */}
+    <TouchableOpacity
+      style={styles.backButton}
+      onPress={() => navigation.goBack()}
+    >
+      <Ionicons name="arrow-back" size={24} color={theme.text} />
+    </TouchableOpacity>
+  
+    <Text style={[styles.headerTitle, { color: theme.text }]}>{workoutName} logs</Text>
+  
+    {/* Filter Buttons */}
+    <View style={styles.filterContainer}>
       <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
+        style={[styles.filterButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={() => setDatePickerVisible({ start: true, end: false })}
       >
-        <Ionicons name="arrow-back" size={24} color="#000000" />
+        <Ionicons name="calendar-outline" size={20} color={theme.buttonText} />
+        <Text style={[styles.filterButtonText, { color: theme.buttonText }]}>
+          {dateRange.start
+            ? `From: ${formatDate(dateRange.start.getTime() / 1000)}`
+            : 'Pick Start Date'}
+        </Text>
       </TouchableOpacity>
-
-      <Text style={styles.headerTitle}>{workoutName} logs</Text>
-
-
-      {/* Filter Buttons */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={() => setDatePickerVisible({ start: true, end: false })}
-        >
-          <Ionicons name="calendar-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.filterButtonText}>
-            {dateRange.start
-              ? `From: ${formatDate(dateRange.start.getTime() / 1000)}`
-              : 'Pick Start Date'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.filterButton}
-          onPress={() => setDatePickerVisible({ start: false, end: true })}
-        >
-          <Ionicons name="calendar-outline" size={20} color="#FFFFFF" />
-          <Text style={styles.filterButtonText}>
-            {dateRange.end
-              ? `To: ${formatDate(dateRange.end.getTime() / 1000)}`
-              : 'Pick End Date'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {dateRange.start && dateRange.end && (
-        <TouchableOpacity
-          style={styles.clearButton}
-          onPress={clearDateSelection}
-        >
-          <Text style={styles.clearButtonText}>Clear Selection</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* Date Pickers */}
-      {datePickerVisible.start && (
-        <DateTimePicker
-          value={dateRange.start || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            setDatePickerVisible({ start: false, end: false });
-            if (date) setDateRange((prev) => ({ ...prev, start: date }));
-          }}
-        />
-      )}
-      {datePickerVisible.end && (
-        <DateTimePicker
-          value={dateRange.end || new Date()}
-          mode="date"
-          display="default"
-          onChange={(event, date) => {
-            setDatePickerVisible({ start: false, end: false });
-            if (date) setDateRange((prev) => ({ ...prev, end: date }));
-          }}
-        />
-      )}
-
-      {/* Logs */}
-      <FlatList
-        data={filteredDays}
-        keyExtractor={(item) => `${item.day_name}_${item.workout_date}`}
-        renderItem={({ item }) => renderDay(item)}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No logs available for the selected range.
-          </Text>
-        }
+      <TouchableOpacity
+        style={[styles.filterButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={() => setDatePickerVisible({ start: false, end: true })}
+      >
+        <Ionicons name="calendar-outline" size={20} color={theme.buttonText} />
+        <Text style={[styles.filterButtonText, { color: theme.buttonText }]}>
+          {dateRange.end
+            ? `To: ${formatDate(dateRange.end.getTime() / 1000)}`
+            : 'Pick End Date'}
+        </Text>
+      </TouchableOpacity>
+    </View>
+  
+    {dateRange.start && dateRange.end && (
+      <TouchableOpacity
+        style={[styles.clearButton, { backgroundColor: theme.text }]}
+        onPress={clearDateSelection}
+      >
+        <Text style={[styles.clearButtonText, { color: theme.card }]}>Clear Selection</Text>
+      </TouchableOpacity>
+    )}
+  
+    {/* Date Pickers */}
+    {datePickerVisible.start && (
+      <DateTimePicker
+        value={dateRange.start || new Date()}
+        mode="date"
+        display="default"
+        onChange={(event, date) => {
+          setDatePickerVisible({ start: false, end: false });
+          if (date) setDateRange((prev) => ({ ...prev, start: date }));
+        }}
       />
+    )}
+    {datePickerVisible.end && (
+      <DateTimePicker
+        value={dateRange.end || new Date()}
+        mode="date"
+        display="default"
+        onChange={(event, date) => {
+          setDatePickerVisible({ start: false, end: false });
+          if (date) setDateRange((prev) => ({ ...prev, end: date }));
+        }}
+      />
+    )}
+  
+    {/* Logs */}
+    <FlatList
+      data={filteredDays}
+      keyExtractor={(item) => `${item.day_name}_${item.workout_date}`}
+      renderItem={({ item }) => renderDay(item)}
+      ListEmptyComponent={
+        <Text style={[styles.emptyText, { color: theme.text }]}>
+          No logs available for the selected range.
+        </Text>
+      }
+    />
                    {/* Banner Ad Section */}
                    <View style={styles.adContainer}>
         <BannerAdComponent />
@@ -362,7 +359,6 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 40,
-    backgroundColor: '#FFFFFF',
   },
   adContainer: {
     alignItems: 'center',
@@ -370,7 +366,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 30,
     fontWeight: '900',
-    color: '#000000',
     textAlign: 'center',
     marginVertical: 20, // Adds spacing above and below the title
   },
@@ -383,7 +378,6 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#000000',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 20,
@@ -391,14 +385,12 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   filterButtonText: {
-    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
     marginLeft: 10,
   },
   clearButton: {
     marginBottom: 20,
-    backgroundColor: '#000000',
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 15,
@@ -408,7 +400,6 @@ const styles = StyleSheet.create({
     marginVertical: 0,
   },
   clearButtonText: {
-    color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -420,14 +411,11 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   logContainer: {
-    backgroundColor: '#F7F7F7',
     borderRadius: 20,
     padding: 20,
     marginBottom: 15,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.1)',
     elevation: 2,
-    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
@@ -441,12 +429,10 @@ const styles = StyleSheet.create({
   logDayName: {
     fontSize: 20,
     fontWeight: '900',
-    color: '#000000',
   },
   logDate: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#000000',
   },
   logList: {
     marginTop: 10,
@@ -458,15 +444,12 @@ const styles = StyleSheet.create({
   exerciseName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#000000',
   },
   logDetail: {
     fontSize: 14,
-    color: '#666666',
   },
   emptyText: {
     textAlign: 'center',
     fontSize: 16,
-    color: 'rgba(0, 0, 0, 0.5)',
   },
 });
