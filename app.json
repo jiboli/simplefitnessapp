@@ -17,7 +17,7 @@
       "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp"
     },
     "android": {
-      "versionCode": 9,
+      "versionCode": 10,
       
       "config": {
         "googleMobileAdsAppId": "ca-app-pub-9707948896132362~7260721577"
