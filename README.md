@@ -58,12 +58,18 @@ An easy to use fitness app that lets you create, schedule and track your workout
     <img src="https://github.com/user-attachments/assets/c11a6262-0a5b-4100-9394-0832507f8eef" alt="Get it on Google Play" width="180">
 </a>
 
+</br>
+
+<a href="https://apps.apple.com/us/app/simple-fitness-simplified/id6740262965" style="padding: 10px;">
+    <img src="https://github.com/user-attachments/assets/9473c701-e53e-4bb9-bbc2-3cf01669889f" alt="Download from App Store" width="180">
+
 </div>
 
+</br>
 
 
 
-Soon on App Store and F-Droid.
+Soon on  F-Droid.
 
 
 
