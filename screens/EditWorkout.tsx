@@ -57,7 +57,11 @@ export default function EditWorkout() {
         })
       );
 
-      setDays(daysWithExercises);
+         // Sort days by day_id in ascending order
+    const sortedDays = daysWithExercises.sort((a, b) => a.day_id - b.day_id);
+
+    setDays(sortedDays);
+
     } catch (error) {
       Alert.alert('Error', 'Failed to fetch workout details.');
       console.error(error);
@@ -162,10 +166,13 @@ export default function EditWorkout() {
 
               {/* Exercises */}
               {day.exercises.map((exercise, index) => (
-                <View key={exercise.exercise_id} style={styles.exerciseContainer}>
+                <View key={exercise.exercise_id}  style={[
+                    styles.exerciseContainer,
+                    { borderBottomColor: theme.border } // Use theme colors for the underline
+                  ]}>
                   {/* Exercise Name */}
                   <TextInput
-                    style={[styles.exerciseInput, { color: theme.text }]}
+                    style={[styles.exerciseInput, { color: theme.text },{ borderBottomColor: theme.border } ]}
                     value={exercise.exercise_name}
                     onChangeText={(text) =>
                       handleExerciseChange(day.day_id, index, 'exercise_name', text)
@@ -175,7 +182,7 @@ export default function EditWorkout() {
                   />
                   {/* Sets */}
                   <TextInput
-                    style={[styles.exerciseInput, { color: theme.text }]}
+                    style={[styles.exerciseInput, { color: theme.text },{ borderBottomColor: theme.border }]}
                     value={exercise.sets.toString()}
                     onChangeText={(text) =>
                       handleExerciseChange(day.day_id, index, 'sets', text)
@@ -186,7 +193,7 @@ export default function EditWorkout() {
                   />
                   {/* Reps */}
                   <TextInput
-                    style={[styles.exerciseInput, { color: theme.text }]}
+                    style={[styles.exerciseInput, { color: theme.text }, { borderBottomColor: theme.border }]}
                     value={exercise.reps.toString()}
                     onChangeText={(text) =>
                       handleExerciseChange(day.day_id, index, 'reps', text)
@@ -268,6 +275,7 @@ const styles = StyleSheet.create({
       alignItems: 'center', 
       justifyContent: 'space-between', 
       marginBottom: 20, 
+      borderBottomWidth: 2, // Add this line to create the underline
       padding: 15, 
       borderRadius: 12, 
       borderWidth: 1, 
