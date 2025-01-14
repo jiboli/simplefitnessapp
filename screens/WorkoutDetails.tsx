@@ -66,7 +66,12 @@ export default function WorkoutDetails() {
       })
     );
 
-    setDays(daysWithExercises);
+     // Sort days by day_id in ascending order
+     const sortedDays = daysWithExercises.sort((a, b) => a.day_id - b.day_id);
+
+     setDays(sortedDays);
+
+    setDays(sortedDays);
   };
 
   const openAddDayModal = () => {
