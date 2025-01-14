@@ -18,12 +18,14 @@
   import MyProgress from './screens/MyProgress';
   import LogWeights from './screens/LogWeights';
   import WeightLogDetail from './screens/WeightLogDetail';
+  
   import Settings from './screens/Settings';
   import { SettingsProvider } from './context/SettingsContext';
   import { ThemeProvider, useTheme } from './context/ThemeContext';
   import { AdProvider } from './context/AdContext';
   import { IAPProvider } from './context/IAPContext';
   
+  import EditWorkout from './screens/EditWorkout';
 
 
 
@@ -92,16 +94,19 @@
   };
 
 
+
   export type WorkoutStackParamList = {
     WorkoutsList: undefined; // No parameters for this route
     CreateWorkout: undefined; // No parameters for this route
     WorkoutDetails: { workout_id: number }; // Add this
+    EditWorkout: { workout_id: number }; // Only `workout_id` for editing a workout
   };
 
   export type WorkoutLogStackParamList = {
     MyCalendar: undefined; // No parameters for this route
     LogWorkout: undefined; // No parameters for this route
   };
+
   export type WeightLogStackParamList = {
     MyProgress: undefined;
     LogWeights: undefined;
@@ -128,6 +133,11 @@
           name='WorkoutDetails'
           component={WorkoutDetails}
           options={{title: 'WorkoutDetails'}}
+          />
+             <WorkoutStackScreen.Screen
+          name='EditWorkout'
+          component={EditWorkout}
+          options={{title: 'EditWorkout'}}
           />
       </WorkoutStackScreen.Navigator>
     );

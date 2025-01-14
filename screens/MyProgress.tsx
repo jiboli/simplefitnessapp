@@ -119,8 +119,13 @@ export default function MyProgress() {
           <Text style={[styles.workoutText, { color: theme.text }]}>{item}</Text>
           <Ionicons name="chevron-forward" size={20} color={theme.text} />
         </View>
+        
       </TouchableOpacity>
+      
     )}
+
+    
+
     ListEmptyComponent={
       <Text style={[styles.emptyText, { color: theme.text }]}>
         No logged workouts available.
@@ -132,6 +137,12 @@ export default function MyProgress() {
    <BannerAdComponent />
   </View>
   
+
+<Text style={[styles.tipText, { color: theme.text }]}>
+      Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail.  
+    </Text>
+
+
 </View>
 
   );
@@ -154,6 +165,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000000',
   },
+
+  tipText: {
+    marginTop: 20, // Space above the text
+    paddingBottom:20,
+    textAlign: 'center', // Center align
+    fontSize: 14, // Smaller font size
+    fontStyle: 'italic', // Italic for emphasis
+  },
+
   logWeightsButton: {
     backgroundColor: '#000000',
     borderRadius: 20,
