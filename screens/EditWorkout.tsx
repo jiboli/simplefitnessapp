@@ -70,6 +70,37 @@ export default function EditWorkout() {
 
   const saveWorkoutDetails = async () => {
     try {
+      // Validation: Ensure workout name is not empty
+      if (!workoutName.trim()) {
+        Alert.alert('Error', 'Workout name cannot be empty.');
+        return;
+      }
+  
+      // Validation: Check all exercises for empty or invalid fields
+      for (const day of days) {
+        if (!day.day_name.trim()) {
+          Alert.alert('Error', `Day name cannot be empty for Day ID: ${day.day_id}`);
+          return;
+        }
+  
+        for (const exercise of day.exercises) {
+          if (
+            !exercise.exercise_name.trim() ||
+            !exercise.sets ||
+            !exercise.reps ||
+            parseInt(exercise.sets.toString(), 10) === 0 ||
+            parseInt(exercise.reps.toString(), 10) === 0
+          ) {
+            Alert.alert(
+              'Error',
+              `Invalid input in Day "${day.day_name}". Ensure all exercises have valid name, sets, and reps.`
+            );
+            return;
+          }
+        }
+      }
+
+
       setIsSaving(true);
 
       // Update workout name
@@ -121,7 +152,7 @@ export default function EditWorkout() {
               ...day,
               exercises: day.exercises.map((exercise, index) =>
                 index === exerciseIndex
-                  ? { ...exercise, [field]: field === 'exercise_name' ? value : parseInt(value as string) || 0 }
+                  ? { ...exercise, [field]: field === 'exercise_name' ? value :value}
                   : exercise
               ),
             }
@@ -157,7 +188,7 @@ export default function EditWorkout() {
             <View key={day.day_id} style={[styles.dayContainer, { backgroundColor: theme.card }]}>
               {/* Day Name */}
               <TextInput
-                style={[styles.dayInput, { color: theme.text }]}
+                style={[styles.dayInput, { color: theme.text },{ borderBottomColor: theme.border }]}
                 value={day.day_name}
                 onChangeText={(text) => handleDayNameChange(day.day_id, text)}
                 placeholder="Day Name"

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -40,9 +41,13 @@ export default function WorkoutDetails() {
   const [exerciseSets, setExerciseSets] = useState('');
   const [exerciseReps, setExerciseReps] = useState('');
   const navigation = useNavigation<WorkoutListNavigationProp>();
-  useEffect(() => {
-    fetchWorkoutDetails();
-  }, [workout_id]);
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchWorkoutDetails();
+    }, [workout_id])
+  );
 
   const fetchWorkoutDetails = async () => {
     const workoutResult = await db.getAllAsync<{ workout_name: string }>(
