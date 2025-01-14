@@ -132,15 +132,16 @@ export default function MyProgress() {
       </Text>
     }
   />
-
+<Text style={[styles.tipText, { color: theme.text }]}>
+      Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail.  
+    </Text>
+    
 <View style={styles.adContainer}>
    <BannerAdComponent />
   </View>
   
 
-<Text style={[styles.tipText, { color: theme.text }]}>
-      Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail.  
-    </Text>
+
 
 
 </View>
