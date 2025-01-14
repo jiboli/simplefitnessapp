@@ -16,7 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useTheme } from '../context/ThemeContext';
 
-type Exercise = { exercise_name: string; sets: number; reps: number };
+type Exercise = { exercise_id: number; exercise_name: string; sets: number; reps: number };
 type Day = { day_id: number; day_name: string; exercises: Exercise[] };
 
 export default function EditWorkout() {
@@ -50,7 +50,7 @@ export default function EditWorkout() {
       const daysWithExercises = await Promise.all(
         daysResult.map(async (day) => {
           const exercises = await db.getAllAsync<Exercise>(
-            'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?',
+            'SELECT exercise_id, exercise_name, sets, reps FROM Exercises WHERE day_id = ?',
             [day.day_id]
           );
           return { ...day, exercises };
@@ -80,8 +80,8 @@ export default function EditWorkout() {
 
         for (const exercise of day.exercises) {
           await db.runAsync(
-            'UPDATE Exercises SET exercise_name = ?, sets = ?, reps = ? WHERE day_id = ?;',
-            [exercise.exercise_name.trim(), exercise.sets, exercise.reps, day.day_id]
+            'UPDATE Exercises SET exercise_name = ?, sets = ?, reps = ? WHERE exercise_id = ?;',
+            [exercise.exercise_name.trim(), exercise.sets, exercise.reps, exercise.exercise_id]
           );
         }
       }
@@ -104,7 +104,12 @@ export default function EditWorkout() {
     );
   };
 
-  const handleExerciseChange = (dayId: number, exerciseIndex: number, field: 'exercise_name' | 'sets' | 'reps', value: string | number) => {
+  const handleExerciseChange = (
+    dayId: number,
+    exerciseIndex: number,
+    field: 'exercise_name' | 'sets' | 'reps',
+    value: string | number
+  ) => {
     setDays((prevDays) =>
       prevDays.map((day) =>
         day.day_id === dayId
@@ -123,91 +128,90 @@ export default function EditWorkout() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+          {/* Back Button */}
+          <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color={theme.text} />
+          </TouchableOpacity>
 
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          <View style={[styles.container, { backgroundColor: theme.background }]}>
-            {/* Back Button */}
-            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-              <Ionicons name="arrow-back" size={24} color={theme.text} />
-            </TouchableOpacity>
+          {/* Title */}
+          <Text style={[styles.title, { color: theme.text }]}>Edit Workout</Text>
 
-            {/* Title */}
-            <Text style={[styles.title, { color: theme.text }]}>Edit Workout</Text>
+          {/* Workout Name */}
+          <TextInput
+            style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
+            value={workoutName}
+            onChangeText={setWorkoutName}
+            placeholder="Workout Name"
+            placeholderTextColor={theme.text}
+          />
 
-            {/* Workout Name */}
-            <TextInput
-              style={[styles.input, { color: theme.text, backgroundColor: theme.card }]}
-              value={workoutName}
-              onChangeText={setWorkoutName}
-              placeholder="Workout Name"
-              placeholderTextColor={theme.text}
-            />
+          {/* Days and Exercises */}
+          <Text style={[styles.subtitle, { color: theme.text }]}>Days and Exercises:</Text>
+          {days.map((day) => (
+            <View key={day.day_id} style={[styles.dayContainer, { backgroundColor: theme.card }]}>
+              {/* Day Name */}
+              <TextInput
+                style={[styles.dayInput, { color: theme.text }]}
+                value={day.day_name}
+                onChangeText={(text) => handleDayNameChange(day.day_id, text)}
+                placeholder="Day Name"
+                placeholderTextColor={theme.text}
+              />
 
-            {/* Days and Exercises */}
-            <Text style={[styles.subtitle, { color: theme.text }]}>Days and Exercises:</Text>
-            {days.map((day) => (
-              <View key={day.day_id} style={[styles.dayContainer, { backgroundColor: theme.card }]}>
-                {/* Day Name */}
-                <TextInput
-                  style={[styles.dayInput, { color: theme.text }]}
-                  value={day.day_name}
-                  onChangeText={(text) => handleDayNameChange(day.day_id, text)}
-                  placeholder="Day Name"
-                  placeholderTextColor={theme.text}
-                />
+              {/* Exercises */}
+              {day.exercises.map((exercise, index) => (
+                <View key={exercise.exercise_id} style={styles.exerciseContainer}>
+                  {/* Exercise Name */}
+                  <TextInput
+                    style={[styles.exerciseInput, { color: theme.text }]}
+                    value={exercise.exercise_name}
+                    onChangeText={(text) =>
+                      handleExerciseChange(day.day_id, index, 'exercise_name', text)
+                    }
+                    placeholder="Exercise Name"
+                    placeholderTextColor={theme.text}
+                  />
+                  {/* Sets */}
+                  <TextInput
+                    style={[styles.exerciseInput, { color: theme.text }]}
+                    value={exercise.sets.toString()}
+                    onChangeText={(text) =>
+                      handleExerciseChange(day.day_id, index, 'sets', text)
+                    }
+                    keyboardType="numeric"
+                    placeholder="Sets"
+                    placeholderTextColor={theme.text}
+                  />
+                  {/* Reps */}
+                  <TextInput
+                    style={[styles.exerciseInput, { color: theme.text }]}
+                    value={exercise.reps.toString()}
+                    onChangeText={(text) =>
+                      handleExerciseChange(day.day_id, index, 'reps', text)
+                    }
+                    keyboardType="numeric"
+                    placeholder="Reps"
+                    placeholderTextColor={theme.text}
+                  />
+                </View>
+              ))}
+            </View>
+          ))}
 
-                {/* Exercises */}
-                {day.exercises.map((exercise, index) => (
-                  <View key={index} style={styles.exerciseContainer}>
-                    {/* Exercise Name */}
-                    <TextInput
-                      style={[styles.exerciseInput, { color: theme.text }]}
-                      value={exercise.exercise_name}
-                      onChangeText={(text) =>
-                        handleExerciseChange(day.day_id, index, 'exercise_name', text)
-                      }
-                      placeholder="Exercise Name"
-                      placeholderTextColor={theme.text}
-                    />
-                    {/* Sets */}
-                    <TextInput
-                      style={[styles.exerciseInput, { color: theme.text }]}
-                      value={exercise.sets.toString()}
-                      onChangeText={(text) =>
-                        handleExerciseChange(day.day_id, index, 'sets', text)
-                      }
-                      keyboardType="numeric"
-                      placeholder="Sets"
-                      placeholderTextColor={theme.text}
-                    />
-                    {/* Reps */}
-                    <TextInput
-                      style={[styles.exerciseInput, { color: theme.text }]}
-                      value={exercise.reps.toString()}
-                      onChangeText={(text) =>
-                        handleExerciseChange(day.day_id, index, 'reps', text)
-                      }
-                      keyboardType="numeric"
-                      placeholder="Reps"
-                      placeholderTextColor={theme.text}
-                    />
-                  </View>
-                ))}
-              </View>
-            ))}
-
-            {/* Save Button */}
-            <TouchableOpacity
-              style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]}
-              onPress={saveWorkoutDetails}
-              disabled={isSaving}
-            >
-              <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>
-                {isSaving ? 'Saving...' : 'Save Changes'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
+          {/* Save Button */}
+          <TouchableOpacity
+            style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]}
+            onPress={saveWorkoutDetails}
+            disabled={isSaving}
+          >
+            <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>
+              {isSaving ? 'Saving...' : 'Save Changes'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </TouchableWithoutFeedback>
   );
 }
