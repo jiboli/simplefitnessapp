@@ -53,12 +53,14 @@ export default function Home({ navigation }: any) {
         >
           <Text style={[styles.buttonText, { color: theme.homeButtonText3 }]}>Go to My Progress &gt;</Text>
         </TouchableOpacity>
+        
       </View>
 
       {/* Banner Ad Section */}
       <View style={styles.adContainer}>
         <BannerAdComponent />
       </View>
+
     </View>
   );
 }
@@ -82,11 +84,11 @@ const styles = ScaledSheet.create({
   },
   card: {
     borderRadius: 15, // Keep fixed border radius for better uniformity
-    padding: '16@s', // Slightly reduced padding
+    padding: '13@s', // Slightly reduced padding
     marginBottom: '12@vs', // Reduced vertical margin
     justifyContent: 'center',
     alignItems: 'center',
-    height: '160@vs', // Adjusted height to be smaller
+    height: '140@vs', // Adjusted height to be smaller
     width: '90%', // Add a width constraint
     alignSelf: 'center',
   },
