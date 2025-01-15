@@ -79,6 +79,8 @@ export default function EditWorkout() {
   
   const fetchOriginalWorkoutLogData = async (workout_id: number) => {
     try {
+      const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
+  
       // Fetch the original workout name
       const originalWorkout = await db.getAllAsync<{ workout_name: string }>(
         'SELECT workout_name FROM Workouts WHERE workout_id = ?;',
@@ -101,15 +103,16 @@ export default function EditWorkout() {
       // Fetch all workout logs referencing the original workout and day names
       const logsWithDayNames = await Promise.all(
         originalDays.map(async (day) => {
-          const logs = await db.getAllAsync<{ workout_log_id: number; day_name: string; workout_name: string }>(
-            'SELECT workout_log_id, day_name, workout_name FROM Workout_Log WHERE day_name = ? AND workout_name = ?;',
-            [day.day_name, originalWorkoutName]
+          const logs = await db.getAllAsync<{ workout_log_id: number; day_name: string; workout_name: string; workout_date: number }>(
+            'SELECT workout_log_id, day_name, workout_name, workout_date FROM Workout_Log WHERE day_name = ? AND workout_name = ? AND workout_date >= ?;',
+            [day.day_name, originalWorkoutName, currentDate] // Only fetch logs with workout_date >= today
           );
   
           return logs.map((log) => ({
             log_id: log.workout_log_id,
             original_day_name: log.day_name,
             original_workout_name: log.workout_name,
+            workout_date: log.workout_date,
             day_id: day.day_id,
           }));
         })
@@ -123,10 +126,19 @@ export default function EditWorkout() {
   };
   
   
+  
   const updateWorkoutLogs = async (originalLogs: any[], updatedWorkoutName: string) => {
     try {
+      const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
+  
       for (const originalLog of originalLogs) {
-        const { log_id, original_day_name, day_id } = originalLog;
+        const { log_id, original_day_name, day_id, workout_date } = originalLog;
+  
+        // Skip logs with workout_date in the past
+        if (workout_date < currentDate) {
+          console.log(`Skipping log ${log_id} as workout_date is in the past.`);
+          continue;
+        }
   
         console.log('Updating log:', log_id, 'Original day:', original_day_name, 'Updated workout:', updatedWorkoutName);
   
@@ -175,6 +187,7 @@ export default function EditWorkout() {
       console.error('Error updating workout logs:', error);
     }
   };
+  
   
   
   
