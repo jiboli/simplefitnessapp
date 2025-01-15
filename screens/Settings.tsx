@@ -8,16 +8,26 @@ import { useTheme } from '../context/ThemeContext';
 
 export default function Settings() {
   const navigation = useNavigation();
-  const { language, setLanguage, dateFormat, setDateFormat, weightFormat, setWeightFormat } = useSettings();
+  const { dateFormat, setDateFormat, weightFormat, setWeightFormat } = useSettings();
   const { theme, toggleTheme } = useTheme();
   const renderButton = (label: string, current: string, onPress: () => void) => (
     <TouchableOpacity
       style={[styles.button, current === label && styles.activeButton]}
       onPress={onPress}
     >
+     <View style={styles.buttonContent}>
       <Text style={[styles.buttonText, current === label && styles.activeButtonText]}>
         {label}
       </Text>
+      {current === label && (
+        <Ionicons
+          name="checkmark"
+          size={18}
+          color={"white"} // Adjust color based on your theme
+          style={styles.tickIcon}
+        />
+      )}
+    </View>
     </TouchableOpacity>
   );
 
@@ -30,14 +40,6 @@ export default function Settings() {
   
     {/* Title */}
     <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
-  
-    {/* Language Section */}
-    <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Language</Text>
-      <View style={styles.buttonGroup}>
-        {renderButton('English', language, () => setLanguage('English'))}
-      </View>
-    </View>
   
     {/* Date Format Section */}
     <View style={styles.section}>
@@ -140,5 +142,12 @@ const styles = StyleSheet.create({
   activeButtonText: {
     color: '#FFFFFF',
     fontWeight: '700',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tickIcon: {
+    marginLeft: 10, // Add space between the text and icon
   },
 });
