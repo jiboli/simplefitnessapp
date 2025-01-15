@@ -84,7 +84,7 @@ export default function WorkoutDetails() {
   const handleDeleteDay = async (day_id: number, day_name: string, workout_id: number) => {
     Alert.alert(
       'Delete Day',
-      'Are you sure you want to delete this day? All associated exercises and logs will also be deleted.',
+      'Are you sure you want to delete this day? All associated exercises and logs with a workout date of today or later will also be deleted.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -92,24 +92,27 @@ export default function WorkoutDetails() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Delete associated logs
-              const logs = await db.getAllAsync<{ workout_log_id: number }>(
-                'SELECT workout_log_id FROM Workout_Log WHERE day_name = ? AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?);',
-                [day_name, workout_id]
+              const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
+  
+              // Fetch logs only for workout_date >= today
+              const logs = await db.getAllAsync<{ workout_log_id: number; workout_date: number }>(
+                'SELECT workout_log_id, workout_date FROM Workout_Log WHERE day_name = ? AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?) AND workout_date >= ?;',
+                [day_name, workout_id, currentDate]
               );
   
               for (const log of logs) {
+                console.log(`Deleting log ${log.workout_log_id} with workout_date: ${log.workout_date}`);
                 await db.runAsync('DELETE FROM Logged_Exercises WHERE workout_log_id = ?;', [log.workout_log_id]);
                 await db.runAsync('DELETE FROM Workout_Log WHERE workout_log_id = ?;', [log.workout_log_id]);
               }
   
-              // Delete the day and its exercises
+              // Delete the day and its exercises regardless of logs
               await db.runAsync('DELETE FROM Exercises WHERE day_id = ?;', [day_id]);
               await db.runAsync('DELETE FROM Days WHERE day_id = ?;', [day_id]);
   
               fetchWorkoutDetails();
             } catch (error) {
-              console.error('Error deleting day:', error);
+              console.error('Error deleting day with future logs:', error);
             }
           },
         },
@@ -120,7 +123,7 @@ export default function WorkoutDetails() {
   const handleDeleteExercise = async (day_id: number, exercise_name: string, workout_id: number) => {
     Alert.alert(
       'Delete Exercise',
-      `Are you sure you want to delete the exercise "${exercise_name}"? This action cannot be undone.`,
+      `Are you sure you want to delete the exercise "${exercise_name}"? This action will also delete logs with a workout date of today or later.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -128,38 +131,44 @@ export default function WorkoutDetails() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Delete associated logged exercises
-              const logs = await db.getAllAsync<{ workout_log_id: number }>(
-                'SELECT workout_log_id FROM Workout_Log WHERE day_name = (SELECT day_name FROM Days WHERE day_id = ?) AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?);',
-                [day_id, workout_id]
+              const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
+  
+              // Fetch logs only for workout_date >= today
+              const logs = await db.getAllAsync<{ workout_log_id: number; workout_date: number }>(
+                'SELECT workout_log_id, workout_date FROM Workout_Log WHERE day_name = (SELECT day_name FROM Days WHERE day_id = ?) AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?) AND workout_date >= ?;',
+                [day_id, workout_id, currentDate]
               );
   
               for (const log of logs) {
+                console.log(`Deleting log ${log.workout_log_id} with workout_date: ${log.workout_date}`);
                 await db.runAsync(
                   'DELETE FROM Logged_Exercises WHERE workout_log_id = ? AND exercise_name = ?;',
                   [log.workout_log_id, exercise_name]
                 );
               }
   
-              // Delete the exercise
+              // Delete the exercise itself
               await db.runAsync('DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;', [day_id, exercise_name]);
   
               fetchWorkoutDetails();
             } catch (error) {
-              console.error('Error deleting exercise:', error);
+              console.error('Error deleting exercise with future logs:', error);
             }
           },
         },
       ]
     );
   };
+  
 
   const updateWorkoutLogsForAdditions = async (workout_id: number) => {
     try {
-      // Fetch all logs for the current workout
-      const logs = await db.getAllAsync<{ workout_log_id: number; day_name: string }>(
-        'SELECT workout_log_id, day_name FROM Workout_Log WHERE workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?);',
-        [workout_id]
+      const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
+  
+      // Fetch all logs for the current workout where workout_date >= today
+      const logs = await db.getAllAsync<{ workout_log_id: number; day_name: string; workout_date: number }>(
+        'SELECT workout_log_id, day_name, workout_date FROM Workout_Log WHERE workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?) AND workout_date >= ?;',
+        [workout_id, currentDate]
       );
   
       // Fetch updated days and exercises
@@ -172,16 +181,18 @@ export default function WorkoutDetails() {
         const day = days.find((d) => d.day_name === log.day_name);
   
         if (day) {
-          // Update exercises for the log
+          console.log(`Updating log ${log.workout_log_id} for day: ${day.day_name}`);
+  
+          // Fetch updated exercises for the day
           const exercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
             'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?;',
             [day.day_id]
           );
   
-          // Delete existing logged exercises
+          // Delete existing logged exercises for the log
           await db.runAsync('DELETE FROM Logged_Exercises WHERE workout_log_id = ?;', [log.workout_log_id]);
   
-          // Insert updated exercises
+          // Insert updated exercises into the log
           const insertExercisePromises = exercises.map((exercise) =>
             db.runAsync(
               'INSERT INTO Logged_Exercises (workout_log_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
@@ -190,13 +201,17 @@ export default function WorkoutDetails() {
           );
   
           await Promise.all(insertExercisePromises);
+  
+          console.log(`Successfully updated log ${log.workout_log_id} with new exercises.`);
+        } else {
+          console.log(`No matching day found for log ${log.workout_log_id} and day_name: ${log.day_name}`);
         }
       }
     } catch (error) {
       console.error('Error updating workout logs for additions:', error);
     }
   };
-
+  
   const openAddDayModal = () => {
     setDayName('');
     setShowDayModal(true);
