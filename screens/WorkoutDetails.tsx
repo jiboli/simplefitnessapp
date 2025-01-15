@@ -55,7 +55,9 @@ export default function WorkoutDetails() {
       [workout_id]
     );
     setWorkoutName(workoutResult[0]?.workout_name || '');
-
+   
+    
+    
     const daysResult = await db.getAllAsync<{ day_id: number; day_name: string }>(
       'SELECT day_id, day_name FROM Days WHERE workout_id = ?',
       [workout_id]
@@ -79,6 +81,122 @@ export default function WorkoutDetails() {
     setDays(sortedDays);
   };
 
+  const handleDeleteDay = async (day_id: number, day_name: string, workout_id: number) => {
+    Alert.alert(
+      'Delete Day',
+      'Are you sure you want to delete this day? All associated exercises and logs will also be deleted.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Delete associated logs
+              const logs = await db.getAllAsync<{ workout_log_id: number }>(
+                'SELECT workout_log_id FROM Workout_Log WHERE day_name = ? AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?);',
+                [day_name, workout_id]
+              );
+  
+              for (const log of logs) {
+                await db.runAsync('DELETE FROM Logged_Exercises WHERE workout_log_id = ?;', [log.workout_log_id]);
+                await db.runAsync('DELETE FROM Workout_Log WHERE workout_log_id = ?;', [log.workout_log_id]);
+              }
+  
+              // Delete the day and its exercises
+              await db.runAsync('DELETE FROM Exercises WHERE day_id = ?;', [day_id]);
+              await db.runAsync('DELETE FROM Days WHERE day_id = ?;', [day_id]);
+  
+              fetchWorkoutDetails();
+            } catch (error) {
+              console.error('Error deleting day:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+  
+  const handleDeleteExercise = async (day_id: number, exercise_name: string, workout_id: number) => {
+    Alert.alert(
+      'Delete Exercise',
+      `Are you sure you want to delete the exercise "${exercise_name}"? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              // Delete associated logged exercises
+              const logs = await db.getAllAsync<{ workout_log_id: number }>(
+                'SELECT workout_log_id FROM Workout_Log WHERE day_name = (SELECT day_name FROM Days WHERE day_id = ?) AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?);',
+                [day_id, workout_id]
+              );
+  
+              for (const log of logs) {
+                await db.runAsync(
+                  'DELETE FROM Logged_Exercises WHERE workout_log_id = ? AND exercise_name = ?;',
+                  [log.workout_log_id, exercise_name]
+                );
+              }
+  
+              // Delete the exercise
+              await db.runAsync('DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;', [day_id, exercise_name]);
+  
+              fetchWorkoutDetails();
+            } catch (error) {
+              console.error('Error deleting exercise:', error);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const updateWorkoutLogsForAdditions = async (workout_id: number) => {
+    try {
+      // Fetch all logs for the current workout
+      const logs = await db.getAllAsync<{ workout_log_id: number; day_name: string }>(
+        'SELECT workout_log_id, day_name FROM Workout_Log WHERE workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?);',
+        [workout_id]
+      );
+  
+      // Fetch updated days and exercises
+      const days = await db.getAllAsync<{ day_id: number; day_name: string }>(
+        'SELECT day_id, day_name FROM Days WHERE workout_id = ?;',
+        [workout_id]
+      );
+  
+      for (const log of logs) {
+        const day = days.find((d) => d.day_name === log.day_name);
+  
+        if (day) {
+          // Update exercises for the log
+          const exercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
+            'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?;',
+            [day.day_id]
+          );
+  
+          // Delete existing logged exercises
+          await db.runAsync('DELETE FROM Logged_Exercises WHERE workout_log_id = ?;', [log.workout_log_id]);
+  
+          // Insert updated exercises
+          const insertExercisePromises = exercises.map((exercise) =>
+            db.runAsync(
+              'INSERT INTO Logged_Exercises (workout_log_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
+              [log.workout_log_id, exercise.exercise_name, exercise.sets, exercise.reps]
+            )
+          );
+  
+          await Promise.all(insertExercisePromises);
+        }
+      }
+    } catch (error) {
+      console.error('Error updating workout logs for additions:', error);
+    }
+  };
+
   const openAddDayModal = () => {
     setDayName('');
     setShowDayModal(true);
@@ -96,6 +214,7 @@ export default function WorkoutDetails() {
     }
 
     await db.runAsync('INSERT INTO Days (workout_id, day_name) VALUES (?, ?);', [workout_id, dayName.trim()]);
+    await updateWorkoutLogsForAdditions(workout_id);
     fetchWorkoutDetails();
     closeAddDayModal();
   };
@@ -137,49 +256,10 @@ export default function WorkoutDetails() {
         'INSERT INTO Exercises (day_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
         [currentDayId, exerciseName.trim(), parseInt(sets, 10), parseInt(reps, 10)]
       );
+      await updateWorkoutLogsForAdditions(workout_id);
       fetchWorkoutDetails();
       closeAddExerciseModal();
     }
-  };
-
-  const deleteDay = async (day_id: number) => {
-    Alert.alert(
-      'Delete Day',
-      'Are you sure you want to delete this day? All associated exercises will also be deleted.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await db.runAsync('DELETE FROM Exercises WHERE day_id = ?;', [day_id]); // Delete associated exercises
-            await db.runAsync('DELETE FROM Days WHERE day_id = ?;', [day_id]); // Delete the day itself
-            fetchWorkoutDetails();
-          },
-        },
-      ]
-    );
-  };
-
-  const deleteExercise = async (day_id: number, exercise_name: string) => {
-    Alert.alert(
-      'Delete Exercise',
-      `Are you sure you want to delete the exercise "${exercise_name}"? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await db.runAsync(
-              'DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;',
-              [day_id, exercise_name]
-            );
-            fetchWorkoutDetails(); // Refresh the data after deletion
-          },
-        },
-      ]
-    );
   };
   
   
@@ -205,7 +285,7 @@ export default function WorkoutDetails() {
     keyExtractor={(item) => item.day_id.toString()}
     renderItem={({ item: day }) => (
       <TouchableOpacity
-        onLongPress={() => deleteDay(day.day_id)} // Long press triggers day deletion
+        onLongPress={() => handleDeleteDay(day.day_id, day.day_name, workout_id)} // Long press triggers day deletion
         activeOpacity={0.8}
         style={[styles.dayContainer, { backgroundColor: theme.card, borderColor: theme.border }]} // Entire day card is now pressable
       >
@@ -223,7 +303,7 @@ export default function WorkoutDetails() {
           day.exercises.map((exercise, index) => (
             <TouchableOpacity
               key={index}
-              onLongPress={() => deleteExercise(day.day_id, exercise.exercise_name)}
+              onLongPress={() => handleDeleteExercise(day.day_id, exercise.exercise_name, workout_id)}
               activeOpacity={0.8}
               style={[styles.exerciseContainer, { backgroundColor: theme.card, borderColor: theme.border }]}
             >
