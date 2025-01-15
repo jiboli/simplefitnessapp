@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  KeyboardAvoidingView,
   ScrollView,
   Keyboard,
   TouchableWithoutFeedback,
@@ -34,6 +33,9 @@ export default function EditWorkout() {
     fetchWorkoutDetails();
   }, [workout_id]);
 
+
+
+  
   const fetchWorkoutDetails = async () => {
     try {
       const workoutResult = await db.getAllAsync<{ workout_name: string }>(
@@ -47,6 +49,7 @@ export default function EditWorkout() {
         [workout_id]
       );
 
+      
       const daysWithExercises = await Promise.all(
         daysResult.map(async (day) => {
           const exercises = await db.getAllAsync<Exercise>(
@@ -68,8 +71,129 @@ export default function EditWorkout() {
     }
   };
 
+  
+  
+  
+
+  
+  
+  const fetchOriginalWorkoutLogData = async (workout_id: number) => {
+    try {
+      // Fetch the original workout name
+      const originalWorkout = await db.getAllAsync<{ workout_name: string }>(
+        'SELECT workout_name FROM Workouts WHERE workout_id = ?;',
+        [workout_id]
+      );
+  
+      if (!originalWorkout.length) {
+        console.error('Workout not found:', workout_id);
+        return [];
+      }
+  
+      const originalWorkoutName = originalWorkout[0].workout_name;
+  
+      // Fetch all days for the workout
+      const originalDays = await db.getAllAsync<{ day_id: number; day_name: string }>(
+        'SELECT day_id, day_name FROM Days WHERE workout_id = ?;',
+        [workout_id]
+      );
+  
+      // Fetch all workout logs referencing the original workout and day names
+      const logsWithDayNames = await Promise.all(
+        originalDays.map(async (day) => {
+          const logs = await db.getAllAsync<{ workout_log_id: number; day_name: string; workout_name: string }>(
+            'SELECT workout_log_id, day_name, workout_name FROM Workout_Log WHERE day_name = ? AND workout_name = ?;',
+            [day.day_name, originalWorkoutName]
+          );
+  
+          return logs.map((log) => ({
+            log_id: log.workout_log_id,
+            original_day_name: log.day_name,
+            original_workout_name: log.workout_name,
+            day_id: day.day_id,
+          }));
+        })
+      );
+  
+      return logsWithDayNames.flat();
+    } catch (error) {
+      console.error('Error fetching original workout log data:', error);
+      return [];
+    }
+  };
+  
+  
+  const updateWorkoutLogs = async (originalLogs: any[]) => {
+    try {
+      for (const originalLog of originalLogs) {
+        const { log_id, original_day_name, original_workout_name, day_id } = originalLog;
+  
+        console.log('Updating log:', log_id, 'Original day:', original_day_name, 'Original workout:', original_workout_name);
+  
+        // Fetch updated workout name using workout_id instead of workout_name
+        const updatedWorkout = await db.getAllAsync<{ workout_name: string }>(
+          'SELECT workout_name FROM Workouts WHERE workout_id = (SELECT workout_id FROM Workouts WHERE workout_name = ?);',
+          [original_workout_name]
+        );
+  
+        if (!updatedWorkout.length) {
+          console.error('Updated workout not found for:', original_workout_name);
+          continue;
+        }
+  
+        const updatedWorkoutName = updatedWorkout[0].workout_name;
+  
+        // Fetch updated day name
+        const updatedDay = await db.getAllAsync<{ day_name: string }>(
+          'SELECT day_name FROM Days WHERE day_id = ?;',
+          [day_id]
+        );
+  
+        if (!updatedDay.length) {
+          console.error('Updated day not found for day_id:', day_id);
+          continue;
+        }
+  
+        const updatedDayName = updatedDay[0].day_name;
+  
+        // Update the log and its exercises
+        await db.runAsync('DELETE FROM Logged_Exercises WHERE workout_log_id = ?;', [log_id]);
+  
+        const updatedExercises = await db.getAllAsync<{ exercise_name: string; sets: number; reps: number }>(
+          'SELECT exercise_name, sets, reps FROM Exercises WHERE day_id = ?;',
+          [day_id]
+        );
+  
+        const insertExercisePromises = updatedExercises.map((exercise) =>
+          db.runAsync(
+            'INSERT INTO Logged_Exercises (workout_log_id, exercise_name, sets, reps) VALUES (?, ?, ?, ?);',
+            [log_id, exercise.exercise_name, exercise.sets, exercise.reps]
+          )
+        );
+  
+        await Promise.all(insertExercisePromises);
+  
+        await db.runAsync(
+          'UPDATE Workout_Log SET workout_name = ?, day_name = ? WHERE workout_log_id = ?;',
+          [updatedWorkoutName, updatedDayName, log_id]
+        );
+  
+        console.log(`Successfully updated log ${log_id}`);
+      }
+    } catch (error) {
+      console.error('Error updating workout logs:', error);
+    }
+  };
+  
+  
+  
+  
+
   const saveWorkoutDetails = async () => {
     try {
+
+      const originalLogs = await fetchOriginalWorkoutLogData(workout_id);
+
       // Validation: Ensure workout name is not empty
       if (!workoutName.trim()) {
         Alert.alert('Error', 'Workout name cannot be empty.');
@@ -103,6 +227,8 @@ export default function EditWorkout() {
 
       setIsSaving(true);
 
+   
+
       // Update workout name
       await db.runAsync('UPDATE Workouts SET workout_name = ? WHERE workout_id = ?;', [
         workoutName.trim(),
@@ -119,7 +245,11 @@ export default function EditWorkout() {
             [exercise.exercise_name.trim(), exercise.sets, exercise.reps, exercise.exercise_id]
           );
         }
+        
       }
+
+          // Update logs after saving the workout
+          await updateWorkoutLogs(originalLogs);
 
       Alert.alert('Success', 'Workout details updated successfully!');
       navigation.goBack(); // Navigate back to WorkoutDetails
