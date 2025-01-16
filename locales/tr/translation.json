@@ -12,7 +12,17 @@
     "settingsSwitchLight": "Aydınlık moda geç",
 
 
-    "createWorkout": "Bir\nantrenman\noluştur."
+
+    "_comment_homepage": "These are homepage-related strings.",
+
+
+    "homeCreateWorkout": "Bir\nantrenman\noluştur.",
+    "homeGotoWorkouts": "Antrenmanlarım'a git",
+    "homeScheduleWorkouts": "Antrenmanlarını\ntakvimine\nekle.",
+    "homeGotoCalendar": "Takvimim'e git",
+    "homeTrackProgress": "İlerlemeni\ntakip\net.",
+    "homeGotoProgress": "İlerlemem'e git"
+    
 
   }
   

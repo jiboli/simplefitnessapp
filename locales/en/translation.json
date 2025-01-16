@@ -12,8 +12,15 @@
 
 
 
+    "_comment_homepage": "These are homepage-related strings.",
 
 
-    "createWorkout": "Create a\nworkout."
+    "homeCreateWorkout": "Create a\nworkout.",
+    "homeGotoWorkouts": "Go to My Workouts",
+    "homeScheduleWorkouts": "Schedule\nyour\nworkout.",
+    "homeGotoCalendar": "Go to My Calendar",
+    "homeTrackProgress": "Track\nyour\nprogress.",
+    "homeGotoProgress": "Go to My Progress"
+
   }
   
