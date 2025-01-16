@@ -1,4 +1,5 @@
 {
+    
     "settingsTitle": "Settings",
     "languageSection": "Language",
     "dateFormatSection": "Date Format",
@@ -9,6 +10,7 @@
     "dd-mm-yyyy": "DD-MM-YYYY",
     "mm-dd-yyyy": "MM-DD-YYYY",
     "kg": "Kilograms",
-    "lbs": "Pounds"
+    "lbs": "Pounds",
+    "createWorkout": "Create a\nworkout."
   }
   

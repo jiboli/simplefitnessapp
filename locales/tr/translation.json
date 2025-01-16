@@ -9,6 +9,8 @@
     "dd-mm-yyyy": "GG-AA-YYYY",
     "mm-dd-yyyy": "AA-GG-YYYY",
     "kg": "Kilogram",
-    "lbs": "Pound"
+    "lbs": "Pound",
+    "createWorkout": "Bir\nantrenman oluştur."
+
   }
   
