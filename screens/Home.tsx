@@ -2,11 +2,17 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { useTheme } from '../context/ThemeContext';
 import { ScaledSheet } from 'react-native-size-matters'; // Import ScaledSheet for scaling
+import { useTranslation } from 'react-i18next';
+
+
+
+
 
 const { height } = Dimensions.get('window'); // Get screen height for dynamic sizing
 
 export default function Home({ navigation }: any) {
   const { theme } = useTheme(); // Get the current theme
+  const { t } = useTranslation(); // Initialize translations
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -18,7 +24,7 @@ export default function Home({ navigation }: any) {
       {/* Create a Workout Section */}
       <View style={[styles.card, { backgroundColor: theme.homeCardColor1 }]}>
         <Text style={[styles.cardTitle, { color: theme.homeCardText1 }]}>
-          Create a{"\n"}workout.
+        {t('createWorkout')}
         </Text>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: theme.homeButtonColor1 }]}

@@ -17,7 +17,6 @@
       "bundleIdentifier": "tr.com.basarsubasi.simplefitnessapp"
     },
     "android": {
-      "appName": "Simple",
       "adaptiveIcon": {
         "foregroundImage": "./assets/simpleicon.png",
         "backgroundColor": "#ffffff"
@@ -31,6 +30,9 @@
       "eas": {
         "projectId": "1b72cc6b-8e1a-47b1-a7d3-8fcf199a3015"
       }
-    }
+    },
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }
