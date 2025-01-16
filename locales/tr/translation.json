@@ -4,16 +4,14 @@
     
     
     "settingsTitle": "Ayarlar",
-    "languageSection": "Dil",
-    "dateFormatSection": "Tarih Formatı",
-    "weightFormatSection": "Ağırlık Formatı",
-    "themeSection": "Tema",
-    "switchToDark": "Karanlık Moda Geç",
-    "switchToLight": "Aydınlık Moda Geç",
-    "dd-mm-yyyy": "GG-AA-YYYY",
-    "mm-dd-yyyy": "AA-GG-YYYY",
-    "kg": "Kilogram",
-    "lbs": "Pound",
+    "settingsLanguage": "Dil",
+    "settingsDateFormat": "Tarih Formatı",
+    "settingsWeightFormat": "Ağırlık Formatı",
+    "settingsTheme": "Tema",
+    "settingsSwitchDark": "Karanlık moda geç",
+    "settingsSwitchLight": "Aydınlık moda geç",
+
+
     "createWorkout": "Bir\nantrenman\noluştur."
 
   }

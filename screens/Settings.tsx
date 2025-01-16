@@ -83,7 +83,7 @@ export default function Settings() {
   
  {/* Language Selection */}
  <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Language</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsLanguage')}</Text>
         {renderLanguageButton()}
         {languageDropdownVisible && (
           <FlatList
@@ -127,7 +127,7 @@ export default function Settings() {
   
     {/* Date Format Section */}
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Date Format</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsDateFormat')}</Text>
       <View style={styles.buttonGroup}>
         {renderButton('dd-mm-yyyy', dateFormat, () => setDateFormat('dd-mm-yyyy'))}
         {renderButton('mm-dd-yyyy', dateFormat, () => setDateFormat('mm-dd-yyyy'))}
@@ -136,7 +136,7 @@ export default function Settings() {
   
     {/* Weight Format Section */}
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Weight Format</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsWeightFormat')}</Text>
       <View style={styles.buttonGroup}>
         {renderButton('kg', weightFormat, () => setWeightFormat('kg'))}
         {renderButton('lbs', weightFormat, () => setWeightFormat('lbs'))}
@@ -145,7 +145,7 @@ export default function Settings() {
   
     {/* Theme Section */}
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>Theme</Text>
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsTheme')}</Text>
       <View style={styles.buttonGroup}>
         <TouchableOpacity
           style={[
@@ -160,7 +160,7 @@ export default function Settings() {
               theme.background === '#FFFFFF' && styles.activeButtonText,
             ]}
           >
-            {theme.background === '#FFFFFF' ? 'Switch to Dark' : 'Switch to Light'}
+            {theme.background === '#FFFFFF' ? t('settingsSwitchDark') : t('settingsSwitchLight')}
           </Text>
         </TouchableOpacity>
       </View>
