@@ -6,12 +6,15 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext'; 
 import i18n from '../i18n';
 import { FlatList } from 'react-native-gesture-handler';
+import { useTranslation } from 'react-i18next';
+
 
 
 export default function Settings() {
   const navigation = useNavigation();
   const { dateFormat, setDateFormat, weightFormat, setWeightFormat } = useSettings();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation(); // Initialize translations
   const [languageDropdownVisible, setLanguageDropdownVisible] = useState(false);
 
 
@@ -35,7 +38,7 @@ export default function Settings() {
       style={styles.dropdownButton}
       onPress={() => setLanguageDropdownVisible((prev) => !prev)}
     >
-      <Text style={[styles.buttonText, { color: theme.text }]}>
+      <Text style={[styles.buttonText, { color: 'white' }]}>
         {languages.find((lang) => lang.code === currentLanguage)?.label || 'Select Language'}
       </Text>
       <Ionicons
@@ -76,7 +79,7 @@ export default function Settings() {
     </TouchableOpacity>
   
     {/* Title */}
-    <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
+    <Text style={[styles.title, { color: theme.text }]}>{t('settingsTitle')}</Text>
   
  {/* Language Selection */}
  <View style={styles.section}>
@@ -100,16 +103,20 @@ export default function Settings() {
                     currentLanguage === item.code && styles.activeDropdownItemText,
                   ]}
                 >
+                  
                   {item.label}
-                </Text>
-                {currentLanguage === item.code && (
+
+                
+                  {currentLanguage === item.code && (
                   <Ionicons
                     name="checkmark"
                     size={18}
-                    color={theme.text}
+                    color='white'
                     style={styles.tickIcon}
                   />
                 )}
+                </Text>
+                
               </TouchableOpacity>
             )}
             style={styles.dropdownList}
@@ -228,6 +235,7 @@ const styles = StyleSheet.create({
   tickIcon: {
     marginLeft: 10, // Add space between the text and icon
   },
+
   dropdownButton: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -237,7 +245,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 15,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#121212',
+    
   },
   dropdownIcon: {
     marginLeft: 10,
