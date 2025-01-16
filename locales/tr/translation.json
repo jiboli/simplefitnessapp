@@ -1,5 +1,13 @@
 {
     
+
+    "_comment_global": "These are global strings.",
+
+
+    "alertCancel" : "İPTAL",
+    "alertDelete": "SİL",
+
+
     "_comment_settings": "These are settings-related strings.",
     
     
@@ -21,7 +29,22 @@
     "homeScheduleWorkouts": "Antrenmanlarını\ntakvimine\nekle.",
     "homeGotoCalendar": "Takvimim'e git",
     "homeTrackProgress": "İlerlemeni\ntakip\net.",
-    "homeGotoProgress": "İlerlemem'e git"
+    "homeGotoProgress": "İlerlemem'e git",
+
+
+    "_comment_workoutlist": "These are workoutlist-related strings.",
+
+    "MyWorkouts": "Antrenmanlarım",
+    "CreateAWorkout" : "Yeni bir Antrenman oluştur",
+    "WorkoutListTip" : "İpucu: Çoğu şeyi üstüne basılı tutarak silebilirsiniz, fırsat bulduğunuzda deneyin!",
+
+
+    "_comment_myworkoutspage": "These are myworkoutspage-related strings.",
+
+    "deleteWorkoutTitle": "{{workoutName}} siliniyor",
+    "deleteWorkoutMessage": "\"{{workoutName}}\" adlı antrenmanı silmek istediğinizden emin misiniz? Bu işlem mevcut kayıtları etkilemeyecek."
+
+
     
 
   }

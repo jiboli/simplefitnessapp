@@ -8,18 +8,17 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
+
 
 
 export default function Workouts() {
   const [workouts, setWorkouts] = React.useState<Workout[]>([]);
   const db = useSQLiteContext();
     const { theme } = useTheme();
+    const { t } = useTranslation(); // Initialize translations
+    
 
-  React.useEffect(() => {
-    db.withTransactionAsync(async () => {
-      await getWorkouts();
-    });
-  }, [db]);
 
    // Use useFocusEffect to fetch workouts when the screen is focused
    useFocusEffect(
@@ -35,16 +34,16 @@ export default function Workouts() {
 
   async function deleteWorkout(workout_id: number, workout_name: string) {
     Alert.alert(
-      `Deleting ${workout_name}`,
-      `Are you sure you want to delete "${workout_name}"? This action won't effect existing logs`,
+      t('deleteWorkoutTitle', { workoutName: workout_name }),
+      t('deleteWorkoutMessage', { workoutName: workout_name }),
       [
         {
-          text: 'No',
+          text: t('alertCancel'),
           onPress: () => console.log('Cancel pressed'), // Do nothing
           style: 'cancel',
         },
         {
-          text: 'Yes',
+          text: t('alertDelete'),
           onPress: async () => {
             await db.withTransactionAsync(async () => {
               await db.runAsync('DELETE FROM Workouts WHERE workout_id = ?;', [

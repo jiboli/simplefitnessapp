@@ -1,5 +1,16 @@
 {
+    
+  
+   "_comment_global": "These are global strings.",
+
+
+    "alertCancel" : "CANCEL",
+    "alertDelete": "DELETE",
+
+
     "_comment_settings": "These are settings-related strings.",
+  
+
 
     "settingsTitle": "Settings",
     "settingsLanguage": "Language",
@@ -20,7 +31,24 @@
     "homeScheduleWorkouts": "Schedule\nyour\nworkout.",
     "homeGotoCalendar": "Go to My Calendar",
     "homeTrackProgress": "Track\nyour\nprogress.",
-    "homeGotoProgress": "Go to My Progress"
+    "homeGotoProgress": "Go to My Progress",
+
+
+    "_comment_workoutlist": "These are workoutlist-related strings.",
+
+    "MyWorkouts": "My Workouts",
+    "CreateAWorkout" : "Create a new Workout",
+    "WorkoutListTip" : "Tip: You can delete most things by pressing long to it, try it when you get the chance!",
+
+
+    "_comment_myworkoutspage": "These are myworkoutspage-related strings.",
+
+    "deleteWorkoutTitle": "Deleting {{workoutName}}",
+    "deleteWorkoutMessage": "Are you sure you want to delete \"{{workoutName}}\"? This action won't affect existing logs."
+
+
+
+
 
   }
   
