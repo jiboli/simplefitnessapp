@@ -1,5 +1,6 @@
 {
-    
+    "_comment_settings": "These are settings-related strings.",
+
     "settingsTitle": "Settings",
     "languageSection": "Language",
     "dateFormatSection": "Date Format",

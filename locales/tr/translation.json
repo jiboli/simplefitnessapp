@@ -1,4 +1,8 @@
 {
+    
+    "_comment_settings": "These are settings-related strings.",
+    
+    
     "settingsTitle": "Ayarlar",
     "languageSection": "Dil",
     "dateFormatSection": "Tarih Formatı",
@@ -10,7 +14,7 @@
     "mm-dd-yyyy": "AA-GG-YYYY",
     "kg": "Kilogram",
     "lbs": "Pound",
-    "createWorkout": "Bir\nantrenman oluştur."
+    "createWorkout": "Bir\nantrenman\noluştur."
 
   }
   
