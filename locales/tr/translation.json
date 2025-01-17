@@ -106,7 +106,25 @@
     "isSaving": "Kaydediliyor...",
     "saveChanges": "Kaydet",
     "daysAndExercises": "Günler ve Egzersizler",
-    "editWorkout": "Antenmanı Düzenle"
+    "editWorkout": "Antenmanı Düzenle",
+
+
+
+    "_comment_myCalendar": "Bunlar takvimle ilgili metinlerdir.",
+
+    "scheduleTip": "İpucu: Burada planladığınız antrenmanları zamanı gelince İlerlemem'den takip edebilirsiniz.",
+    "noUpcomingWorkouts": "Yaklaşan bir antrenman planlanmadı.",
+    "upcomingWorkouts": "Yaklaşan Antrenmanlar",
+    "noUntrackedWorkouts": "Takip edilmeyen bir antrenman bulunamadı.",
+    "untrackedWorkouts": "Takip Edilmeyen Antrenmanlar",
+    "noWorkoutToday": "Bugün için bir antrenman planlanmadı.",
+    "todaysWorkout": "Bugünün Antrenmanı",
+    "scheduleWorkout": "Bir Antrenman Planla",
+    "myCalendar": "Takvimim",
+    "noExerciseLogged": " Bu gün için egzersiz bulunamadı."
+
+
+
 
 
     

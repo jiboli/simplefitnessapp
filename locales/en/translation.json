@@ -12,6 +12,9 @@
     "Save":"Save",
     "Sets":"sets",
     "Reps":"reps",
+    "Today":"Today",
+    "Tomorrow":"Tomorrow",
+    "Yesterday":"Yesterday",
 
 
 
@@ -106,7 +109,25 @@
     "isSaving": "Saving...",
     "saveChanges": "Save Changes",
     "daysAndExercises": "Days and Exercises",
-    "editWorkout": "Edit Workout"
+    "editWorkout": "Edit Workout",
+
+
+    "_comment_myCalendar": "These are my-calendar-related strings.",
+
+  
+    "scheduleTip": "Tip: You need to schedule your workouts here to track them on the My Progress screen!",
+    "noUpcomingWorkouts": "No upcoming workouts scheduled.",
+    "upcomingWorkouts": "Upcoming Workouts",
+    "noUntrackedWorkouts": "No untracked workouts found.",
+    "untrackedWorkouts": "Untracked Workouts",
+    "noWorkoutToday": "No workout scheduled for today.",
+    "todaysWorkout": "Today's Workout",
+    "scheduleWorkout": "Schedule a Workout",
+    "myCalendar": "My Calendar",
+    "noExerciseLogged":" No exercises logged."
+        
+
+
 
 
 
