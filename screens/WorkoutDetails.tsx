@@ -8,6 +8,8 @@ import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
 import { useTheme } from '../context/ThemeContext';
 import { WorkoutStackParamList } from '../App';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useTranslation } from 'react-i18next';
+
 
 
 
@@ -27,6 +29,8 @@ export default function WorkoutDetails() {
  
 
   const { theme } = useTheme();
+  const { t } = useTranslation(); // Initialize translations
+  
   
   const { workout_id } = route.params as { workout_id: number };
 
@@ -83,12 +87,12 @@ export default function WorkoutDetails() {
 
   const handleDeleteDay = async (day_id: number, day_name: string, workout_id: number) => {
     Alert.alert(
-      'Delete Day',
-      'Are you sure you want to delete this day? All associated exercises and logs with a workout date of today or later will also be deleted.',
+      t('deleteDayTitleDetails'),
+      t('deleteDayMessageDetails'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('alertCancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('alertDelete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -122,12 +126,12 @@ export default function WorkoutDetails() {
   
   const handleDeleteExercise = async (day_id: number, exercise_name: string, workout_id: number) => {
     Alert.alert(
-      'Delete Exercise',
-      `Are you sure you want to delete the exercise "${exercise_name}"? This action will also delete logs with a workout date of today or later.`,
+      t('deleteExerciseTitleDetails'),
+      t('deleteExerciseMessageDetails'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('alertCancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('alertDelete'),
           style: 'destructive',
           onPress: async () => {
             try {
@@ -224,7 +228,7 @@ export default function WorkoutDetails() {
 
   const addDay = async () => {
     if (!dayName.trim()) {
-      Alert.alert('Error', 'Day name cannot be empty.');
+      Alert.alert(t('errorTitle'), t('dayNameValidationError'));
       return;
     }
 
@@ -252,17 +256,17 @@ export default function WorkoutDetails() {
     const reps = exerciseReps.trim();
 
     if (!exerciseName.trim()) {
-      Alert.alert('Error', 'Exercise name cannot be empty.');
+      Alert.alert(t('errorTitle'), t('exerciseNameValidationError'));
       return;
     }
 
     if (!sets || parseInt(sets, 10) <= 0) {
-      Alert.alert('Error', 'Sets must be a number greater than 0.');
+      Alert.alert(t('errorTitle'), t('setsValidationError'));
       return;
     }
 
     if (!reps || parseInt(reps, 10) <= 0) {
-      Alert.alert('Error', 'Reps must be a number greater than 0.');
+      Alert.alert(t('errorTitle'), t('repsValidationError'));
       return;
     }
 
@@ -336,12 +340,12 @@ export default function WorkoutDetails() {
                 mode={ResizeTextMode.max_lines}
                 style={[styles.exerciseDetails, { color: theme.text }]}
               >
-                {exercise.sets} sets x {exercise.reps} reps
+                {exercise.sets} {t('Sets')} x {exercise.reps} {t('Reps')} 
               </AutoSizeText>
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={[styles.noExercisesText, { color: theme.text }]}>No exercises on this day</Text>
+          <Text style={[styles.noExercisesText, { color: theme.text }]}>{t('noExercises')} </Text>
         )}
       </TouchableOpacity>
     )}
@@ -351,12 +355,12 @@ export default function WorkoutDetails() {
         onPress={openAddDayModal}
       >
         <Ionicons name="add-circle" size={28} color={theme.buttonText} />
-        <Text style={[styles.addDayButtonText, { color: theme.buttonText }]}>Add Day</Text>
+        <Text style={[styles.addDayButtonText, { color: theme.buttonText }]}>{t('addDayFromDetails')}</Text>
       </TouchableOpacity>
     }
     ListEmptyComponent={
       <Text style={[styles.emptyText, { color: theme.text }]}>
-        No days or exercises available for this workout.
+        {t('emptyWorkoutDetails')}
       </Text>
     }
   />
@@ -364,19 +368,19 @@ export default function WorkoutDetails() {
   <Modal visible={showDayModal} animationType="slide" transparent>
     <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
       <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-        <Text style={[styles.modalTitle, { color: theme.text }]}>Add Day</Text>
+        <Text style={[styles.modalTitle, { color: theme.text }]}>{t('addDayFromDetails')}</Text>
         <TextInput
           style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
-          placeholder="Day Name"
+          placeholder={t('dayNamePlaceholder')}
           placeholderTextColor={theme.text}
           value={dayName}
           onChangeText={setDayName}
         />
         <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={addDay}>
-          <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Save</Text>
+          <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>{t('Save')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.cancelButton, { backgroundColor: theme.card }]} onPress={closeAddDayModal}>
-          <Text style={[styles.cancelButtonText, { color: theme.text }]}>Cancel</Text>
+          <Text style={[styles.cancelButtonText, { color: theme.text }]}>{t('Cancel')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -385,17 +389,17 @@ export default function WorkoutDetails() {
   <Modal visible={showExerciseModal} animationType="slide" transparent>
     <View style={[styles.modalContainer, { backgroundColor: 'rgba(0, 0, 0, 0.5)' }]}>
       <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-        <Text style={[styles.modalTitle, { color: theme.text }]}>Add Exercise</Text>
+        <Text style={[styles.modalTitle, { color: theme.text }]}>{t('addExerciseFromDetails')}</Text>
         <TextInput
           style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
-          placeholder="Exercise Name"
+          placeholder={t('exerciseNamePlaceholder')}
           placeholderTextColor={theme.text}
           value={exerciseName}
           onChangeText={setExerciseName}
         />
         <TextInput
           style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
-          placeholder="Sets (e.g., 3)"
+          placeholder={t('setsPlaceholder')}
           placeholderTextColor={theme.text}
           keyboardType="numeric"
           value={exerciseSets}
@@ -411,7 +415,7 @@ export default function WorkoutDetails() {
         />
         <TextInput
           style={[styles.input, { color: theme.text, backgroundColor: theme.background, borderColor: theme.border }]}
-          placeholder="Reps (e.g., 10)"
+          placeholder={t('repsPlaceholder')}
           placeholderTextColor={theme.text}
           keyboardType="numeric"
           value={exerciseReps}
@@ -426,10 +430,10 @@ export default function WorkoutDetails() {
           }}
         />
         <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={addExercise}>
-          <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>Save</Text>
+          <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>{t('Save')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.cancelButton, { backgroundColor: theme.card }]} onPress={closeAddExerciseModal}>
-          <Text style={[styles.cancelButtonText, { color: theme.text }]}>Cancel</Text>
+          <Text style={[styles.cancelButtonText, { color: theme.text }]}>{t('Cancel')}</Text>
         </TouchableOpacity>
       </View>
     </View>
