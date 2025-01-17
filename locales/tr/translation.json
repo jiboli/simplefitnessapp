@@ -163,7 +163,23 @@
     "Set":"Set",
     "Weight":"Ağırlık",
     "noWorkoutScheduled": "Antrenmanı takip etmek için önce planla!",
-    "trackWeights":"Ağırlıkları takip et."
+    "trackWeights":"Ağırlıkları takip et.",
+
+
+    "_comment_WeightLogDetails": "These are Weight-Log-Details-related strings.",
+
+  
+    "deleteWeightLog": "Bu tarihteki günün kayıtlarını silmek istediğinizden emin misiniz?",
+    "weightLog": "kayıtları",
+    "dateFrom": "Başlangıç Tarihi:",
+    "pickStartDate": "Bir başlangıç tarihi seçin",
+    "dateTo": "Bitiş Tarihi:",
+    "pickEndDate": "Bir bitiş tarihi seçin",
+    "clearSelection": "Seçimi Temizle",
+    "noLog": "Seçilen tarihler arasında kayıt bulunmamaktadır."
+    
+    
+
 
 
 

@@ -161,8 +161,25 @@
     "failedToLogWeights": "Failed to log weights.",
     "Set":"Set",
     "Weight":"Weight",
-    "noWorkoutScheduled": "You need to schedule a Workout to track it!",
-    "trackWeights":"Track Weights"
+    "noWorkoutScheduled": "You need to schedule a workout to track it!",
+    "trackWeights":"Track Weights",
+
+
+
+    "_comment_WeightLogDetails": "These are Weight-Log-Details-related strings.",
+
+    "deleteWeightLog": "Are you sure you want to delete all logs for this day on this date?",
+    "weightLog": "logs",
+    "dateFrom": "Date From:",
+    "pickStartDate": "Pick a start date",
+    "dateTo": "Date To:",
+    "pickEndDate": "Pick an end date",
+    "clearSelection":"Clear Selection",
+    "noLog":"No logs available between the selected dates."
+
+
+
+
     
 
 
