@@ -124,7 +124,25 @@
     "todaysWorkout": "Today's Workout",
     "scheduleWorkout": "Schedule a Workout",
     "myCalendar": "My Calendar",
-    "noExerciseLogged":" No exercises logged."
+    "noExerciseLogged":" No exercises logged.",
+
+
+    "_comment_LogWorkouts": "These are Log-Workouts-related strings.",
+    
+    
+    "noDatePicked": "Please select a date.",
+    "selectAWorkout":"Please select a workout.",
+    "selectADay":"Please select a day.",
+    "duplicateLogTitle": "Duplicate Log",
+    "duplicateLogMessage": "There is already a log present for this workout at the picked date.",
+    "selectDate":"Select Date",
+    "selectADate":"Select a Date",
+    "selectWorkout":"Select Workout",
+    "selectDay":"Select Day",
+    "emptyWorkoutLog":"Create a workout to track!",
+    "noDaysAvailable":"This workout has no days!",
+    "scheduleWorkoutLog":"Schedule Workout"
+
         
 
 

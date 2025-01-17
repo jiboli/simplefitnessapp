@@ -12,6 +12,9 @@
     "Save":"Kaydet",
     "Sets":"set",
     "Reps":"tekrar",
+    "Today":"Bugün",
+    "Tomorrow":"Yarın",
+    "Yesterday":"Dün",
 
 
     "workoutNameErrorMessage": "Lütfen bir antrenman adı girin.",
@@ -121,7 +124,28 @@
     "todaysWorkout": "Bugünün Antrenmanı",
     "scheduleWorkout": "Bir Antrenman Planla",
     "myCalendar": "Takvimim",
-    "noExerciseLogged": " Bu gün için egzersiz bulunamadı."
+    "noExerciseLogged": " Bu gün için egzersiz bulunamadı.",
+
+
+    "_comment_LogWorkouts": "These are Log-Workouts-related strings.",
+  
+    "noDatePicked": "Lütfen bir tarih seçin.",
+    "selectAWorkout": "Lütfen bir antrenman seçin.",
+    "selectADay": "Lütfen bir gün seçin.",
+    "duplicateLogTitle": "Çift Kayıt",
+    "duplicateLogMessage": "Aynı antrenman için aynı güne bir kayıt zaten mevcut.",
+    "selectDate": "Tarih Seç",
+    "selectADate": "Bir tarih seçin",
+    "selectWorkout": "Antrenman Seç",
+    "selectDay": "Gün Seç",
+    "emptyWorkoutLog": "Takip etmek için bir antrenman oluşturun!",
+    "noDaysAvailable": "Bu antrenmanda gün yok!",
+    "scheduleWorkoutLog": "Antrenman Planla"
+  
+    
+
+
+
 
 
 
