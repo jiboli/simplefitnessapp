@@ -18,7 +18,12 @@ An easy to use fitness app that lets you create, schedule and track your workout
 ## 🚀 **Features**
 
 🏋️ **Create a Workout**  
-- Easily create customized workouts with exercises, sets, and reps.  
+- Easily create customized workouts with exercises, sets, and reps.
+
+✏️ **Edit Your Workouts**
+
+- Modify your existing workouts to update exercises, sets, or reps as your fitness goals evolve.
+
 
 📅 **Schedule Your Workouts**  
 - Plan your fitness journey by scheduling workouts on specific days.  
