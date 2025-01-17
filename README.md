@@ -30,9 +30,8 @@ An easy to use fitness app that lets you create, schedule and track your workout
 - Choose between `dd-mm-yyyy` or `mm-dd-yyyy` date formats and toggle between `kg` or `lbs` for weights.  
 
 
-## Languages 🌐
-- :us: Simple. is available in English! 
-- :tr: Simple. v1.3.1 ile birlikte Türkçe dilini de destekliyor!
+## Languages 🌍
+🇨🇿 🇩🇪 🇬🇧 🇪🇸 🇫🇮 🇫🇷 🇮🇹 🇳🇱 🇳🇴 🇵🇱 🇵🇹 🇷🇺 🇸🇮 🇸🇪 🇹🇷 🇺🇦
 
 ## 🛠️ **How It Works**
 
