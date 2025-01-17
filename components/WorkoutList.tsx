@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     marginTop: 50, // Move everything down
   },
   title: {
-    fontSize: 50, // Larger font size
+    fontSize: 35, // Larger font size
     fontWeight: '900', // Extra bold
     marginBottom: 24,
     textAlign: 'center', // Centered text

@@ -6,6 +6,8 @@
 
     "alertCancel" : "İPTAL",
     "alertDelete": "SİL",
+    "errorTitle": "Hata",
+
 
 
     "_comment_settings": "These are settings-related strings.",
@@ -35,16 +37,38 @@
     "_comment_workoutlist": "These are workoutlist-related strings.",
 
     "MyWorkouts": "Antrenmanlarım",
-    "CreateAWorkout" : "Yeni bir Antrenman oluştur",
+    "CreateAWorkout" : "Yeni bir antrenman oluştur",
     "WorkoutListTip" : "İpucu: Çoğu şeyi üstüne basılı tutarak silebilirsiniz, fırsat bulduğunuzda deneyin!",
 
 
     "_comment_myworkoutspage": "These are myworkoutspage-related strings.",
 
     "deleteWorkoutTitle": "{{workoutName}} siliniyor",
-    "deleteWorkoutMessage": "\"{{workoutName}}\" adlı antrenmanı silmek istediğinizden emin misiniz? Bu işlem mevcut kayıtları etkilemeyecek."
+    "deleteWorkoutMessage": "\"{{workoutName}}\" adlı antrenmanı silmek istediğinizden emin misiniz? Bu işlem mevcut kayıtları etkilemeyecek.",
 
 
+
+    "_comment_createWorkout": "These are create-workout-related strings.",
+
+    "deleteDayTitle": "Günü Sil",
+    "deleteDayMessage": "Gün Silinecek.",
+    "deleteExerciseTitle": "Egzersizi Sil",
+    "deleteExerciseMessage": "Bu egzersizi silmek istediğinizden emin misiniz?",
+
+    "addExercise": "+ Egzersiz Ekle",
+    "addDay": "+ Gün Ekle",
+    "saveWorkout": "Antrenmanı Kaydet",
+    "workoutNamePlaceholder": "Antrenman Adı",
+    "dayNamePlaceholder": "Gün Adı",
+    "exerciseNamePlaceholder": "Egzersiz Adı",
+    "setsPlaceholder": "Set",
+    "repsPlaceholder": "Tekrar",
+    "workoutNameErrorMessage": "Lütfen bir antrenman adı girin.",
+    "provideDayNamesErrorMessage": "Lütfen tüm günler için bir ad girin.",
+    "fillExercisesErrorMessage": "Lütfen tüm egzersizleri geçerli verilerle doldurun.",
+    "failedToCreateWorkoutErrorMessage": "Antrenman oluşturulamadı. Lütfen tekrar deneyin."
+  
+    
     
 
   }
