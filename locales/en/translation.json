@@ -142,7 +142,20 @@
     "selectDay":"Select Day",
     "emptyWorkoutLog":"Create a workout to track!",
     "noDaysAvailable":"This workout has no days!",
-    "scheduleWorkoutLog":"Schedule Workout"
+    "scheduleWorkoutLog":"Schedule Workout",
+
+
+    "_comment_MyProgress": "These are My-Progress-related strings.",
+
+    "deleteLogsTitle": "Delete Logs",
+    "deleteLogsMessage": "Are you sure you want to delete all logs associated with this workout?",
+    "failedToDeleteDays": "Failed to delete associated days.",
+    "myProgress":"My Progress",
+    "trackAWorkout":"Track a Workout",
+    "notTracking":"You are not tracking any workouts.",
+    "myProgressTip": "Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail."
+
+
 
         
 

@@ -7,6 +7,8 @@ import { WeightLogStackParamList } from '../App'; // Adjust the path to where We
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
+
 
 
 type WeightLogNavigationProp = StackNavigationProp<
@@ -19,6 +21,8 @@ export default function MyProgress() {
   const db = useSQLiteContext();
 
   const { theme } = useTheme(); // Add the theme hook here
+  const { t } = useTranslation(); // Initialize translations
+  
 
   const [workouts, setWorkouts] = useState<string[]>([]);
 
@@ -67,18 +71,18 @@ export default function MyProgress() {
       }
     } catch (error) {
       console.error('Error deleting associated days:', error);
-      Alert.alert('Error', 'Failed to delete associated days.');
+      Alert.alert(t('errorTitle'), t('failedToDeleteDays'));
     }
   };
 
   const handleWorkoutLongPress = (workoutName: string) => {
     Alert.alert(
-      'Delete Logs',
-      `Are you sure you want to delete all logs associated with ${workoutName}?`,
+      t('deleteLogsTitle'),
+      t('deleteLogsMessage'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('alertCancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('alertDelete'),
           style: 'destructive',
           onPress: () => deleteAssociatedDays(workoutName),
         },
@@ -89,7 +93,7 @@ export default function MyProgress() {
   return (
 <View style={[styles.container, { backgroundColor: theme.background }]}>
   {/* Title */}
-  <Text style={[styles.title, { color: theme.text }]}>My Progress</Text>
+  <Text style={[styles.title, { color: theme.text }]}>{t('myProgress')}</Text>
 
   {/* Log Weights Button */}
   <TouchableOpacity
@@ -98,7 +102,7 @@ export default function MyProgress() {
   >
     <Ionicons name="stats-chart" size={24} color={theme.buttonText} />
     <Text style={[styles.logWeightsButtonText, { color: theme.buttonText }]}>
-      Track a Workout
+    {t('trackAWorkout')}    
     </Text>
   </TouchableOpacity>
 
@@ -126,14 +130,14 @@ export default function MyProgress() {
 
     ListEmptyComponent={
       <Text style={[styles.emptyText, { color: theme.text }]}>
-        No logged workouts available.
+        {t('notTracking')}
       </Text>
     }
   />
 
 <Text style={[styles.tipText, { color: theme.text }]}>
-      Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail.  
-    </Text>
+  {t('myProgressTip')}  
+  </Text>
 
 
 </View>

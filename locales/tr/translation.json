@@ -140,7 +140,19 @@
     "selectDay": "Gün Seç",
     "emptyWorkoutLog": "Takip etmek için bir antrenman oluşturun!",
     "noDaysAvailable": "Bu antrenmanda gün yok!",
-    "scheduleWorkoutLog": "Antrenman Planla"
+    "scheduleWorkoutLog": "Antrenman Planla",
+
+
+
+    "_comment_MyProgress": "These are My-Progress-related strings.",
+    
+    "deleteLogsTitle": "Kayıtları Sil",
+    "deleteLogsMessage": "Bu antrenman ile ilişkilendirilen tüm kayıtları silmek istediğinizden emin misiniz?",
+    "failedToDeleteDays": "İlişkili günler silinemedi.",
+    "myProgress": "İlerlemem",
+    "trackAWorkout": "Bir antrenmanı takip et",
+    "notTracking": "Hiçbir antrenmanı takip etmiyorsunuz.",
+    "myProgressTip": "İpucu: Yaptığınız antrenmanlardaki egzersizleri buradan takip edebilirsiniz. Her. Bir. Detayına. Kadar."
   
     
 
