@@ -7,8 +7,6 @@ import WorkoutList from '../components/WorkoutList';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
-
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -64,10 +62,6 @@ export default function Workouts() {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <WorkoutList workouts={workouts} deleteWorkout={deleteWorkout} />
-       {/* Banner Ad Section */}
-       <View style={styles.adContainer}>
-        <BannerAdComponent />
-      </View>
     </View>
     
   );

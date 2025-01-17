@@ -13,7 +13,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext'; 
-import BannerAdComponent from '../components/BannerAd';
 import { useTranslation } from 'react-i18next';
 
 
@@ -323,8 +322,8 @@ export default function WeightLogDetail() {
           if (date) setDateRange((prev) => ({ ...prev, start: date }));
         }}
       />
-    )}
-    {datePickerVisible.end && (
+      )}
+      {datePickerVisible.end && (
       <DateTimePicker
         value={dateRange.end || new Date()}
         mode="date"
@@ -333,24 +332,21 @@ export default function WeightLogDetail() {
           setDatePickerVisible({ start: false, end: false });
           if (date) setDateRange((prev) => ({ ...prev, end: date }));
         }}
-      />
-    )}
+        />
+      )}
   
-    {/* Logs */}
-    <FlatList
-      data={filteredDays}
-      keyExtractor={(item) => `${item.day_name}_${item.workout_date}`}
-      renderItem={({ item }) => renderDay(item)}
-      ListEmptyComponent={
-        <Text style={[styles.emptyText, { color: theme.text }]}>
-          {t('noLog')}
-        </Text>
-      }
-    />
-                   {/* Banner Ad Section */}
-                   <View style={styles.adContainer}>
-        <BannerAdComponent />
-      </View>
+      {/* Logs */}
+       <FlatList
+         data={filteredDays}
+         keyExtractor={(item) => `${item.day_name}_${item.workout_date}`}
+         renderItem={({ item }) => renderDay(item)}
+         ListEmptyComponent={
+           <Text style={[styles.emptyText, { color: theme.text }]}>
+             {t('noLog')}
+           </Text>
+         }
+       />
+
     </View>
   );
 }

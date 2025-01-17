@@ -12,7 +12,6 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { WorkoutLog, LoggedExercise } from '../types';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
-import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
 
 import { useTheme } from '../context/ThemeContext';
 import { KeyboardAwareFlatList, KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -287,10 +286,6 @@ export default function LogWeights() {
     >
 
   
-    <View style={styles.adContainer}  onLayout={(event) => setAdHeight(event.nativeEvent.layout.height)}>
-        <BannerAdComponent />
-      </View>
-   
 
       <Text style={[styles.title, { color: theme.text }]}>Track Weights</Text>
 

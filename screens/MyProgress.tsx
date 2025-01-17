@@ -6,8 +6,6 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { WeightLogStackParamList } from '../App'; // Adjust the path to where WeightLogStackParamList is defined
 import { useSQLiteContext } from 'expo-sqlite';
 import { useFocusEffect } from '@react-navigation/native';
-import BannerAdComponent from '../components/BannerAd'; // Import the BannerAdComponent
-
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
@@ -140,9 +138,6 @@ export default function MyProgress() {
   {t('myProgressTip')}  
   </Text>
 
-<View style={styles.adContainer}>
-   <BannerAdComponent />
-  </View>
   
 
 

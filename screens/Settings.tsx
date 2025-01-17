@@ -5,7 +5,6 @@ import { FlatList } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/native';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
-import RemoveAdsButton from '../components/RemoveAdsButton';
 import { useTranslation } from 'react-i18next';
 
 export default function Settings() {
@@ -182,12 +181,6 @@ export default function Settings() {
         </View>
       </View>
 
-      {/* Remove Ads */}
-      <View style={styles.section}>
-        <View style={styles.buttonGroup}>
-          <RemoveAdsButton />
-        </View>
-      </View>
     </View>
   );
 }
