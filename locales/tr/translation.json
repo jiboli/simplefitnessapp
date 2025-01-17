@@ -14,6 +14,12 @@
     "Reps":"tekrar",
 
 
+    "workoutNameErrorMessage": "Lütfen bir antrenman adı girin.",
+    "provideDayNamesErrorMessage": "Lütfen tüm günler için bir ad girin.",
+    "fillExercisesErrorMessage": "Lütfen tüm egzersizleri geçerli verilerle doldurun.",
+    "failedToCreateWorkoutErrorMessage": "Antrenman oluşturulamadı. Lütfen tekrar deneyin.",
+
+
     "workoutNamePlaceholder": "Antrenman Adı",
     "dayNamePlaceholder": "Gün Adı",
     "exerciseNamePlaceholder": "Egzersiz Adı",
@@ -72,10 +78,6 @@
     "saveWorkout": "Antrenmanı Kaydet",
 
 
-    "workoutNameErrorMessage": "Lütfen bir antrenman adı girin.",
-    "provideDayNamesErrorMessage": "Lütfen tüm günler için bir ad girin.",
-    "fillExercisesErrorMessage": "Lütfen tüm egzersizleri geçerli verilerle doldurun.",
-    "failedToCreateWorkoutErrorMessage": "Antrenman oluşturulamadı. Lütfen tekrar deneyin.",
 
 
     "_comment_workoutDetails": "These are workot-details-related strings.",
@@ -96,7 +98,16 @@
     "repsValidationError": "Tekrar sayısı 0'dan büyük bir sayı olmalıdır.",
     "setsValidationError": "Set sayısı 0'dan büyük bir sayı olmalıdır.",
     "exerciseNameValidationError": "Egzersiz adı boş olamaz.",
-    "dayNameValidationError": "Gün adı boş olamaz."
+    "dayNameValidationError": "Gün adı boş olamaz.",
+
+    "_comment_editWorkout": "These are edit-workout-related strings.",
+    
+    "fetchWorkoutDetailsError": "Anternman detayları güncellenemedi",
+    "isSaving": "Kaydediliyor...",
+    "saveChanges": "Kaydet",
+    "daysAndExercises": "Günler ve Egzersizler",
+    "editWorkout": "Antenmanı Düzenle"
+
 
     
     

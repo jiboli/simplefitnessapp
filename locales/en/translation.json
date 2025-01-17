@@ -14,6 +14,13 @@
     "Reps":"reps",
 
 
+
+    "workoutNameErrorMessage": "Please enter a workout name.",
+    "provideDayNamesErrorMessage": "Please provide names for all days.",
+    "fillExercisesErrorMessage": "Please complete all exercises with valid data.",
+    "failedToCreateWorkoutErrorMessage": "Failed to create workout. Please try again.",
+
+
     "workoutNamePlaceholder": "Workout Name",
     "dayNamePlaceholder": "Day Name",
     "exerciseNamePlaceholder": "Exercise Name",
@@ -72,10 +79,6 @@
     "addDay": "+ Add Day",
     "saveWorkout":"Save Workout",
 
-    "workoutNameErrorMessage": "Please enter a workout name.",
-    "provideDayNamesErrorMessage": "Please provide names for all days.",
-    "fillExercisesErrorMessage": "Please complete all exercises with valid data.",
-    "failedToCreateWorkoutErrorMessage": "Failed to create workout. Please try again.",
 
 
     "_comment_workoutDetails": "These are workot-details-related strings.",
@@ -93,7 +96,20 @@
     "repsValidationError": "Reps must be a number greater than 0.",
     "setsValidationError": "Sets must be a number greater than 0.",
     "exerciseNameValidationError": "Exercise name cannot be empty.",
-    "dayNameValidationError": "Day name cannot be empty."
+    "dayNameValidationError": "Day name cannot be empty.",
+
+
+
+    "_comment_editWorkout": "These are edit-workout-related strings.",
+    
+    "fetchWorkoutDetailsError": "Failed to update workout details.",
+    "isSaving": "Saving...",
+    "saveChanges": "Save Changes",
+    "daysAndExercises": "Days and Exercises",
+    "editWorkout": "Edit Workout"
+
+
+
 
     
 
