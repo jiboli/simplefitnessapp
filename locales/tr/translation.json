@@ -7,6 +7,18 @@
     "alertCancel" : "İPTAL",
     "alertDelete": "SİL",
     "errorTitle": "Hata",
+    "Cancel":"İptal",
+    "Delete":"Sil",
+    "Save":"Kaydet",
+    "Sets":"set",
+    "Reps":"tekrar",
+
+
+    "workoutNamePlaceholder": "Antrenman Adı",
+    "dayNamePlaceholder": "Gün Adı",
+    "exerciseNamePlaceholder": "Egzersiz Adı",
+    "setsPlaceholder": "Set",
+    "repsPlaceholder": "Tekrar",
 
 
 
@@ -58,18 +70,35 @@
     "addExercise": "+ Egzersiz Ekle",
     "addDay": "+ Gün Ekle",
     "saveWorkout": "Antrenmanı Kaydet",
-    "workoutNamePlaceholder": "Antrenman Adı",
-    "dayNamePlaceholder": "Gün Adı",
-    "exerciseNamePlaceholder": "Egzersiz Adı",
-    "setsPlaceholder": "Set",
-    "repsPlaceholder": "Tekrar",
+
+
     "workoutNameErrorMessage": "Lütfen bir antrenman adı girin.",
     "provideDayNamesErrorMessage": "Lütfen tüm günler için bir ad girin.",
     "fillExercisesErrorMessage": "Lütfen tüm egzersizleri geçerli verilerle doldurun.",
-    "failedToCreateWorkoutErrorMessage": "Antrenman oluşturulamadı. Lütfen tekrar deneyin."
+    "failedToCreateWorkoutErrorMessage": "Antrenman oluşturulamadı. Lütfen tekrar deneyin.",
+
+
+    "_comment_workoutDetails": "These are workot-details-related strings.",
+
+    "noExercises": "Bu günde egzersiz yok",
+    "addExerciseFromDetails": "Egzersiz Ekle",
+    "addDayFromDetails": "Gün Ekle",
+    "emptyWorkoutDetails": "Bu antrenman için gün veya egzersiz mevcut değil.",
   
     
     
+    
+    "deleteDayTitleDetails": "Günü Sil",
+   "deleteExerciseTitleDetails": "Egzersizi Sil",
+   "deleteExerciseMessageDetails": "Bu egzersizi silmek istediğinizden emin misiniz? Bu işlem, egzersizi ileri tarihe planlanmış olan antrenmanlardan da silecektir.",
+    "deleteDayMessageDetails": "Bu günü silmek istediğinizden emin misiniz? Bu işlem, bu günü ileri tarihe planlanmış olan antrenmanlardan da silecektir.",
 
+    "repsValidationError": "Tekrar sayısı 0'dan büyük bir sayı olmalıdır.",
+    "setsValidationError": "Set sayısı 0'dan büyük bir sayı olmalıdır.",
+    "exerciseNameValidationError": "Egzersiz adı boş olamaz.",
+    "dayNameValidationError": "Gün adı boş olamaz."
+
+    
+    
   }
   

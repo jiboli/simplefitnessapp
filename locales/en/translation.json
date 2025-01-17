@@ -7,6 +7,19 @@
     "alertCancel" : "CANCEL",
     "alertDelete": "DELETE",
     "errorTitle": "Error",
+    "Cancel":"Cancel",
+    "Delete":"Delete",
+    "Save":"Save",
+    "Sets":"sets",
+    "Reps":"reps",
+
+
+    "workoutNamePlaceholder": "Workout Name",
+    "dayNamePlaceholder": "Day Name",
+    "exerciseNamePlaceholder": "Exercise Name",
+
+    "setsPlaceholder": "Sets",
+    "repsPlaceholder": "Reps",
 
 
     "_comment_settings": "These are settings-related strings.",
@@ -58,16 +71,38 @@
     "addExercise": "+ Add Exercise",
     "addDay": "+ Add Day",
     "saveWorkout":"Save Workout",
-    "workoutNamePlaceholder": "Workout Name",
-    "dayNamePlaceholder": "Day Name",
-    "exerciseNamePlaceholder": "Exercise Name",
 
-    "setsPlaceholder": "Sets",
-    "repsPlaceholder": "Reps",
     "workoutNameErrorMessage": "Please enter a workout name.",
     "provideDayNamesErrorMessage": "Please provide names for all days.",
     "fillExercisesErrorMessage": "Please complete all exercises with valid data.",
-    "failedToCreateWorkoutErrorMessage": "Failed to create workout. Please try again."
+    "failedToCreateWorkoutErrorMessage": "Failed to create workout. Please try again.",
+
+
+    "_comment_workoutDetails": "These are workot-details-related strings.",
+
+    "noExercises":"No exercises on this day",
+    "addExerciseFromDetails": "Add Exercise",
+    "addDayFromDetails":"Add Day",
+    "emptyWorkoutDetails":" No days or exercises available for this workout.",
+
+    "deleteDayTitleDetails": "Delete Day",
+    "deleteDayMessageDetails": "Are you sure you want to delete this day? This action will also delete the days from the upcoming planned workouts",
+    "deleteExerciseTitleDetails": "Delete Exercise",
+    "deleteExerciseMessageDetails": "Are you sure you want to delete this exercise? This action will also delete the exercise from the upcoming planned workouts",
+
+    "repsValidationError": "Reps must be a number greater than 0.",
+    "setsValidationError": "Sets must be a number greater than 0.",
+    "exerciseNameValidationError": "Exercise name cannot be empty.",
+    "dayNameValidationError": "Day name cannot be empty."
+
+    
+
+
+
+
+
+
+
 
     
 
