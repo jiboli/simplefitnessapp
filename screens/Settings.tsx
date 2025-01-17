@@ -8,6 +8,9 @@ import i18n from '../i18n';
 import { FlatList } from 'react-native-gesture-handler';
 import { useTranslation } from 'react-i18next';
 import { saveSettings, loadSettings } from '../settingsStorage'
+import * as Localization from 'expo-localization';
+
+
 
 
 
@@ -33,15 +36,29 @@ export default function Settings() {
     useCallback(() => {
       const fetchSettings = async () => {
         const savedSettings = await loadSettings();
-        if (savedSettings) {
-          setDateFormat(savedSettings.dateFormat || 'dd-mm-yyyy');
-          setWeightFormat(savedSettings.weightFormat || 'kg');
-          if (savedSettings.language) i18n.changeLanguage(savedSettings.language);
+        if (savedSettings && savedSettings.dateFormat) {
+          setDateFormat(savedSettings.dateFormat);
+        } else {
+          setDateFormat('dd-mm-yyyy'); // Default to 'dd-mm-yyyy'
+        }
+  
+        if (savedSettings && savedSettings.weightFormat) {
+          setWeightFormat(savedSettings.weightFormat);
+        } else {
+          setWeightFormat('kg'); // Default to 'kg'
+        }
+  
+        if (savedSettings?.language) {
+          i18n.changeLanguage(savedSettings.language);
+        } else {
+          const defaultLanguage = Localization.getLocales()[0]?.languageCode || 'en';
+          i18n.changeLanguage(defaultLanguage);
         }
       };
       fetchSettings();
     }, [])
   );
+  
 
 
 
