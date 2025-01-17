@@ -105,7 +105,7 @@ useEffect(() => {
       <Ionicons
         name={languageDropdownVisible ? 'chevron-up' : 'chevron-down'}
         size={18}
-        color={theme.text}
+        color='white'
         style={styles.dropdownIcon}
       />
     </TouchableOpacity>
