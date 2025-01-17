@@ -153,7 +153,20 @@
     "myProgress":"My Progress",
     "trackAWorkout":"Track a Workout",
     "notTracking":"You are not tracking any workouts.",
-    "myProgressTip": "Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail."
+    "myProgressTip": "Tip: You can track the exercises at the workouts you've done. Down to the every. single. detail.",
+
+
+    "_comment_LogWeights": "These are Log-Weights-related strings.",
+
+    "failedToLogWeights": "Failed to log weights.",
+    "Set":"Set",
+    "Weight":"Weight",
+    "noWorkoutScheduled": "You need to schedule a Workout to track it!",
+    "trackWeights":"Track Weights"
+    
+
+
+
 
 
 

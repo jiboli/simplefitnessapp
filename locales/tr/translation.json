@@ -145,16 +145,26 @@
 
 
     "_comment_MyProgress": "These are My-Progress-related strings.",
-    
+
+
     "deleteLogsTitle": "Kayıtları Sil",
     "deleteLogsMessage": "Bu antrenman ile ilişkilendirilen tüm kayıtları silmek istediğinizden emin misiniz?",
     "failedToDeleteDays": "İlişkili günler silinemedi.",
     "myProgress": "İlerlemem",
     "trackAWorkout": "Bir antrenmanı takip et",
     "notTracking": "Hiçbir antrenmanı takip etmiyorsunuz.",
-    "myProgressTip": "İpucu: Yaptığınız antrenmanlardaki egzersizleri buradan takip edebilirsiniz. Her. Bir. Detayına. Kadar."
+    "myProgressTip": "İpucu: Yaptığınız antrenmanlardaki egzersizleri buradan takip edebilirsiniz. Her. Bir. Detayına. Kadar.",
   
     
+    "_comment_LogWeights": "These are Log-Weights-related strings.",
+
+
+    "failedToLogWeights": "Ağırlıklar kaydedilemedi.",
+    "Set":"Set",
+    "Weight":"Ağırlık",
+    "noWorkoutScheduled": "Antrenmanı takip etmek için önce planla!",
+    "trackWeights":"Ağırlıkları takip et."
+
 
 
 

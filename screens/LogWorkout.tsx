@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, {useCallback, useState } from 'react';
+
 import {
   View,
   Text,
@@ -9,7 +10,7 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
@@ -30,9 +31,14 @@ export default function LogWorkout() {
   const [days, setDays] = useState<{ day_id: number; day_name: string }[]>([]);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const { dateFormat } = useSettings();
-  useEffect(() => {
-    fetchWorkouts();
-  }, []);
+
+
+  useFocusEffect(
+    useCallback(() => {
+      fetchWorkouts();
+    }, [])
+  );
+
 
   // Fetch the list of available workouts
   const fetchWorkouts = async () => {
