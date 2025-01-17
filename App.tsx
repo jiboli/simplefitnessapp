@@ -28,6 +28,8 @@
   import { IAPProvider } from './context/IAPContext';
   
   import EditWorkout from './screens/EditWorkout';
+  import { loadSettings } from './settingsStorage';
+
 
 
 
@@ -290,6 +292,16 @@ const AppContent = () => {
           //await resetDatabase();
           await loadDatabase();
           setDbLoaded(true);
+          const initializeSettings = async () => {
+            const savedSettings = await loadSettings();
+            if (savedSettings) {
+              if (savedSettings.language) {
+                i18n.changeLanguage(savedSettings.language); // Apply saved language
+              }
+            }
+          };
+          initializeSettings();
+          
         } catch (e) {
           console.error("Database loading error:", e);
         }
