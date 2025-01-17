@@ -24,9 +24,6 @@
   import Settings from './screens/Settings';
   import { SettingsProvider } from './context/SettingsContext';
   import { ThemeProvider, useTheme } from './context/ThemeContext';
-  import { AdProvider } from './context/AdContext';
-  import { IAPProvider } from './context/IAPContext';
-  
   import EditWorkout from './screens/EditWorkout';
   import { loadSettings } from './settingsStorage';
 
@@ -312,11 +309,7 @@ const AppContent = () => {
         <NavigationContainer>
           <SettingsProvider>
           <I18nextProvider i18n={i18n}>
-          <AdProvider>
-          <IAPProvider>
           <AppContent/>
-          </IAPProvider>
-          </AdProvider>
           </I18nextProvider>
           </SettingsProvider>
          
