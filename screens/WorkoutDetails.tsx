@@ -336,11 +336,11 @@ export default function WorkoutDetails() {
               </AutoSizeText>
               <AutoSizeText
                 fontSize={16}
-                numberOfLines={1}
+                numberOfLines={3}
                 mode={ResizeTextMode.max_lines}
                 style={[styles.exerciseDetails, { color: theme.text }]}
               >
-                {exercise.sets} {t('Sets')} x {exercise.reps} {t('Reps')} 
+                {exercise.sets} {t('Sets')} {'\n'} {exercise.reps} {t('Reps')} 
               </AutoSizeText>
             </TouchableOpacity>
           ))
