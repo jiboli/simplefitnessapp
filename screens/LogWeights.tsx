@@ -346,8 +346,8 @@ const styles = StyleSheet.create({
   alignItems : 'center',
   },
   backButton: {
-    position: 'absolute',
-    top: 20,
+
+    top: 40,
     left: 10,
     zIndex: 10,
     padding: 8,
