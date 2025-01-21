@@ -25,8 +25,15 @@
   import { SettingsProvider } from './context/SettingsContext';
   import { ThemeProvider, useTheme } from './context/ThemeContext';
   import EditWorkout from './screens/EditWorkout';
+  
+  
+  
   import { loadSettings } from './settingsStorage';
+  
   import AllLogs from './screens/AllLogs';
+import Difficulty from './screens/Difficulty';
+import Template from './screens/Template';
+import TemplateDetails from './screens/TemplateDetails';
 
 
 
@@ -102,6 +109,11 @@
     CreateWorkout: undefined; // No parameters for this route
     WorkoutDetails: { workout_id: number }; // Add this
     EditWorkout: { workout_id: number }; // Only `workout_id` for editing a workout
+    TemplateList: undefined;
+    DifficultyList: undefined;
+    Difficulty: undefined;
+    Template: undefined;
+    TemplateDetails: undefined
   };
 
   export type WorkoutLogStackParamList = {
@@ -141,6 +153,21 @@
           name='EditWorkout'
           component={EditWorkout}
           options={{title: 'EditWorkout'}}
+          />
+                       <WorkoutStackScreen.Screen
+          name='Difficulty'
+          component={Difficulty}
+          options={{title: 'Difficulty'}}
+          />
+                       <WorkoutStackScreen.Screen
+          name='Template'
+          component={Template}
+          options={{title: 'Template'}}
+          />
+                       <WorkoutStackScreen.Screen
+          name='TemplateDetails'
+          component={TemplateDetails}
+          options={{title: 'TemplateDetails'}}
           />
       </WorkoutStackScreen.Navigator>
     );
