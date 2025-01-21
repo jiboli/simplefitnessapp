@@ -293,7 +293,7 @@ const AppContent = () => {
         console.error("Database loading error:", e);
       }
     })();
-  }, [db]);
+  }, []);
   
   if (!dbLoaded) {
     return (
@@ -314,7 +314,6 @@ const AppContent = () => {
             }
             />
 
-          <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
             <Bottom.Navigator
                 screenOptions={{
                   headerShown: false,
@@ -378,7 +377,6 @@ const AppContent = () => {
        />
 
                  </Bottom.Navigator>
-               </SQLiteProvider>
          </>
   );
 };
