@@ -13,7 +13,6 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
-import BannerAdComponent from '../components/BannerAd';
 import { useTranslation } from 'react-i18next';
 
 export default function AllLogs() {
@@ -381,9 +380,7 @@ export default function AllLogs() {
           </Text>
         }
       />
-      <View style={styles.adContainer}>
-        <BannerAdComponent />
-      </View>
+
     </View>
   );
 }
