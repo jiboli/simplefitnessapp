@@ -8,11 +8,10 @@ An easy to use fitness app that lets you create, schedule and track your workout
 
 ## 📸 **Screenshots**
 
-
-<div align="center"> <img src="https://github.com/user-attachments/assets/510c6c7d-38bf-420b-994e-bca1e891d5e4" width="200"/>
-<img src="https://github.com/user-attachments/assets/cb4ba8f3-0c18-4f62-9c25-6a7c2c1bfec1" width="200"/>
-<img src="https://github.com/user-attachments/assets/e8e09ede-b73e-46ec-8eb3-3fbc0f2b5c3a" width="200"/> 
-<img src="https://github.com/user-attachments/assets/612f6e1f-397f-471a-8e17-475f71bd2175" width="200"/>  </div> 
+<div align="center"> <img src="https://github.com/user-attachments/assets/476c4d88-103b-49e9-bf50-dba2141e2223" width="200"/>
+<img src="https://github.com/user-attachments/assets/11d53362-a10a-4058-87aa-11b774fd91e2" width="200"/>
+<img src="https://github.com/user-attachments/assets/71534f7a-6d31-4664-b53e-4068ef44ab00" width="200"/> 
+<img src="https://github.com/user-attachments/assets/308ac5c5-9060-48be-8938-102970fcf801" width="200"/>  </div> 
 
 
 ## 🚀 **Features**
