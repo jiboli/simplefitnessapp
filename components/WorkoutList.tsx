@@ -31,7 +31,7 @@ export default function WorkoutList({
 
       {/* Create New Workout Button */}
       <TouchableOpacity
-        style={[styles.createButton, { backgroundColor: theme.buttonBackground, shadowColor: theme.text }]}
+        style={[styles.createButton, { backgroundColor: theme.buttonBackground}]}
         activeOpacity={0.7}
         onPress={() => navigation.navigate('CreateWorkout')}
       >
@@ -45,7 +45,7 @@ export default function WorkoutList({
             {
               backgroundColor: theme.card,
               borderColor: theme.border,
-              shadowColor: theme.text,
+
             },
           ]}
           activeOpacity={0.7}
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
-    elevation: 5,
+    elevation: 2,
   },
   createButtonText: {
     fontSize: 18,
