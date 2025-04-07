@@ -116,7 +116,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
-  
   },
   workoutText: {
     fontSize: 20, // Slightly larger
