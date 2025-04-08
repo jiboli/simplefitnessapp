@@ -311,13 +311,12 @@ export default function EditWorkout() {
           styles.exerciseContainer,
           { 
             borderBottomColor: theme.border,
-            backgroundColor: isActive ? `${theme.buttonBackground}30` : 'transparent',
           }
         ]}
       >
         {/* Drag handle */}
         <TouchableOpacity onPressIn={drag} style={styles.dragHandle}>
-          <Ionicons name="reorder-three" size={24} color={theme.text} />
+          <Ionicons name="reorder-three" size={30} color={theme.text} />
         </TouchableOpacity>
         
         {/* Exercise Name */}
@@ -328,7 +327,7 @@ export default function EditWorkout() {
             handleExerciseChange(day.day_id, index, 'exercise_name', text)
           }
           placeholder={t('exerciseNamePlaceholder')}
-          placeholderTextColor={theme.text + '80'}
+          placeholderTextColor={theme.text}
         />
         
         {/* Sets */}
@@ -340,7 +339,7 @@ export default function EditWorkout() {
           }
           keyboardType="numeric"
           placeholder={t('setsPlaceholder')}
-          placeholderTextColor={theme.text + '80'}
+          placeholderTextColor={theme.text}
         />
         
         {/* Reps */}
@@ -352,7 +351,7 @@ export default function EditWorkout() {
           }
           keyboardType="numeric"
           placeholder={t('repsPlaceholder')}
-          placeholderTextColor={theme.text + '80'}
+          placeholderTextColor={theme.text}
         />
       </TouchableOpacity>
     );
@@ -376,7 +375,7 @@ export default function EditWorkout() {
             value={workoutName}
             onChangeText={setWorkoutName}
             placeholder={t('workoutNamePlaceholder')}
-            placeholderTextColor={theme.text + '80'}
+            placeholderTextColor={theme.text}
           />
 
           {/* Days and Exercises */}
@@ -389,7 +388,7 @@ export default function EditWorkout() {
                 value={day.day_name}
                 onChangeText={(text) => handleDayNameChange(day.day_id, text)}
                 placeholder={t('dayNamePlaceholder')}
-                placeholderTextColor={theme.text + '80'}
+                placeholderTextColor={theme.text}
               />
 
               {/* Exercises as DraggableFlatList */}
@@ -487,7 +486,7 @@ const styles = StyleSheet.create({
     borderColor: 'transparent'
   },
   dragHandle: {
-    paddingRight: 10,
+    marginRight: 30,
     justifyContent: 'center',
     alignItems: 'center',
   },
