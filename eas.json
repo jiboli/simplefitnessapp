@@ -2,8 +2,7 @@
   "build": {
     "beta": {
       "android": {
-        "buildType": "apk",
-        "architectures": ["arm64-v8a"]
+        "buildType": "apk"
       }
     },
     "preview2": {
