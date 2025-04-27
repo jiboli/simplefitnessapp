@@ -56,7 +56,7 @@ export default function LogWorkout() {
   const fetchDays = async (workout_id: number) => {
     try {
       const result = await db.getAllAsync<{ day_id: number; day_name: string }>(
-        'SELECT * FROM Days WHERE workout_id = ?;',
+        'SELECT * FROM Days WHERE workout_id = ? ORDER BY day_id ASC;',
         [workout_id]
       );
       setDays(result);
