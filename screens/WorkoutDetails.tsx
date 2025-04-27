@@ -101,25 +101,30 @@ export default function WorkoutDetails() {
             try {
               const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
   
+              // Use a transaction to ensure all operations succeed or fail together
+              await db.withTransactionAsync(async () => {
               // Fetch logs only for workout_date >= today
               const logs = await db.getAllAsync<{ workout_log_id: number; workout_date: number }>(
                 'SELECT workout_log_id, workout_date FROM Workout_Log WHERE day_name = ? AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?) AND workout_date >= ?;',
                 [day_name, workout_id, currentDate]
               );
   
+                // Delete all associated future logs
               for (const log of logs) {
                 console.log(`Deleting log ${log.workout_log_id} with workout_date: ${log.workout_date}`);
                 await db.runAsync('DELETE FROM Logged_Exercises WHERE workout_log_id = ?;', [log.workout_log_id]);
                 await db.runAsync('DELETE FROM Workout_Log WHERE workout_log_id = ?;', [log.workout_log_id]);
               }
   
-              // Delete the day and its exercises regardless of logs
+                // Delete the day and its exercises
               await db.runAsync('DELETE FROM Exercises WHERE day_id = ?;', [day_id]);
               await db.runAsync('DELETE FROM Days WHERE day_id = ?;', [day_id]);
+              });
   
               fetchWorkoutDetails();
             } catch (error) {
               console.error('Error deleting day with future logs:', error);
+              Alert.alert(t('errorTitle'), 'Error deleting day and associated logs.');
             }
           },
         },
@@ -140,26 +145,51 @@ export default function WorkoutDetails() {
             try {
               const currentDate = Math.floor(new Date().setHours(0, 0, 0, 0) / 1000); // Today's date as Unix timestamp
   
+              // Use a transaction to ensure all operations succeed or fail together
+              await db.withTransactionAsync(async () => {
+                // Get day name for this day_id
+                const dayResult = await db.getAllAsync<{ day_name: string }>(
+                  'SELECT day_name FROM Days WHERE day_id = ?',
+                  [day_id]
+                );
+                
+                const dayName = dayResult[0]?.day_name;
+                
+                if (dayName) {
+                  // Get workout name for this workout_id
+                  const workoutResult = await db.getAllAsync<{ workout_name: string }>(
+                    'SELECT workout_name FROM Workouts WHERE workout_id = ?',
+                    [workout_id]
+                  );
+                  
+                  const workoutName = workoutResult[0]?.workout_name;
+                  
+                  if (workoutName) {
               // Fetch logs only for workout_date >= today
               const logs = await db.getAllAsync<{ workout_log_id: number; workout_date: number }>(
-                'SELECT workout_log_id, workout_date FROM Workout_Log WHERE day_name = (SELECT day_name FROM Days WHERE day_id = ?) AND workout_name = (SELECT workout_name FROM Workouts WHERE workout_id = ?) AND workout_date >= ?;',
-                [day_id, workout_id, currentDate]
+                      'SELECT workout_log_id, workout_date FROM Workout_Log WHERE day_name = ? AND workout_name = ? AND workout_date >= ?;',
+                      [dayName, workoutName, currentDate]
               );
   
+                    // Delete the exercise from all future logs
               for (const log of logs) {
-                console.log(`Deleting log ${log.workout_log_id} with workout_date: ${log.workout_date}`);
+                      console.log(`Deleting exercise ${exercise_name} from log ${log.workout_log_id} with workout_date: ${log.workout_date}`);
                 await db.runAsync(
                   'DELETE FROM Logged_Exercises WHERE workout_log_id = ? AND exercise_name = ?;',
                   [log.workout_log_id, exercise_name]
                 );
+                    }
+                  }
               }
   
               // Delete the exercise itself
               await db.runAsync('DELETE FROM Exercises WHERE day_id = ? AND exercise_name = ?;', [day_id, exercise_name]);
+              });
   
               fetchWorkoutDetails();
             } catch (error) {
               console.error('Error deleting exercise with future logs:', error);
+              Alert.alert(t('errorTitle'), 'Error deleting exercise from future logs.');
             }
           },
         },
@@ -513,9 +543,9 @@ export default function WorkoutDetails() {
           }
         ]}
       >
-        <TouchableOpacity
+      <TouchableOpacity
           onLongPress={() => handleDeleteDay(day.day_id, day.day_name, workout_id)}
-          activeOpacity={0.8}
+        activeOpacity={0.8}
           style={[
             styles.dayContainer, 
             { 
@@ -523,10 +553,10 @@ export default function WorkoutDetails() {
               borderColor: theme.border
             }
           ]}
-        >
-          {/* Day Header */}
-          <View style={styles.dayHeader}>
-            <Text style={[styles.dayTitle, { color: theme.text }]}>{day.day_name}</Text>
+      >
+        {/* Day Header */}
+        <View style={styles.dayHeader}>
+          <Text style={[styles.dayTitle, { color: theme.text }]}>{day.day_name}</Text>
             
             <View style={styles.dayHeaderRightControls}>
               {/* Day reordering arrows */}
@@ -551,7 +581,7 @@ export default function WorkoutDetails() {
                 )}
               </View>
               
-            {/* Add Exercise Button */}
+          {/* Add Exercise Button */}
             <TouchableOpacity 
               onPress={() => openAddExerciseModal(day.day_id)}
               disabled={isReordering}
@@ -561,16 +591,16 @@ export default function WorkoutDetails() {
                 size={28} 
                 color={isReordering ? theme.border : theme.text} 
               />
-            </TouchableOpacity>
+          </TouchableOpacity>
             </View>
-          </View>
+        </View>
 
-          {/* Exercises */}
-          {day.exercises.length > 0 ? (
-            day.exercises.map((exercise, index) => (
-              <TouchableOpacity
-                key={index}
-                onLongPress={() => handleDeleteExercise(day.day_id, exercise.exercise_name, workout_id)}
+        {/* Exercises */}
+        {day.exercises.length > 0 ? (
+          day.exercises.map((exercise, index) => (
+            <TouchableOpacity
+              key={index}
+              onLongPress={() => handleDeleteExercise(day.day_id, exercise.exercise_name, workout_id)}
                 activeOpacity={0.6}
                 delayLongPress={500}
                 style={[
@@ -580,29 +610,29 @@ export default function WorkoutDetails() {
                     borderColor: theme.border 
                   }
                 ]}
+            >
+              <AutoSizeText
+                fontSize={18}
+                numberOfLines={2}
+                mode={ResizeTextMode.max_lines}
+                style={[styles.exerciseName, { color: theme.text }]}
               >
-                <AutoSizeText
-                  fontSize={18}
-                  numberOfLines={2}
-                  mode={ResizeTextMode.max_lines}
-                  style={[styles.exerciseName, { color: theme.text }]}
-                >
-                  {exercise.exercise_name}
-                </AutoSizeText>
-                <AutoSizeText
-                  fontSize={16}
-                  numberOfLines={3}
-                  mode={ResizeTextMode.max_lines}
-                  style={[styles.exerciseDetails, { color: theme.text }]}
-                >
-                  {exercise.sets} {t('Sets')} {'\n'} {exercise.reps} {t('Reps')} 
-                </AutoSizeText>
-              </TouchableOpacity>
-            ))
-          ) : (
-            <Text style={[styles.noExercisesText, { color: theme.text }]}>{t('noExercises')} </Text>
-          )}
-        </TouchableOpacity>
+                {exercise.exercise_name}
+              </AutoSizeText>
+              <AutoSizeText
+                fontSize={16}
+                numberOfLines={3}
+                mode={ResizeTextMode.max_lines}
+                style={[styles.exerciseDetails, { color: theme.text }]}
+              >
+                {exercise.sets} {t('Sets')} {'\n'} {exercise.reps} {t('Reps')} 
+              </AutoSizeText>
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={[styles.noExercisesText, { color: theme.text }]}>{t('noExercises')} </Text>
+        )}
+      </TouchableOpacity>
       </Animated.View>
     )}
     ListFooterComponent={
