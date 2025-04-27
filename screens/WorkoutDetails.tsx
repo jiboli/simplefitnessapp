@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native'; // Import useFocusEffect
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, Modal, TextInput, Animated } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -46,6 +46,8 @@ export default function WorkoutDetails() {
   const [exerciseReps, setExerciseReps] = useState('');
   const navigation = useNavigation<WorkoutListNavigationProp>();
   const [isReordering, setIsReordering] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
 
   useFocusEffect(
@@ -282,90 +284,134 @@ export default function WorkoutDetails() {
     }
   };
   
+  // Function to animate the reordering state change
+  const animateReordering = (reordering: boolean) => {
+    // Create animation sequence
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: reordering ? 0.7 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: reordering ? 0.98 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      })
+    ]).start();
+  };
+
+  // Update animation when reordering state changes
+  useEffect(() => {
+    animateReordering(isReordering);
+  }, [isReordering]);
+
   // Function to move a day up (swap with the previous day)
   const moveDayUp = async (index: number) => {
-    if (index <= 0 || index >= days.length) return; // Can't move first day up
+    if (index <= 0 || index >= days.length || isReordering) return; // Can't move first day up
     
     try {
       setIsReordering(true);
-      const currentDay = days[index];
-      const prevDay = days[index - 1];
       
-      // Use a transaction to ensure everything happens together
-      await db.withTransactionAsync(async () => {
-        // First, temporarily change the day_id for all exercises in the current day
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [-1 * currentDay.day_id, currentDay.day_id]);
-        
-        // Then temporarily change the day_id for all exercises in the previous day
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [-1 * prevDay.day_id, prevDay.day_id]);
-        
-        // Swap day_ids in the Days table
-        await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [-999, currentDay.day_id]); // Temporary ID
-        await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [currentDay.day_id, prevDay.day_id]);
-        await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [prevDay.day_id, -999]);
-        
-        // Now update exercises to their new day_ids
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [prevDay.day_id, -1 * currentDay.day_id]);
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [currentDay.day_id, -1 * prevDay.day_id]);
-      });
+      // Add a small delay for visual feedback
+      setTimeout(async () => {
+        try {
+          const currentDay = days[index];
+          const prevDay = days[index - 1];
+          
+          // Use a transaction to ensure everything happens together
+          await db.withTransactionAsync(async () => {
+            // First, temporarily change the day_id for all exercises in the current day
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [-1 * currentDay.day_id, currentDay.day_id]);
+            
+            // Then temporarily change the day_id for all exercises in the previous day
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [-1 * prevDay.day_id, prevDay.day_id]);
+            
+            // Swap day_ids in the Days table
+            await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [-999, currentDay.day_id]); 
+            await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [currentDay.day_id, prevDay.day_id]);
+            await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [prevDay.day_id, -999]);
+            
+            // Now update exercises to their new day_ids
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [prevDay.day_id, -1 * currentDay.day_id]);
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [currentDay.day_id, -1 * prevDay.day_id]);
+          });
+          
+          // Update workout logs for future dates
+          await updateWorkoutLogsForReordering(workout_id);
+          
+          // Refresh the list
+          await fetchWorkoutDetails();
+        } catch (error) {
+          console.error('Database operation failed:', error);
+          Alert.alert(t('errorTitle'), 'Failed to reorder days.');
+        } finally {
+          setIsReordering(false);
+        }
+      }, 300); // 300ms delay for visual effect
       
-      // Update workout logs for future dates
-      await updateWorkoutLogsForReordering(workout_id);
-      
-      // Refresh the list
-      await fetchWorkoutDetails();
     } catch (error) {
       console.error('Error moving day up:', error);
       Alert.alert(t('errorTitle'), 'Failed to reorder days.');
-    } finally {
       setIsReordering(false);
     }
   };
 
   // Function to move a day down (swap with the next day)
   const moveDayDown = async (index: number) => {
-    if (index < 0 || index >= days.length - 1) return; // Can't move last day down
+    if (index < 0 || index >= days.length - 1 || isReordering) return; // Can't move last day down
     
     try {
       setIsReordering(true);
-      const currentDay = days[index];
-      const nextDay = days[index + 1];
       
-      // Use a transaction to ensure everything happens together
-      await db.withTransactionAsync(async () => {
-        // First, temporarily change the day_id for all exercises in the current day
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [-1 * currentDay.day_id, currentDay.day_id]);
-        
-        // Then temporarily change the day_id for all exercises in the next day
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [-1 * nextDay.day_id, nextDay.day_id]);
-        
-        // Swap day_ids in the Days table
-        await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [-999, currentDay.day_id]); // Temporary ID
-        await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [currentDay.day_id, nextDay.day_id]);
-        await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [nextDay.day_id, -999]);
-        
-        // Now update exercises to their new day_ids
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [nextDay.day_id, -1 * currentDay.day_id]);
-        await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
-          [currentDay.day_id, -1 * nextDay.day_id]);
-      });
+      // Add a small delay for visual feedback
+      setTimeout(async () => {
+        try {
+          const currentDay = days[index];
+          const nextDay = days[index + 1];
+          
+          // Use a transaction to ensure everything happens together
+          await db.withTransactionAsync(async () => {
+            // First, temporarily change the day_id for all exercises in the current day
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [-1 * currentDay.day_id, currentDay.day_id]);
+            
+            // Then temporarily change the day_id for all exercises in the next day
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [-1 * nextDay.day_id, nextDay.day_id]);
+            
+            // Swap day_ids in the Days table
+            await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [-999, currentDay.day_id]);
+            await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [currentDay.day_id, nextDay.day_id]);
+            await db.runAsync('UPDATE Days SET day_id = ? WHERE day_id = ?', [nextDay.day_id, -999]);
+            
+            // Now update exercises to their new day_ids
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [nextDay.day_id, -1 * currentDay.day_id]);
+            await db.runAsync('UPDATE Exercises SET day_id = ? WHERE day_id = ?', 
+              [currentDay.day_id, -1 * nextDay.day_id]);
+          });
+          
+          // Update workout logs for future dates
+          await updateWorkoutLogsForReordering(workout_id);
+          
+          // Refresh the list
+          await fetchWorkoutDetails();
+        } catch (error) {
+          console.error('Database operation failed:', error);
+          Alert.alert(t('errorTitle'), 'Failed to reorder days.');
+        } finally {
+          setIsReordering(false);
+        }
+      }, 300); // 300ms delay for visual effect
       
-      // Update workout logs for future dates
-      await updateWorkoutLogsForReordering(workout_id);
-      
-      // Refresh the list
-      await fetchWorkoutDetails();
     } catch (error) {
       console.error('Error moving day down:', error);
       Alert.alert(t('errorTitle'), 'Failed to reorder days.');
-    } finally {
       setIsReordering(false);
     }
   };
@@ -457,83 +503,107 @@ export default function WorkoutDetails() {
     data={days}
     keyExtractor={(item) => item.day_id.toString()}
     renderItem={({ item: day, index }) => (
-      <TouchableOpacity
-        onLongPress={() => handleDeleteDay(day.day_id, day.day_name, workout_id)} // Long press triggers day deletion
-        activeOpacity={0.8}
-        style={[styles.dayContainer, { backgroundColor: theme.card, borderColor: theme.border }]} // Entire day card is now pressable
+      <Animated.View
+        style={[
+          styles.animatedDayContainer,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }],
+            backgroundColor: theme.card,
+          }
+        ]}
       >
-        {/* Day Header */}
-        <View style={styles.dayHeader}>
-          <Text style={[styles.dayTitle, { color: theme.text }]}>{day.day_name}</Text>
-          
-          <View style={styles.dayHeaderRightControls}>
-            {/* Day reordering arrows */}
-            <View style={styles.reorderButtonsContainer}>
-              {index > 0 && (
-                <TouchableOpacity
-                  onPress={() => !isReordering && moveDayUp(index)}
-                  disabled={isReordering}
-                  style={styles.reorderButton}
-                >
-                  <Ionicons name="arrow-up-circle" size={28} color={theme.text} />
-                </TouchableOpacity>
-              )}
-              {index < days.length - 1 && (
-                <TouchableOpacity
-                  onPress={() => !isReordering && moveDayDown(index)}
-                  disabled={isReordering}
-                  style={styles.reorderButton}
-                >
-                  <Ionicons name="arrow-down-circle" size={28} color={theme.text} />
-                </TouchableOpacity>
-              )}
-            </View>
+        <TouchableOpacity
+          onLongPress={() => handleDeleteDay(day.day_id, day.day_name, workout_id)}
+          activeOpacity={0.8}
+          style={[
+            styles.dayContainer, 
+            { 
+              backgroundColor: theme.card, 
+              borderColor: theme.border
+            }
+          ]}
+        >
+          {/* Day Header */}
+          <View style={styles.dayHeader}>
+            <Text style={[styles.dayTitle, { color: theme.text }]}>{day.day_name}</Text>
             
-          {/* Add Exercise Button */}
-          <TouchableOpacity onPress={() => openAddExerciseModal(day.day_id)}>
-            <Ionicons name="add-circle" size={28} color={theme.text} />
-          </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Exercises */}
-        {day.exercises.length > 0 ? (
-          day.exercises.map((exercise, index) => (
-            <TouchableOpacity
-              key={index}
-              onLongPress={() => handleDeleteExercise(day.day_id, exercise.exercise_name, workout_id)}
-              activeOpacity={0.6}
-              delayLongPress={500}
-              style={[
-                styles.exerciseContainer, 
-                { 
-                  backgroundColor: theme.card, 
-                  borderColor: theme.border 
-                }
-              ]}
+            <View style={styles.dayHeaderRightControls}>
+              {/* Day reordering arrows */}
+              <View style={styles.reorderButtonsContainer}>
+                {index > 0 && (
+                  <TouchableOpacity
+                    onPress={() => !isReordering && moveDayUp(index)}
+                    disabled={isReordering}
+                    style={styles.reorderButton}
+                  >
+                    <Ionicons name="arrow-up-circle" size={28} color={isReordering ? theme.border : theme.text} />
+                  </TouchableOpacity>
+                )}
+                {index < days.length - 1 && (
+                  <TouchableOpacity
+                    onPress={() => !isReordering && moveDayDown(index)}
+                    disabled={isReordering}
+                    style={styles.reorderButton}
+                  >
+                    <Ionicons name="arrow-down-circle" size={28} color={isReordering ? theme.border : theme.text} />
+                  </TouchableOpacity>
+                )}
+              </View>
+              
+            {/* Add Exercise Button */}
+            <TouchableOpacity 
+              onPress={() => openAddExerciseModal(day.day_id)}
+              disabled={isReordering}
             >
-              <AutoSizeText
-                fontSize={18}
-                numberOfLines={2}
-                mode={ResizeTextMode.max_lines}
-                style={[styles.exerciseName, { color: theme.text }]}
-              >
-                {exercise.exercise_name}
-              </AutoSizeText>
-              <AutoSizeText
-                fontSize={16}
-                numberOfLines={3}
-                mode={ResizeTextMode.max_lines}
-                style={[styles.exerciseDetails, { color: theme.text }]}
-              >
-                {exercise.sets} {t('Sets')} {'\n'} {exercise.reps} {t('Reps')} 
-              </AutoSizeText>
+              <Ionicons 
+                name="add-circle" 
+                size={28} 
+                color={isReordering ? theme.border : theme.text} 
+              />
             </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={[styles.noExercisesText, { color: theme.text }]}>{t('noExercises')} </Text>
-        )}
-      </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Exercises */}
+          {day.exercises.length > 0 ? (
+            day.exercises.map((exercise, index) => (
+              <TouchableOpacity
+                key={index}
+                onLongPress={() => handleDeleteExercise(day.day_id, exercise.exercise_name, workout_id)}
+                activeOpacity={0.6}
+                delayLongPress={500}
+                style={[
+                  styles.exerciseContainer, 
+                  { 
+                    backgroundColor: theme.card, 
+                    borderColor: theme.border 
+                  }
+                ]}
+              >
+                <AutoSizeText
+                  fontSize={18}
+                  numberOfLines={2}
+                  mode={ResizeTextMode.max_lines}
+                  style={[styles.exerciseName, { color: theme.text }]}
+                >
+                  {exercise.exercise_name}
+                </AutoSizeText>
+                <AutoSizeText
+                  fontSize={16}
+                  numberOfLines={3}
+                  mode={ResizeTextMode.max_lines}
+                  style={[styles.exerciseDetails, { color: theme.text }]}
+                >
+                  {exercise.sets} {t('Sets')} {'\n'} {exercise.reps} {t('Reps')} 
+                </AutoSizeText>
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={[styles.noExercisesText, { color: theme.text }]}>{t('noExercises')} </Text>
+          )}
+        </TouchableOpacity>
+      </Animated.View>
     )}
     ListFooterComponent={
       <TouchableOpacity
@@ -803,6 +873,11 @@ const styles = StyleSheet.create({
     cancelButtonText: {
       color: '#000000',
       fontWeight: 'bold',
+    },
+    animatedDayContainer: {
+      marginBottom: 20,
+      borderRadius: 20,
+      overflow: 'hidden',
     },
   });
   
