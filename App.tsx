@@ -18,8 +18,8 @@
   import MyProgress from './screens/MyProgress';
   import LogWeights from './screens/LogWeights';
   import WeightLogDetail from './screens/WeightLogDetail';
-  import './i18n'; // Ensure this is present to initialize i18n
-  import i18n from './i18n'; // Import the i18n instance
+  import './utils/i18n'; // Ensure this is present to initialize i18n
+  import i18n from './utils/i18n'; // Import the i18n instance
   import { I18nextProvider } from 'react-i18next';
   import Settings from './screens/Settings';
   import { SettingsProvider } from './context/SettingsContext';

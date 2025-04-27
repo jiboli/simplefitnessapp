@@ -2,12 +2,11 @@
 
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Workout } from '../types';
+import { Workout } from '../utils/types';
 import WorkoutList from '../components/WorkoutList';
 import { useSQLiteContext } from 'expo-sqlite';
 import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 

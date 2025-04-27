@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { loadSettings, saveSettings } from '../settingsStorage';
-import i18n from '../i18n';
+import { loadSettings, saveSettings } from '../utils/settingsStorage';
+import i18n from '../utils/i18n';
 import * as Localization from 'expo-localization'; // <-- import expo-localization
 
 // 1) Create the type for your context values:
