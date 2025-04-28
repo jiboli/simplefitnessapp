@@ -18,6 +18,12 @@
   import MyProgress from './screens/MyProgress';
   import LogWeights from './screens/LogWeights';
   import WeightLogDetail from './screens/WeightLogDetail';
+  import RecurringWorkoutOptions from './screens/RecurringWorkoutOptions';
+  import CreateRecurringWorkout from './screens/CreateRecurringWorkout';
+  import ManageRecurringWorkouts from './screens/ManageRecurringWorkouts';
+  import RecurringWorkoutDetails from './screens/RecurringWorkoutDetails';
+  import EditRecurringWorkout from './screens/EditRecurringWorkout';
+
   import './utils/i18n'; // Ensure this is present to initialize i18n
   import i18n from './utils/i18n'; // Import the i18n instance
   import { I18nextProvider } from 'react-i18next';
@@ -126,6 +132,11 @@
   export type WorkoutLogStackParamList = {
     MyCalendar: undefined; // No parameters for this route
     LogWorkout: undefined; // No parameters for this route
+    RecurringWorkoutOptions: undefined;
+    CreateRecurringWorkout: undefined;
+    ManageRecurringWorkouts: undefined;
+    RecurringWorkoutDetails: { recurring_workout_id: number };
+    EditRecurringWorkout: { recurring_workout_id: number };
   };
 
   export type WeightLogStackParamList = {
@@ -201,7 +212,35 @@
           component={LogWorkout}
           options={{ title: 'Log a Workout' }} // Title for the LogWorkout screen
         />
+        <WorkoutLogStackScreen.Screen
+          name="RecurringWorkoutOptions"
+          component={RecurringWorkoutOptions}
+          options={{ title: 'Recurring Workout Options' }}
+        /> 
+         <WorkoutLogStackScreen.Screen
+          name="CreateRecurringWorkout"
+          component={CreateRecurringWorkout}
+          options={{ title: 'Create Recurring Workout' }}
+        /> 
+        <WorkoutLogStackScreen.Screen
+          name="ManageRecurringWorkouts"
+          component={ManageRecurringWorkouts}
+          options={{ title: 'Manage Recurring Workouts' }}
+        /> 
+         <WorkoutLogStackScreen.Screen
+          name="RecurringWorkoutDetails"
+          component={RecurringWorkoutDetails}
+          options={{ title: 'Recurring Workout Details' }}
+        /> 
+        <WorkoutLogStackScreen.Screen
+          name="EditRecurringWorkout"
+          component={EditRecurringWorkout}
+          options={{ title: 'Edit Recurring Workout' }}
+        />
+         
       </WorkoutLogStackScreen.Navigator>
+
+      
     );
   }
 

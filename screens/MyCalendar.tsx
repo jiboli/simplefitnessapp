@@ -268,21 +268,40 @@ export default function MyCalendar() {
   >
     <Text style={[styles.title, { color: theme.text }]}>{t('myCalendar')}</Text>
   
-    {/* Schedule a Workout Button */}
-    <TouchableOpacity
-      style={[styles.logWorkoutButton, { backgroundColor: theme.buttonBackground }]}
-      onPress={() => navigation.navigate('LogWorkout')}
-    >
-      <Ionicons
-        name="calendar"
-        size={24}
-        color={theme.buttonText}
-        style={styles.icon}
-      />
-      <Text style={[styles.logWorkoutButtonText, { color: theme.buttonText }]}>
-      {t('scheduleWorkout')}
-      </Text>
-    </TouchableOpacity>
+    {/* Schedule Buttons Row */}
+    <View style={styles.buttonRow}>
+      {/* Schedule a Workout Button */}
+      <TouchableOpacity
+        style={[styles.actionButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={() => navigation.navigate('LogWorkout')}
+      >
+        <Ionicons
+          name="calendar"
+          size={22}
+          color={theme.buttonText}
+          style={styles.icon}
+        />
+        <Text style={[styles.actionButtonText, { color: theme.buttonText }]}>
+          {t('scheduleWorkout')}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Recurring Workouts Button */}
+      <TouchableOpacity
+        style={[styles.actionButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={() => navigation.navigate('RecurringWorkoutOptions')}
+      >
+        <Ionicons
+          name="repeat"
+          size={22}
+          color={theme.buttonText}
+          style={styles.icon}
+        />
+        <Text style={[styles.actionButtonText, { color: theme.buttonText }]}>
+          {t('recurringWorkouts')}
+        </Text>
+      </TouchableOpacity>
+    </View>
   
     {/* Today's Workout Section */}
     <View style={styles.section}>
@@ -402,15 +421,27 @@ const styles = StyleSheet.create({
     color: '#000000',
     textAlign: 'center',
   },
-  logWorkoutButton: {
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 30,
+  },
+  actionButton: {
     backgroundColor: '#000000',
     borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 30,
+    width: '48%', // Slightly less than 50% to leave some space between
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+    fontSize: 14, // Smaller font to fit on button
+    textAlign: 'center',
   },
   adContainer: {
     alignItems: 'center',
@@ -425,11 +456,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
-  },
-  logWorkoutButtonText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 18,
   },
   logContainer: {
     backgroundColor: '#FFFFFF',
