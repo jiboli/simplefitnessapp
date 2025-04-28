@@ -46,7 +46,7 @@
       [
       "expo-notifications",
       {
-        "icon": "./assets/notification-icon.png",
+        "icon": "./assets/notificationicon.png",
         "color": "#000000",
         "enableBackgroundRemoteNotifications": false
       }]
