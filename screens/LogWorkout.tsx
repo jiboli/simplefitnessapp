@@ -45,8 +45,30 @@ export default function LogWorkout() {
   useFocusEffect(
     useCallback(() => {
       fetchWorkouts();
+      addColumn();
     }, [])
   );
+
+  const addColumn = async () => {
+    try {
+      // Check if column exists first
+      const tableInfo = await db.getAllAsync(
+        "PRAGMA table_info(Workout_Log);"
+      );
+      const columnExists = tableInfo.some(
+        (column: any) => column.name === 'notification_id'
+      );
+      
+      if (!columnExists) {
+        await db.runAsync('ALTER TABLE Workout_Log ADD COLUMN notification_id TEXT;');
+        console.log('Column added successfully');
+      } else {
+        console.log('Column already exists, skipping');
+      }
+    } catch (error) {
+      console.error('Error managing column:', error);
+    }
+  };
 
   // Fetch the list of available workouts
   const fetchWorkouts = async () => {
@@ -54,6 +76,10 @@ export default function LogWorkout() {
       const result = await db.getAllAsync<{ workout_id: number; workout_name: string }>(
         'SELECT * FROM Workouts;'
       );
+
+      
+
+
       setWorkouts(result);
     } catch (error) {
       console.error('Error fetching workouts:', error);
@@ -216,11 +242,16 @@ export default function LogWorkout() {
   };
   
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: theme.background }]}
+      contentContainerStyle={{ paddingBottom: 60 }}
+    >
+
+            {/* Back Button */}
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={24} color={theme.text} />
       </TouchableOpacity>
+
 
       {/* Date Picker */}
       <Text style={[styles.Title, { color: theme.text }]}>{t('selectDate')}</Text>
@@ -316,61 +347,51 @@ export default function LogWorkout() {
       {selectedDay && (
         <>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Notify me on the workout date</Text>
-          <View style={styles.buttonGroup}>
-            <TouchableOpacity
-              style={[
-                styles.listItem,
-                { backgroundColor: theme.card, borderColor: theme.border, flex: 1, marginRight: 5 },
-                notifyMe && { backgroundColor: theme.buttonBackground },
-              ]}
-              onPress={() => {
-                if (!notificationPermissionGranted) {
-                  Alert.alert(
-                    'Notifications Disabled',
-                    'You need to enable notifications in Settings first.',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      { 
-                        text: 'Go to Settings', 
-                        onPress: () => navigation.navigate('Settings' as never)
-                      }
-                    ]
-                  );
-                } else {
-                  setNotifyMe(true);
-                }
-              }}
-            >
-              <Text
+          <FlatList
+            data={[
+              { id: 'yes', label: 'Yes', value: true },
+              { id: 'no', label: 'No', value: false }
+            ]}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity
                 style={[
-                  styles.listItemText,
-                  { color: theme.text, textAlign: 'center' },
-                  notifyMe && { color: theme.buttonText },
+                  styles.listItem,
+                  { backgroundColor: theme.card, borderColor: theme.border },
+                  notifyMe === item.value && { backgroundColor: theme.buttonBackground },
                 ]}
+                onPress={() => {
+                  if (item.value && !notificationPermissionGranted) {
+                    Alert.alert(
+                      'Notifications Disabled',
+                      'You need to enable notifications in Settings first.',
+                      [
+                        { text: 'Cancel', style: 'cancel' },
+                        { 
+                          text: 'Go to Settings', 
+                          onPress: () => navigation.navigate('Settings' as never)
+                        }
+                      ]
+                    );
+                  } else {
+                    setNotifyMe(item.value);
+                  }
+                }}
               >
-                Yes
-              </Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity
-              style={[
-                styles.listItem,
-                { backgroundColor: theme.card, borderColor: theme.border, flex: 1, marginLeft: 5 },
-                !notifyMe && { backgroundColor: theme.buttonBackground },
-              ]}
-              onPress={() => setNotifyMe(false)}
-            >
-              <Text
-                style={[
-                  styles.listItemText,
-                  { color: theme.text, textAlign: 'center' },
-                  !notifyMe && { color: theme.buttonText },
-                ]}
-              >
-                No
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  style={[
+                    styles.listItemText,
+                    { color: theme.text },
+                    notifyMe === item.value && { color: theme.buttonText },
+                  ]}
+                >
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            )}
+            nestedScrollEnabled={true}
+            style={{ maxHeight: 200 }}
+          />
         </>
       )}
 
@@ -403,14 +424,18 @@ export default function LogWorkout() {
         </>
       )}
 
-      {/* Save Button */}
-      <TouchableOpacity
+            {/* Save Button */}
+            <TouchableOpacity
         style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]}
         onPress={logWorkout}
       >
         <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>{t('scheduleWorkoutLog')}</Text>
       </TouchableOpacity>
+
+
     </ScrollView>
+
+    
   );
 }
 
@@ -422,7 +447,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 20,
+    top:10,
     left: 10,
     zIndex: 10,
     padding: 8,

@@ -5,7 +5,7 @@ import { Platform } from 'react-native';
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: true,
+    shouldPlaySound: false,
     shouldSetBadge: false,
   }),
 });
@@ -83,7 +83,11 @@ export const scheduleWorkoutNotification = async ({
       content: {
         title: `Workout Reminder: ${workoutName}`,
         body: `Time for your ${dayName} workout!`,
-        data: { workoutName, dayName, scheduledDate: scheduledDate.toISOString() },
+        data: { 
+          workoutName, 
+          dayName, 
+          scheduledDate: scheduledDate.toISOString(),
+          }
       },
       trigger: {
         date: triggerDate,
