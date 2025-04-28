@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: 'rgba(0, 0, 0, 0.1)',
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderWidth: 1,
-    borderColor: '#E5E5E5',
+    borderColor: 'rgba(0, 0, 0, 0.1)',
     borderRadius: 8,
   },
   timeSelectorText: {

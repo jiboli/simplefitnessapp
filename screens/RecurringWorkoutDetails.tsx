@@ -62,12 +62,6 @@ export default function RecurringWorkoutDetails() {
           <Text style={[styles.buttonText, { color: theme.buttonText }]}>Edit</Text>
         </TouchableOpacity>
         
-        <TouchableOpacity 
-          style={[styles.button, styles.deleteButton, { backgroundColor: '#FF3B30' }]}
-        >
-          <Ionicons name="trash" size={20} color="#FFFFFF" style={styles.buttonIcon} />
-          <Text style={[styles.buttonText, { color: '#FFFFFF' }]}>Delete</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );
