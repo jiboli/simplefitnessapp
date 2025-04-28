@@ -295,9 +295,6 @@ export const useRecurringWorkouts = () => {
         ]
       );
       
-      // Immediately check if we should schedule the first occurrence
-      await checkRecurringWorkouts();
-      
       return true;
     } catch (error) {
       console.error('Error creating recurring workout:', error);

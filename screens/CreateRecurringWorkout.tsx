@@ -8,10 +8,13 @@ import {
   Switch, 
   TextInput,
   Platform,
-  Modal
+  Modal,
+  Alert,
+  Keyboard,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -19,6 +22,7 @@ import { WorkoutLogStackParamList } from '../App';
 import { useSQLiteContext } from 'expo-sqlite';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRecurringWorkouts } from '../utils/recurringWorkoutUtils';
+import { useSettings } from '../context/SettingsContext';
 
 type NavigationProp = StackNavigationProp<
   WorkoutLogStackParamList,
@@ -52,6 +56,7 @@ export default function CreateRecurringWorkout() {
   const { t } = useTranslation();
   const db = useSQLiteContext();
   const { createRecurringWorkout } = useRecurringWorkouts();
+  const { notificationPermissionGranted } = useSettings();
 
   // State for form elements
   const [workouts, setWorkouts] = useState<Workout[]>([]);
@@ -268,8 +273,36 @@ export default function CreateRecurringWorkout() {
     return true;
   };
 
+  const handleNotificationToggle = (value: boolean) => {
+    if (value && !notificationPermissionGranted) {
+      // User is trying to enable notifications but doesn't have permission
+      Alert.alert(
+        t('notificationPermissions'),
+        t('notificationPermissionsRequired'),
+        [
+          {
+            text: t('cancel'),
+            style: 'cancel'
+          },
+          {
+            text: t('goToSettings'),
+            onPress: () => navigation.navigate('Settings' as never)
+          }
+        ]
+      );
+    } else {
+      // Either turning off notifications or has permission
+      setNotificationsEnabled(value);
+    }
+  };
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: theme.background }]}
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={{ paddingBottom: 40 }}
+      onScrollBeginDrag={Keyboard.dismiss}
+    >
       {/* Back Button */}
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Ionicons name="arrow-back" size={24} color={theme.text} />
@@ -570,7 +603,7 @@ export default function CreateRecurringWorkout() {
               </Text>
               <Switch
                 value={notificationsEnabled}
-                onValueChange={setNotificationsEnabled}
+                onValueChange={handleNotificationToggle}
                 trackColor={{ false: '#767577', true: theme.buttonBackground }}
                 thumbColor={'#f4f3f4'}
               />
