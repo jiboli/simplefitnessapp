@@ -17,6 +17,7 @@ import { useSettings } from '../context/SettingsContext';
 
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '../utils/useNotifications';
 
 
 
@@ -57,6 +58,8 @@ export default function MyCalendar() {
     today.getMonth(),
     today.getDate()
   ).getTime() / 1000; // Start of today in seconds
+
+  const { cancelNotification } = useNotifications();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -214,6 +217,18 @@ export default function MyCalendar() {
           style: 'destructive',
           onPress: async () => {
             try {
+              // First, get the notification_id if it exists
+              const [workoutNotification] = await db.getAllAsync<{ notification_id: string | null }>(
+                'SELECT notification_id FROM Workout_Log WHERE workout_log_id = ?;',
+                [workout_log_id]
+              );
+              
+              // If notification_id exists, cancel the notification
+              if (workoutNotification && workoutNotification.notification_id) {
+                await cancelNotification(workoutNotification.notification_id);
+              }
+              
+              // Then proceed with database deletions as before
               await db.runAsync(
                 `DELETE FROM Workout_Log WHERE workout_log_id = ?;`,
                 [workout_log_id]

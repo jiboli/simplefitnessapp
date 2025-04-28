@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
   Alert,
+  ScrollView,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -15,14 +16,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-
-
+import { useNotifications } from '../utils/useNotifications';
 
 export default function LogWorkout() {
   const db = useSQLiteContext();
   const navigation = useNavigation();
   const { theme } = useTheme(); 
   const { t } = useTranslation(); // Initialize translations
+  const { notificationPermissionGranted, scheduleNotification } = useNotifications();
+  const { dateFormat } = useSettings();
   
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -30,15 +32,21 @@ export default function LogWorkout() {
   const [selectedWorkout, setSelectedWorkout] = useState<number | null>(null);
   const [days, setDays] = useState<{ day_id: number; day_name: string }[]>([]);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
-  const { dateFormat } = useSettings();
-
+  
+  // Notification related states
+  const [notifyMe, setNotifyMe] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [notificationTime, setNotificationTime] = useState<Date>(() => {
+    const defaultTime = new Date();
+    defaultTime.setHours(8, 0, 0, 0); // Default to 8:00 AM
+    return defaultTime;
+  });
 
   useFocusEffect(
     useCallback(() => {
       fetchWorkouts();
     }, [])
   );
-
 
   // Fetch the list of available workouts
   const fetchWorkouts = async () => {
@@ -68,6 +76,11 @@ export default function LogWorkout() {
   // Normalize the date to midnight
   const normalizeDate = (date: Date): number => {
     return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime() / 1000; // Midnight timestamp
+  };
+
+  // Format time for display (24h format)
+  const formatTime = (date: Date): string => {
+    return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
   };
 
   // Log the workout and prevent duplication
@@ -129,10 +142,21 @@ export default function LogWorkout() {
 
       const { workout_name } = workoutResult;
 
-      // Insert the workout log into the database
+      // Schedule notification if selected
+      let notificationId = null;
+      if (notifyMe && notificationPermissionGranted) {
+        notificationId = await scheduleNotification({
+          workoutName: workout_name,
+          dayName: selectedDayName,
+          scheduledDate: new Date(workoutDate * 1000),
+          notificationTime: notificationTime
+        });
+      }
+
+      // Insert the workout log into the database with notification_id if available
       const { lastInsertRowId: workoutLogId } = await db.runAsync(
-        'INSERT INTO Workout_Log (workout_date, day_name, workout_name) VALUES (?, ?, ?);',
-        [workoutDate, selectedDayName, workout_name]
+        'INSERT INTO Workout_Log (workout_date, day_name, workout_name, notification_id) VALUES (?, ?, ?, ?);',
+        [workoutDate, selectedDayName, workout_name, notificationId]
       );
 
       // Fetch all exercises associated with the selected day
@@ -192,201 +216,299 @@ export default function LogWorkout() {
   };
   
   return (
-<View style={[styles.container, { backgroundColor: theme.background }]}>
-  {/* Back Button */}
-  <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-    <Ionicons name="arrow-back" size={24} color={theme.text} />
-  </TouchableOpacity>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color={theme.text} />
+      </TouchableOpacity>
 
-  {/* Date Picker */}
-  <Text style={[styles.Title, { color: theme.text }]}>{t('selectDate')}</Text>
-  <TouchableOpacity style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border }]} onPress={() => setShowDatePicker(true)}>
-    <Text style={[styles.inputText, { color: theme.text }]}>
-      {selectedDate ? formatDate(normalizeDate(selectedDate)) : t('selectADate')}
-    </Text>
-  </TouchableOpacity>
-  {showDatePicker && (
-    <DateTimePicker
-      value={selectedDate || new Date()}
-      mode="date"
-      display="default"
-      onChange={(event, date) => {
-        setShowDatePicker(false);
-        if (date) {
-          setSelectedDate(date);
-        }
-      }}
-    />
-  )}
-
-  {/* Workouts List */}
-  <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('selectWorkout')}</Text>
-  <FlatList
-    data={workouts}
-    keyExtractor={(item) => item.workout_id.toString()}
-    renderItem={({ item }) => (
-      <TouchableOpacity
-        style={[
-          styles.listItem,
-          { backgroundColor: theme.card, borderColor: theme.border },
-          selectedWorkout === item.workout_id && { backgroundColor: theme.buttonBackground },
-        ]}
-        onPress={() => {
-          setSelectedWorkout(item.workout_id);
-          setDays([]);
-          setSelectedDay(null);
-          fetchDays(item.workout_id);
-        }}
-      >
-        <Text
-          style={[
-            styles.listItemText,
-            { color: theme.text },
-            selectedWorkout === item.workout_id && { color: theme.buttonText },
-          ]}
-        >
-          {item.workout_name}
+      {/* Date Picker */}
+      <Text style={[styles.Title, { color: theme.text }]}>{t('selectDate')}</Text>
+      <TouchableOpacity style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border }]} onPress={() => setShowDatePicker(true)}>
+        <Text style={[styles.inputText, { color: theme.text }]}>
+          {selectedDate ? formatDate(normalizeDate(selectedDate)) : t('selectADate')}
         </Text>
       </TouchableOpacity>
-    )}
-    ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.text }]}>{t('emptyWorkoutLog')}</Text>}
-  />
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate || new Date()}
+          mode="date"
+          display="default"
+          onChange={(event, date) => {
+            setShowDatePicker(false);
+            if (date) {
+              setSelectedDate(date);
+            }
+          }}
+        />
+      )}
 
-  {/* Days List */}
-  {selectedWorkout && (
-    <>
-      <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('selectDay')}</Text>
+      {/* Workouts List */}
+      <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('selectWorkout')}</Text>
       <FlatList
-        data={days}
-        keyExtractor={(item) => item.day_id.toString()}
+        data={workouts}
+        keyExtractor={(item) => item.workout_id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
               styles.listItem,
               { backgroundColor: theme.card, borderColor: theme.border },
-              selectedDay === item.day_id && { backgroundColor: theme.buttonBackground },
+              selectedWorkout === item.workout_id && { backgroundColor: theme.buttonBackground },
             ]}
-            onPress={() => setSelectedDay(item.day_id)}
+            onPress={() => {
+              setSelectedWorkout(item.workout_id);
+              setDays([]);
+              setSelectedDay(null);
+              fetchDays(item.workout_id);
+            }}
           >
             <Text
               style={[
                 styles.listItemText,
                 { color: theme.text },
-                selectedDay === item.day_id && { color: theme.buttonText },
+                selectedWorkout === item.workout_id && { color: theme.buttonText },
               ]}
             >
-              {item.day_name}
+              {item.workout_name}
             </Text>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.text }]}>{t('noDaysAvailable')}</Text>}
+        ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.text }]}>{t('emptyWorkoutLog')}</Text>}
+        nestedScrollEnabled={true}
+        style={{ maxHeight: 200 }}
       />
-    </>
-  )}
 
-  {/* Save Button */}
-  <TouchableOpacity style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]} onPress={logWorkout}>
-    <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>{t('scheduleWorkoutLog')}</Text>
-  </TouchableOpacity>
-</View>
+      {/* Days List */}
+      {selectedWorkout && (
+        <>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('selectDay')}</Text>
+          <FlatList
+            data={days}
+            keyExtractor={(item) => item.day_id.toString()}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={[
+                  styles.listItem,
+                  { backgroundColor: theme.card, borderColor: theme.border },
+                  selectedDay === item.day_id && { backgroundColor: theme.buttonBackground },
+                ]}
+                onPress={() => setSelectedDay(item.day_id)}
+              >
+                <Text
+                  style={[
+                    styles.listItemText,
+                    { color: theme.text },
+                    selectedDay === item.day_id && { color: theme.buttonText },
+                  ]}
+                >
+                  {item.day_name}
+                </Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={<Text style={[styles.emptyText, { color: theme.text }]}>{t('noDaysAvailable')}</Text>}
+            nestedScrollEnabled={true}
+            style={{ maxHeight: 200 }}
+          />
+        </>
+      )}
 
+      {/* Notification Option - only show if a day is selected */}
+      {selectedDay && (
+        <>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Notify me on the workout date</Text>
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity
+              style={[
+                styles.listItem,
+                { backgroundColor: theme.card, borderColor: theme.border, flex: 1, marginRight: 5 },
+                notifyMe && { backgroundColor: theme.buttonBackground },
+              ]}
+              onPress={() => {
+                if (!notificationPermissionGranted) {
+                  Alert.alert(
+                    'Notifications Disabled',
+                    'You need to enable notifications in Settings first.',
+                    [
+                      { text: 'Cancel', style: 'cancel' },
+                      { 
+                        text: 'Go to Settings', 
+                        onPress: () => navigation.navigate('Settings' as never)
+                      }
+                    ]
+                  );
+                } else {
+                  setNotifyMe(true);
+                }
+              }}
+            >
+              <Text
+                style={[
+                  styles.listItemText,
+                  { color: theme.text, textAlign: 'center' },
+                  notifyMe && { color: theme.buttonText },
+                ]}
+              >
+                Yes
+              </Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[
+                styles.listItem,
+                { backgroundColor: theme.card, borderColor: theme.border, flex: 1, marginLeft: 5 },
+                !notifyMe && { backgroundColor: theme.buttonBackground },
+              ]}
+              onPress={() => setNotifyMe(false)}
+            >
+              <Text
+                style={[
+                  styles.listItemText,
+                  { color: theme.text, textAlign: 'center' },
+                  !notifyMe && { color: theme.buttonText },
+                ]}
+              >
+                No
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
+      {/* Time Picker - only show if notification is enabled */}
+      {selectedDay && notifyMe && notificationPermissionGranted && (
+        <>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Select time for the notification</Text>
+          <TouchableOpacity
+            style={[styles.input, { backgroundColor: theme.card, borderColor: theme.border }]}
+            onPress={() => setShowTimePicker(true)}
+          >
+            <Text style={[styles.inputText, { color: theme.text }]}>
+              {formatTime(notificationTime)}
+            </Text>
+          </TouchableOpacity>
+          {showTimePicker && (
+            <DateTimePicker
+              value={notificationTime}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              onChange={(event, date) => {
+                setShowTimePicker(false);
+                if (date) {
+                  setNotificationTime(date);
+                }
+              }}
+            />
+          )}
+        </>
+      )}
+
+      {/* Save Button */}
+      <TouchableOpacity
+        style={[styles.saveButton, { backgroundColor: theme.buttonBackground }]}
+        onPress={logWorkout}
+      >
+        <Text style={[styles.saveButtonText, { color: theme.buttonText }]}>{t('scheduleWorkoutLog')}</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
-
-// LogWorkout.tsx
-
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-      backgroundColor: '#FFFFFF',
-    },
-        backButton: {
-      position: 'absolute',
-      top: 20,
-      left: 10,
-      zIndex: 10,
-      padding: 8,
-    },
-    input: {
-      borderWidth: 1,
-      borderColor: 'rgba(0, 0, 0, 0.2)',
-      borderRadius: 10,
-      paddingVertical: 18,
-      paddingHorizontal: 20,
-      marginBottom: 20,
-      backgroundColor: '#F7F7F7',
-      elevation: 2,
-    },
-    inputText: {
-      fontSize: 18,
-      color: '#000000',
-      fontWeight: '600',
-      textAlign: 'center',
-    },
-    sectionTitle: {
-      fontSize: 22,
-      fontWeight: '800',
-      marginVertical: 15,
-      color: '#000000',
-      textAlign: 'left',
-    },
-
-   Title: {
-        fontSize: 22,
-        fontWeight: '800',
-        marginVertical: 15,
-        color: '#000000',
-        textAlign: 'center',
-      },
-    listItem: {
-      padding: 20,
-      borderWidth: 1,
-      borderColor: 'rgba(0, 0, 0, 0.2)',
-      borderRadius: 12,
-      marginBottom: 12,
-      backgroundColor: '#FFFFFF',
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 5,
-      elevation: 3,
-    },
-    listItemText: {
-      fontSize: 18,
-      color: '#000000',
-      fontWeight: '700',
-    },
-    selectedItem: {
-      backgroundColor: '#000000', // Black background for selected item
-      borderColor: '#000000',
-    },
-    selectedItemText: {
-      color: '#FFFFFF', // White text for selected item
-    },
-    emptyText: {
-      fontSize: 16,
-      color: 'rgba(0, 0, 0, 0.5)',
-      textAlign: 'center',
-      marginTop: 10,
-    },
-    saveButton: {
-      backgroundColor: '#000000',
-      borderRadius: 12,
-      paddingVertical: 20,
-      alignItems: 'center',
-      marginTop: 30,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 5,
-      elevation: 5,
-    },
-    saveButtonText: {
-      fontSize: 20,
-      color: '#FFFFFF',
-      fontWeight: 'bold',
-    },
-  });
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#FFFFFF',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 10,
+    zIndex: 10,
+    padding: 8,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 10,
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    backgroundColor: '#F7F7F7',
+    elevation: 2,
+  },
+  inputText: {
+    fontSize: 18,
+    color: '#000000',
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginVertical: 15,
+    color: '#000000',
+    textAlign: 'left',
+  },
+  Title: {
+    fontSize: 22,
+    fontWeight: '800',
+    marginVertical: 15,
+    color: '#000000',
+    textAlign: 'center',
+  },
+  listItem: {
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+  },
+  listItemText: {
+    fontSize: 18,
+    color: '#000000',
+    fontWeight: '700',
+  },
+  selectedItem: {
+    backgroundColor: '#000000', // Black background for selected item
+    borderColor: '#000000',
+  },
+  selectedItemText: {
+    color: '#FFFFFF', // White text for selected item
+  },
+  emptyText: {
+    fontSize: 16,
+    color: 'rgba(0, 0, 0, 0.5)',
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  saveButton: {
+    backgroundColor: '#000000',
+    borderRadius: 12,
+    paddingVertical: 20,
+    alignItems: 'center',
+    marginTop: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  saveButtonText: {
+    fontSize: 20,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
+});
   

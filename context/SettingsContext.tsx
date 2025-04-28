@@ -14,8 +14,6 @@ type SettingsContextType = {
   setWeightFormat: (fmt: string) => void;
   notificationPermissionGranted: boolean;
   setNotificationPermissionGranted: (granted: boolean) => void;
-  notifyUntracked: boolean;
-  setNotifyUntracked: (notify: boolean) => void;
   requestNotificationPermission: () => Promise<boolean>;
 };
 
@@ -29,15 +27,11 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [dateFormat, setDateFormat] = useState('dd-mm-yyyy');
   const [weightFormat, setWeightFormat] = useState('kg');
   const [notificationPermissionGranted, setNotificationPermissionGranted] = useState(false);
-  const [notifyUntracked, setNotifyUntracked] = useState(false);
 
   // Function to request notification permission
   const requestNotificationPermission = async (): Promise<boolean> => {
     const granted = await requestNotificationPermissions();
     setNotificationPermissionGranted(granted);
-    if (!granted) {
-      setNotifyUntracked(false); // Turn off secondary toggle if permission denied
-    }
     return granted;
   };
 
@@ -50,7 +44,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setDateFormat(savedSettings.dateFormat || 'dd-mm-yyyy');
         setWeightFormat(savedSettings.weightFormat || 'kg');
         setNotificationPermissionGranted(savedSettings.notificationPermissionGranted || false);
-        setNotifyUntracked(savedSettings.notifyUntracked || false);
       }
       else {
        const fallbackLng = 'en';
@@ -78,11 +71,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         dateFormat, 
         weightFormat,
         notificationPermissionGranted,
-        notifyUntracked
       });
     };
     persistSettings();
-  }, [language, dateFormat, weightFormat, notificationPermissionGranted, notifyUntracked, isInitialized]);
+  }, [language, dateFormat, weightFormat, notificationPermissionGranted, isInitialized]);
 
   return (
     <SettingsContext.Provider
@@ -95,8 +87,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         setWeightFormat,
         notificationPermissionGranted,
         setNotificationPermissionGranted,
-        notifyUntracked,
-        setNotifyUntracked,
         requestNotificationPermission,
       }}
     >
