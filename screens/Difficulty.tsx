@@ -15,7 +15,7 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { WorkoutStackParamList } from '../App';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { insertWorkouts } from '../utils/insertWorkouts'
-import { addTables } from '../utils/addTables';
+import { addTables } from '../utils/addTemplateTable';
 
 
 
