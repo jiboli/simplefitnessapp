@@ -1,11 +1,11 @@
   // App.tsx
-  import React, {useState } from 'react';
-  import { View, ActivityIndicator, StatusBar, StyleSheet, Pressable } from 'react-native'; // Import Pressable here
+  import React, {useState, useEffect, useRef } from 'react';
+  import { View, ActivityIndicator, StatusBar, StyleSheet, Pressable, Text } from 'react-native'; // Import Pressable here
   import * as FileSystem from 'expo-file-system';
   import { SQLiteProvider} from 'expo-sqlite';
   import { Asset } from 'expo-asset';
   import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-  import { NavigationContainer } from '@react-navigation/native';
+  import { NavigationContainer, useNavigation } from '@react-navigation/native';
   import Ionicons from 'react-native-vector-icons/Ionicons';
   import Home from './screens/Home'; // Assuming you have a Home screen component
   import Workouts from './screens/Workouts';
@@ -29,6 +29,8 @@
   import Difficulty from './screens/Difficulty';
   import Template from './screens/Template';
   import TemplateDetails from './screens/TemplateDetails';
+  import { requestNotificationPermissions, getAllScheduledNotifications } from './utils/notificationUtils';
+  import * as Notifications from 'expo-notifications';
 
 
 
@@ -104,6 +106,8 @@
       console.error("Error in loadDatabase:", error);
     }
   };
+
+
   
 
 
@@ -321,34 +325,82 @@ const AppContent = () => {
 
 
   export default function App() {
-
     const [dbLoaded, setDbLoaded] = useState<boolean>(false);
+    const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
+    const [scheduledNotifications, setScheduledNotifications] = useState<Notifications.NotificationRequest[]>([]);
+    const navigationRef = useRef(null);
 
-  React.useEffect(() => {
-    (async () => {
-      try {
-        //await resetDatabase();
-        await loadDatabase();
-        setDbLoaded(true);
-      } catch (e) {
-        console.error("Database loading error:", e);
-      }
-    })();
-  }, []);
+    useEffect(() => {
+      // Request notification permissions on app start
+      const setupNotifications = async () => {
+        try {
+          const hasPermission = await requestNotificationPermissions();
+          setPermissionGranted(hasPermission);
+          
+          // If permission is granted, get all scheduled notifications
+          if (hasPermission) {
+
+            
+
+
+            const notifications = await getAllScheduledNotifications();
+            setScheduledNotifications(notifications);
+            console.log('Current scheduled notifications:', notifications.length);
+          }
+          
+          // Set up notification listeners
+          const receivedSubscription = Notifications.addNotificationReceivedListener(notification => {
+            console.log('Notification received:', notification);
+          });
+          
+          const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
+            console.log('User interacted with notification:', response);
+            
+            // Navigate to MyCalendar screen when notification is tapped
+            if (navigationRef.current) {
+              // @ts-ignore - navigationRef.current.navigate exists but TypeScript may not recognize it
+              navigationRef.current.navigate('MyCalendar');
+            }
+          });
+          
+          // Clean up listeners when component unmounts
+          return () => {
+            receivedSubscription.remove();
+            responseSubscription.remove();
+          };
+        } catch (error) {
+          console.error('Error setting up notifications:', error);
+        }
+      };
+      
+      setupNotifications();
+    }, []);
+
+    React.useEffect(() => {
+      (async () => {
+        try {
+          //await resetDatabase();
+          await loadDatabase();
+          setDbLoaded(true);
+        } catch (e) {
+          console.error("Database loading error:", e);
+        }
+      })();
+    }, []);
   
-  if (!dbLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="black" />
-      </View>
-    );
-  }
+    if (!dbLoaded) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" color="black" />
+        </View>
+      );
+    }
 
 
     return (
       <ThemeProvider>
       <GestureHandlerRootView>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <SettingsProvider>
           <I18nextProvider i18n={i18n}>
           <AppContent/>
@@ -392,5 +444,16 @@ const AppContent = () => {
       alignItems: 'center',
       justifyContent: 'center',
       padding: 1,
+    },
+    permissionBanner: {
+      backgroundColor: '#FFF9C4',
+      padding: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: '#E0E0E0',
+    },
+    permissionText: {
+      fontSize: 14,
+      color: '#333333',
+      textAlign: 'center',
     },
   });

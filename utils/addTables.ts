@@ -30,6 +30,7 @@ export const addTables = async (db: any) => {
             UNIQUE(day_id, exercise_name)
           );`
         );
+
         console.log("tables created")
     } catch (error) {
       console.error('Database initialization error:', error);
