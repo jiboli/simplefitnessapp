@@ -29,7 +29,11 @@ interface Exercise {
  * Check and schedule any pending recurring workouts
  * This should be called on app startup or when the user opens relevant screens
  */
-export const checkAndScheduleRecurringWorkouts = async (db: any, scheduleNotification: any) => {
+export const checkAndScheduleRecurringWorkouts = async (
+  db: any, 
+  scheduleNotification: any,
+  notificationPermissionGranted: boolean
+) => {
   try {
     // Get all recurring workouts
     const recurringWorkouts = await db.getAllAsync(
@@ -60,7 +64,7 @@ export const checkAndScheduleRecurringWorkouts = async (db: any, scheduleNotific
       
       // Schedule if not already scheduled
       if (existingLog.length === 0) {
-        await scheduleWorkout(db, workout, nextOccurrence, scheduleNotification);
+        await scheduleWorkout(db, workout, nextOccurrence, scheduleNotification, notificationPermissionGranted);
       }
     }
     
@@ -166,13 +170,14 @@ const scheduleWorkout = async (
   db: any, 
   workout: RecurringWorkout, 
   scheduledDate: number,
-  scheduleNotification: any
+  scheduleNotification: any,
+  notificationPermissionGranted: boolean
 ) => {
   try {
     let notificationId = null;
     
-    // Schedule notification if enabled
-    if (workout.notification_enabled && workout.notification_time) {
+    // Schedule notification if enabled AND permissions are granted
+    if (workout.notification_enabled && workout.notification_time && notificationPermissionGranted) {
       // Parse notification time (HH:MM format)
       const [hours, minutes] = workout.notification_time.split(':').map(Number);
       
@@ -249,11 +254,15 @@ const getDayId = async (db: any, workoutId: number, dayName: string): Promise<nu
  */
 export const useRecurringWorkouts = () => {
   const db = useSQLiteContext();
-  const { scheduleNotification } = useNotifications();
+  const { scheduleNotification, notificationPermissionGranted } = useNotifications();
   
   // Check and schedule recurring workouts
   const checkRecurringWorkouts = async () => {
-    return await checkAndScheduleRecurringWorkouts(db, scheduleNotification);
+    return await checkAndScheduleRecurringWorkouts(
+      db, 
+      scheduleNotification,
+      notificationPermissionGranted
+    );
   };
   
   // Create a new recurring workout
