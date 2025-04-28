@@ -1,109 +1,99 @@
 import { useCallback, useEffect, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import { 
-  requestNotificationPermissions, 
+  requestNotificationPermissions,
   scheduleWorkoutNotification, 
   cancelWorkoutNotification,
   getAllScheduledNotifications
-} from '../utils/notificationUtils';
-import { Alert } from 'react-native';
+} from './notificationUtils';
+import { useSettings } from '../context/SettingsContext';
 
 /**
  * Custom hook for managing notifications in the app
  */
 export const useNotifications = () => {
-  const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [scheduledNotifications, setScheduledNotifications] = useState<Notifications.NotificationRequest[]>([]);
+  
+  const { 
+    notificationPermissionGranted,
+    setNotificationPermissionGranted
+  } = useSettings();
 
-  // Check permission on mount
-  useEffect(() => {
-    const checkPermission = async () => {
-      try {
-        const hasPermission = await requestNotificationPermissions();
-        setPermissionGranted(hasPermission);
-
-        if (hasPermission) {
-          const notifications = await getAllScheduledNotifications();
-          setScheduledNotifications(notifications);
-        }
-      } catch (error) {
-        console.error('Error checking notification permissions:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkPermission();
-
-    // Set up listener for receiving notifications
-    const subscription = Notifications.addNotificationReceivedListener((notification) => {
-      console.log('Notification received:', notification);
-    });
-
-    // Set up listener for user interactions with notifications
-    const responseSubscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      console.log('Notification response received:', response);
-      // Handle notification response (e.g., navigate to relevant screen)
-    });
-
-    // Clean up listeners
-    return () => {
-      subscription.remove();
-      responseSubscription.remove();
-    };
+  // 1) Check if notification permission is granted
+  const checkNotificationPermission = useCallback(async (): Promise<boolean> => {
+    try {
+      const { status } = await Notifications.getPermissionsAsync();
+      return status === 'granted';
+    } catch (error) {
+      console.error('Error checking notification permission:', error);
+      return false;
+    }
   }, []);
 
-  // Request permissions manually
-  const requestPermissions = useCallback(async () => {
+  // 2) Request permission and update settings context
+  const requestNotificationPermission = useCallback(async () => {
     setLoading(true);
     try {
-      const hasPermission = await requestNotificationPermissions();
-      setPermissionGranted(hasPermission);
-      return hasPermission;
+      const granted = await requestNotificationPermissions();
+      setNotificationPermissionGranted(granted);
+      return granted;
     } catch (error) {
       console.error('Error requesting notification permissions:', error);
       return false;
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [setNotificationPermissionGranted]);
 
-  // Schedule a workout notification
+  // Update notifications list when permissions change
+  useEffect(() => {
+    const loadNotifications = async () => {
+      if (notificationPermissionGranted) {
+        try {
+          const notifications = await getAllScheduledNotifications();
+          setScheduledNotifications(notifications);
+          console.log('Loaded notifications:', notifications.length);
+        } catch (error) {
+          console.error('Error loading notifications:', error);
+        }
+      } else {
+        setScheduledNotifications([]);
+      }
+    };
+    
+    loadNotifications();
+  }, [notificationPermissionGranted]);
+
+  // 3) Schedule a workout notification
   const scheduleNotification = useCallback(async (params: {
     workoutName: string;
     dayName: string;
     scheduledDate: Date;
     notificationTime: Date;
   }) => {
-    if (!permissionGranted) {
-      const granted = await requestPermissions();
-      if (!granted) {
-        Alert.alert(
-          'Permission Required',
-          'Notification permission is required to set reminders',
-          [{ text: 'OK' }]
-        );
-        return null;
-      }
+    // Only proceed if notification permissions are enabled
+    if (!notificationPermissionGranted) {
+      console.log('Notifications disabled in app settings');
+      return null;
     }
-
+    
     const notificationId = await scheduleWorkoutNotification(params);
     
-    // Refresh list of scheduled notifications
+    // Refresh the notification list if successful
     if (notificationId) {
       const notifications = await getAllScheduledNotifications();
       setScheduledNotifications(notifications);
     }
     
     return notificationId;
-  }, [permissionGranted, requestPermissions]);
+  }, [notificationPermissionGranted]);
 
-  // Cancel a scheduled notification
+  // 4) Cancel a single notification
   const cancelNotification = useCallback(async (notificationId: string) => {
     const success = await cancelWorkoutNotification(notificationId);
     
-    // Refresh list of scheduled notifications
+    // Refresh the notification list if successful
     if (success) {
       const notifications = await getAllScheduledNotifications();
       setScheduledNotifications(notifications);
@@ -112,21 +102,26 @@ export const useNotifications = () => {
     return success;
   }, []);
 
-  // Refresh scheduled notifications list
-  const refreshNotifications = useCallback(async () => {
-    if (permissionGranted) {
-      const notifications = await getAllScheduledNotifications();
-      setScheduledNotifications(notifications);
+  // 5) Cancel all notifications
+  const cancelAllNotifications = useCallback(async () => {
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+      setScheduledNotifications([]);
+      return true;
+    } catch (error) {
+      console.error('Error cancelling all notifications:', error);
+      return false;
     }
-  }, [permissionGranted]);
+  }, []);
 
   return {
-    permissionGranted,
     loading,
     scheduledNotifications,
-    requestPermissions,
+    notificationPermissionGranted,
+    checkNotificationPermission,
+    requestNotificationPermission,
     scheduleNotification,
     cancelNotification,
-    refreshNotifications,
+    cancelAllNotifications
   };
 };

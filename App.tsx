@@ -5,7 +5,7 @@
   import { SQLiteProvider} from 'expo-sqlite';
   import { Asset } from 'expo-asset';
   import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-  import { NavigationContainer, useNavigation } from '@react-navigation/native';
+  import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native';
   import Ionicons from 'react-native-vector-icons/Ionicons';
   import Home from './screens/Home'; // Assuming you have a Home screen component
   import Workouts from './screens/Workouts';
@@ -29,7 +29,7 @@
   import Difficulty from './screens/Difficulty';
   import Template from './screens/Template';
   import TemplateDetails from './screens/TemplateDetails';
-  import { requestNotificationPermissions, getAllScheduledNotifications } from './utils/notificationUtils';
+  import {getAllScheduledNotifications } from './utils/notificationUtils';
   import * as Notifications from 'expo-notifications';
 
 
@@ -326,19 +326,17 @@ const AppContent = () => {
 
   export default function App() {
     const [dbLoaded, setDbLoaded] = useState<boolean>(false);
-    const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
     const [scheduledNotifications, setScheduledNotifications] = useState<Notifications.NotificationRequest[]>([]);
-    const navigationRef = useRef(null);
+    const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
     useEffect(() => {
-      // Request notification permissions on app start
       const setupNotifications = async () => {
         try {
-          const hasPermission = await requestNotificationPermissions();
-          setPermissionGranted(hasPermission);
+         // const hasPermission = await requestNotificationPermissions();
+          // setPermissionGranted(hasPermission);
           
           // If permission is granted, get all scheduled notifications
-          if (hasPermission) {
+         
 
             
 
@@ -346,7 +344,7 @@ const AppContent = () => {
             const notifications = await getAllScheduledNotifications();
             setScheduledNotifications(notifications);
             console.log('Current scheduled notifications:', notifications.length);
-          }
+    
           
           // Set up notification listeners
           const receivedSubscription = Notifications.addNotificationReceivedListener(notification => {
@@ -358,7 +356,6 @@ const AppContent = () => {
             
             // Navigate to MyCalendar screen when notification is tapped
             if (navigationRef.current) {
-              // @ts-ignore - navigationRef.current.navigate exists but TypeScript may not recognize it
               navigationRef.current.navigate('MyCalendar');
             }
           });

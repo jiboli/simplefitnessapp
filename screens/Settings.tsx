@@ -1,18 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Switch, ScrollView, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { FlatList } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/native';
 import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useNotifications } from '../utils/useNotifications';
 
 export default function Settings() {
-  const navigation = useNavigation();
-  const { dateFormat, setDateFormat, weightFormat, setWeightFormat, language, setLanguage } =
-    useSettings();
+
+  const { 
+    dateFormat, 
+    setDateFormat, 
+    weightFormat, 
+    setWeightFormat, 
+    language, 
+    setLanguage,
+    notificationPermissionGranted,
+    setNotificationPermissionGranted
+  } = useSettings();
   const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation(); // for translations
+  
+  // Use the notifications hook to access all notification-related functionality
+  const { 
+    requestNotificationPermission,
+    cancelAllNotifications
+  } = useNotifications();
 
   // Manages whether the language dropdown is visible
   const [languageDropdownVisible, setLanguageDropdownVisible] = useState(false);
@@ -57,6 +71,36 @@ export default function Settings() {
 
   const handleWeightFormatChange = (format: string) => {
     setWeightFormat(format);
+  };
+
+  // Handle notification main toggle change
+  const handleNotificationToggle = async (value: boolean) => {
+    if (value) {
+      // Request permission when toggle is turned on
+      const granted = await requestNotificationPermission();
+      setNotificationPermissionGranted(granted);
+    } else {
+      // Show confirmation alert when turning off
+      Alert.alert(
+        t('notificationsDisableTitle') || 'Disable Notifications', 
+        t('notificationsDisableMessage') || 'Turning off notifications will cancel all scheduled workout reminders. Are you sure?',
+        [
+          {
+            text: t('cancel') || 'Cancel',
+            style: 'cancel',
+          },
+          { 
+            text: t('confirm') || 'Confirm', 
+            onPress: async () => {
+              // Cancel all notifications and update settings
+              await cancelAllNotifications();
+              setNotificationPermissionGranted(false);
+            }
+          },
+        ],
+        { cancelable: true }
+      );
+    }
   };
 
   // Renders the button that toggles the language dropdown
@@ -109,94 +153,108 @@ export default function Settings() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color={theme.text} />
-      </TouchableOpacity>
 
-      {/* Title */}
-      <Text style={[styles.title, { color: theme.text }]}>{t('settingsTitle')}</Text>
 
-      {/* Language Selection */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsLanguage')}</Text>
-        {renderLanguageButton()}
-        {languageDropdownVisible && (
-          <FlatList
-            data={languages}
-            keyExtractor={(item) => item.code}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[
-                  styles.dropdownItem,
-                  currentLanguage === item.code && styles.activeDropdownItem,
-                ]}
-                onPress={() => handleLanguageChange(item.code)}
-              >
-                <Text
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+        {/* Title */}
+        <Text style={[styles.title, { color: theme.text }]}>{t('settingsTitle')}</Text>
+
+        {/* Language Selection */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsLanguage')}</Text>
+          {renderLanguageButton()}
+          {languageDropdownVisible && (
+            <FlatList
+              data={languages}
+              keyExtractor={(item) => item.code}
+              renderItem={({ item }) => (
+                <TouchableOpacity
                   style={[
-                    styles.dropdownItemText,
-                    currentLanguage === item.code && styles.activeDropdownItemText,
+                    styles.dropdownItem,
+                    currentLanguage === item.code && styles.activeDropdownItem,
                   ]}
+                  onPress={() => handleLanguageChange(item.code)}
                 >
-                  {item.label}{' '}
-                  {currentLanguage === item.code && (
-                    <Ionicons
-                      name="checkmark"
-                      size={18}
-                      color="white"
-                      style={styles.tickIcon}
-                    />
-                  )}
-                </Text>
-              </TouchableOpacity>
-            )}
-            style={styles.dropdownList}
-          />
-        )}
-      </View>
-
-      {/* Date Format Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsDateFormat')}</Text>
-        <View style={styles.buttonGroup}>
-          {renderButton('dd-mm-yyyy', dateFormat, () => handleDateFormatChange('dd-mm-yyyy'))}
-          {renderButton('mm-dd-yyyy', dateFormat, () => handleDateFormatChange('mm-dd-yyyy'))}
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      currentLanguage === item.code && styles.activeDropdownItemText,
+                    ]}
+                  >
+                    {item.label}{' '}
+                    {currentLanguage === item.code && (
+                      <Ionicons
+                        name="checkmark"
+                        size={18}
+                        color="white"
+                        style={styles.tickIcon}
+                      />
+                    )}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              style={styles.dropdownList}
+            />
+          )}
         </View>
-      </View>
 
-      {/* Weight Format Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsWeightFormat')}</Text>
-        <View style={styles.buttonGroup}>
-          {renderButton('kg', weightFormat, () => handleWeightFormatChange('kg'))}
-          {renderButton('lbs', weightFormat, () => handleWeightFormatChange('lbs'))}
+        {/* Date Format Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsDateFormat')}</Text>
+          <View style={styles.buttonGroup}>
+            {renderButton('dd-mm-yyyy', dateFormat, () => handleDateFormatChange('dd-mm-yyyy'))}
+            {renderButton('mm-dd-yyyy', dateFormat, () => handleDateFormatChange('mm-dd-yyyy'))}
+          </View>
         </View>
-      </View>
 
-      {/* Theme Section */}
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsTheme')}</Text>
-        <View style={styles.buttonGroup}>
-          <TouchableOpacity
-            style={[
-              styles.button,
-              theme.background === '#FFFFFF' && styles.activeButton,
-            ]}
-            onPress={toggleTheme}
-          >
-            <Text
+        {/* Weight Format Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsWeightFormat')}</Text>
+          <View style={styles.buttonGroup}>
+            {renderButton('kg', weightFormat, () => handleWeightFormatChange('kg'))}
+            {renderButton('lbs', weightFormat, () => handleWeightFormatChange('lbs'))}
+          </View>
+        </View>
+
+        {/* Notification Settings Section / Translate this to the other languages */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('notifications')}</Text>
+          
+          {/* Main Notification Toggle */}
+          <View style={styles.toggleRow}>
+            <Text style={[styles.toggleText, { color: '#FFFFFF' }]}>{t('remindScheduledWorkouts')}</Text>
+            <Switch
+              value={notificationPermissionGranted}
+              onValueChange={handleNotificationToggle}
+              trackColor={{ false: '#767577', true: '#FFFFFF' }}
+              thumbColor={notificationPermissionGranted ? '#ffffff' : '#f4f3f4'}
+            />
+          </View>
+        </View>
+
+        {/* Theme Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('settingsTheme')}</Text>
+          <View style={styles.buttonGroup}>
+            <TouchableOpacity
               style={[
-                styles.buttonText,
-                theme.background === '#FFFFFF' && styles.activeButtonText,
+                styles.button,
+                theme.background === '#FFFFFF' && styles.activeButton,
               ]}
+              onPress={toggleTheme}
             >
-              {theme.background === '#FFFFFF' ? t('settingsSwitchDark') : t('settingsSwitchLight')}
-            </Text>
-          </TouchableOpacity>
+              <Text
+                style={[
+                  styles.buttonText,
+                  theme.background === '#FFFFFF' && styles.activeButtonText,
+                ]}
+              >
+                {theme.background === '#FFFFFF' ? t('settingsSwitchDark') : t('settingsSwitchLight')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-
+      </ScrollView>
     </View>
   );
 }
@@ -204,7 +262,7 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingHorizontal: 20,
     backgroundColor: '#FFFFFF',
   },
@@ -299,5 +357,24 @@ const styles = StyleSheet.create({
   activeDropdownItemText: {
     color: '#FFFFFF',
     fontWeight: '700',
+  },
+  toggleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#121212',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#000000',
+    marginBottom: 10,
+  },
+  toggleText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
 });

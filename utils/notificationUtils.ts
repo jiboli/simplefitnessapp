@@ -78,7 +78,7 @@ export const scheduleWorkoutNotification = async ({
       return null;
     }
 
-    // Schedule the notification
+    // Schedule the notification Translate this to the other languages
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
         title: `Workout Reminder: ${workoutName}`,
