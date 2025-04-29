@@ -38,7 +38,6 @@
   import * as Notifications from 'expo-notifications';
   import { useRecurringWorkouts } from './utils/recurringWorkoutUtils';
   import { AppState } from 'react-native';
-  import EventBus, { EventTypes } from './utils/eventBus';
 
 
 
@@ -292,7 +291,6 @@ function RecurringWorkoutManager() {
       if (!initialCheckDone.current) {
         await checkRecurringWorkouts();
         // Publish event to notify MyCalendar to refresh
-        EventBus.publish(EventTypes.WORKOUTS_UPDATED);
         console.log('Initial recurring workout check triggered and event published');
         initialCheckDone.current = true;
       }
@@ -301,18 +299,8 @@ function RecurringWorkoutManager() {
     checkAndNotify();
     
     // Set up listener for app returning to foreground
-    const subscription = AppState.addEventListener('change', nextAppState => {
-      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        checkRecurringWorkouts().then(() => {
-          // Publish event to notify MyCalendar to refresh
-          EventBus.publish(EventTypes.WORKOUTS_UPDATED);
-          console.log('Foreground recurring workout check triggered and event published');
-        });
-      }
-      appState.current = nextAppState;
-    });
+   
 
-    return () => subscription.remove();
   }, [checkRecurringWorkouts]);
 
   return null;

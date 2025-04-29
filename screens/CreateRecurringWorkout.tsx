@@ -245,7 +245,7 @@ export default function CreateRecurringWorkout() {
 
       if (success) {
         console.log('DEBUG: Successfully created recurring workout');
-        navigation.goBack();
+        navigation.navigate('MyCalendar');
       } else {
         console.error('DEBUG: Failed to create recurring workout - returned false');
       }

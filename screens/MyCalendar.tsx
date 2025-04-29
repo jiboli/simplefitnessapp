@@ -18,7 +18,6 @@ import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../utils/useNotifications';
-import EventBus, { EventTypes } from '../utils/eventBus';
 import { useRecurringWorkouts } from '../utils/recurringWorkoutUtils';
 
 
@@ -78,14 +77,9 @@ export default function MyCalendar() {
       
       checkAndFetchWorkouts();
       
-      // Subscribe to workout updates
-      const unsubscribe = EventBus.subscribe(EventTypes.WORKOUTS_UPDATED, () => {
-        console.log('MyCalendar: Refreshing due to workout update');
-        fetchWorkouts();
-      });
+     
       
       return () => {
-        unsubscribe();
       };
     }, [])
   );
