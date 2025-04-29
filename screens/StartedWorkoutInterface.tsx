@@ -162,6 +162,7 @@ export default function StartedWorkoutInterface() {
       setRestTimeRemaining(prevTime => {
         if (prevTime <= 1) {
           stopRestTimer();
+          setCurrentSetIndex(currentSetIndex + 1);
           setWorkoutStage('exercise');
           return 0;
         }
@@ -552,7 +553,7 @@ export default function StartedWorkoutInterface() {
           onPress={saveWorkout}
         >
           <Text style={[styles.buttonText, { color: theme.buttonText }]}>
-            Save Workout
+            Complete Workout
           </Text>
         </TouchableOpacity>
       </View>
