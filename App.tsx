@@ -23,7 +23,6 @@
   import ManageRecurringWorkouts from './screens/ManageRecurringWorkouts';
   import RecurringWorkoutDetails from './screens/RecurringWorkoutDetails';
   import EditRecurringWorkout from './screens/EditRecurringWorkout';
-
   import './utils/i18n'; // Ensure this is present to initialize i18n
   import i18n from './utils/i18n'; // Import the i18n instance
   import { I18nextProvider } from 'react-i18next';
@@ -37,6 +36,9 @@
   import TemplateDetails from './screens/TemplateDetails';
   import {getAllScheduledNotifications } from './utils/notificationUtils';
   import * as Notifications from 'expo-notifications';
+  import { useRecurringWorkouts } from './utils/recurringWorkoutUtils';
+  import { AppState } from 'react-native';
+  import EventBus, { EventTypes } from './utils/eventBus';
 
 
 
@@ -237,7 +239,7 @@
           component={EditRecurringWorkout}
           options={{ title: 'Edit Recurring Workout' }}
         />
-         
+
       </WorkoutLogStackScreen.Navigator>
 
       
@@ -277,73 +279,113 @@
       </WeightLogStackScreen.Navigator>
     );
   }
+
+// First, create a component that will handle the recurring workout checks
+function RecurringWorkoutManager() {
+  const { checkRecurringWorkouts } = useRecurringWorkouts();
+  const appState = useRef(AppState.currentState);
+  const initialCheckDone = useRef(false);
+
+  useEffect(() => {
+    // Function to check workouts and publish event
+    const checkAndNotify = async () => {
+      if (!initialCheckDone.current) {
+        await checkRecurringWorkouts();
+        // Publish event to notify MyCalendar to refresh
+        EventBus.publish(EventTypes.WORKOUTS_UPDATED);
+        console.log('Initial recurring workout check triggered and event published');
+        initialCheckDone.current = true;
+      }
+    };
+    
+    checkAndNotify();
+    
+    // Set up listener for app returning to foreground
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        checkRecurringWorkouts().then(() => {
+          // Publish event to notify MyCalendar to refresh
+          EventBus.publish(EventTypes.WORKOUTS_UPDATED);
+          console.log('Foreground recurring workout check triggered and event published');
+        });
+      }
+      appState.current = nextAppState;
+    });
+
+    return () => subscription.remove();
+  }, [checkRecurringWorkouts]);
+
+  return null;
+}
+
 // Define AppContent here
 const AppContent = () => {
-  const { theme } = useTheme(); // Access the theme context
-  
+  const { theme } = useTheme();
 
   return (
     <>
-         <StatusBar   barStyle={theme.type === 'light' ? "dark-content" : "light-content"}  backgroundColor={theme.background}  />
-          <React.Suspense
-            fallback={
-              <View style={{ flex:1}}>
-                <ActivityIndicator size={'large'}/>
-              </View>
-            }
-            />
-             <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
-            <Bottom.Navigator
-                screenOptions={{
-                  headerShown: false,
-                  tabBarStyle: {
-                    backgroundColor: theme.background, // Dynamically set based on theme
-                    borderTopWidth: 0, // Removes the top border of the tab bar
-                    elevation: 0, // Removes shadow on Android
-                    shadowOpacity: 0, // Removes shadow on iOS
-                    height: 60,
-                    paddingVertical: 10,
-                  },
-                  tabBarActiveTintColor: theme.text, // Active icon color
-                  tabBarInactiveTintColor: theme.inactivetint, // Inactive icon color
-                }}
-            >
-              <Bottom.Screen
-                name="Home"
-                component={Home}
-                options={{
-                  tabBarButton: (props) => (
-                    <TabButton {...props} iconName="home" />
-                  ),
-                }}
-              />
-              <Bottom.Screen
-                name="My Workouts"
-                component={WorkoutStack}
-                options={{
-                  tabBarButton: (props) => (
-                    <TabButton {...props} iconName="barbell" />
-                  ),
-                }}
-              />
-              <Bottom.Screen
-                name="My Calendar"
-                component={WorkoutLogStack}
-                options={{
-                  tabBarButton: (props) => (
-                    <TabButton {...props} iconName="calendar" />
-                  ),
-                }}
-              />
-              <Bottom.Screen
-                name="My Progress"
-                component={WeightLogStack}
-                options={{
-                  tabBarButton: (props) => (
-                    <TabButton {...props} iconName="stats-chart" />
-                  ),
-                }}
-              />
+      <StatusBar barStyle={theme.type === 'light' ? "dark-content" : "light-content"} backgroundColor={theme.background} />
+      <React.Suspense
+        fallback={
+          <View style={{ flex:1 }}>
+            <ActivityIndicator size={'large'}/>
+          </View>
+        }
+      />
+      <SQLiteProvider databaseName="SimpleDB.db" useSuspense>
+        <RecurringWorkoutManager />
+        
+        <Bottom.Navigator
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: {
+              backgroundColor: theme.background, // Dynamically set based on theme
+              borderTopWidth: 0, // Removes the top border of the tab bar
+              elevation: 0, // Removes shadow on Android
+              shadowOpacity: 0, // Removes shadow on iOS
+              height: 60,
+              paddingVertical: 10,
+            },
+            tabBarActiveTintColor: theme.text, // Active icon color
+            tabBarInactiveTintColor: theme.inactivetint, // Inactive icon color
+          }}
+        >
+          <Bottom.Screen
+            name="Home"
+            component={Home}
+            options={{
+              tabBarButton: (props) => (
+                <TabButton {...props} iconName="home" />
+              ),
+            }}
+          />
+          <Bottom.Screen
+            name="My Workouts"
+            component={WorkoutStack}
+            options={{
+              tabBarButton: (props) => (
+                <TabButton {...props} iconName="barbell" />
+              ),
+            }}
+          />
+          <Bottom.Screen
+            name="My Calendar"
+            component={WorkoutLogStack}
+            options={{
+              tabBarButton: (props) => (
+                <TabButton {...props} iconName="calendar" />
+              ),
+            }}
+          />
+          <Bottom.Screen
+            name="My Progress"
+            component={WeightLogStack}
+            options={{
+              tabBarButton: (props) => (
+                <TabButton {...props} iconName="stats-chart" />
+              ),
+            }}
+          />
 
        <Bottom.Screen
          name="Settings"
@@ -397,6 +439,7 @@ const AppContent = () => {
             if (navigationRef.current) {
               navigationRef.current.navigate('MyCalendar');
             }
+            
           });
           
           // Clean up listeners when component unmounts

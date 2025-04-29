@@ -18,6 +18,8 @@ import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../utils/useNotifications';
+import EventBus, { EventTypes } from '../utils/eventBus';
+import { useRecurringWorkouts } from '../utils/recurringWorkoutUtils';
 
 
 
@@ -60,11 +62,32 @@ export default function MyCalendar() {
   ).getTime() / 1000; // Start of today in seconds
 
   const { cancelNotification } = useNotifications();
+  const { checkRecurringWorkouts } = useRecurringWorkouts();
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchWorkouts();
-    }, [db])
+      // Check for recurring workouts when screen is focused
+      const checkAndFetchWorkouts = async () => {
+        console.log('MyCalendar: Checking recurring workouts');
+        // First check and schedule any recurring workouts
+        await checkRecurringWorkouts();
+        
+        // Then fetch the workouts to display the latest data
+        fetchWorkouts();
+      };
+      
+      checkAndFetchWorkouts();
+      
+      // Subscribe to workout updates
+      const unsubscribe = EventBus.subscribe(EventTypes.WORKOUTS_UPDATED, () => {
+        console.log('MyCalendar: Refreshing due to workout update');
+        fetchWorkouts();
+      });
+      
+      return () => {
+        unsubscribe();
+      };
+    }, [])
   );
 
   const fetchWorkouts = async () => {

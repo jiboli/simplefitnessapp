@@ -39,17 +39,6 @@ type Day = {
   day_name: string;
 };
 
-// Day of week names for selection
-const DAYS_OF_WEEK = [
-  { id: 0, name: 'Sunday' },
-  { id: 1, name: 'Monday' },
-  { id: 2, name: 'Tuesday' },
-  { id: 3, name: 'Wednesday' },
-  { id: 4, name: 'Thursday' },
-  { id: 5, name: 'Friday' },
-  { id: 6, name: 'Saturday' }
-];
-
 export default function CreateRecurringWorkout() {
   const navigation = useNavigation<NavigationProp>();
   const { theme } = useTheme();
@@ -57,6 +46,17 @@ export default function CreateRecurringWorkout() {
   const db = useSQLiteContext();
   const { createRecurringWorkout } = useRecurringWorkouts();
   const { notificationPermissionGranted } = useSettings();
+
+  // Using t() for day names inside the component
+  const DAYS_OF_WEEK = [
+    { id: 1, name: t('Monday') },
+    { id: 2, name: t('Tuesday') },
+    { id: 3, name: t('Wednesday') },
+    { id: 4, name: t('Thursday') },
+    { id: 5, name: t('Friday') },
+    { id: 6, name: t('Saturday') },
+    { id: 0, name: t('Sunday') },
+  ];
 
   // State for form elements
   const [workouts, setWorkouts] = useState<Workout[]>([]);
