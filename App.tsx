@@ -23,6 +23,8 @@
   import ManageRecurringWorkouts from './screens/ManageRecurringWorkouts';
   import RecurringWorkoutDetails from './screens/RecurringWorkoutDetails';
   import EditRecurringWorkout from './screens/EditRecurringWorkout';
+  import StartWorkout from './screens/StartWorkout';
+  import StartedWorkoutInterface from './screens/StartedWorkoutInterface';
   import './utils/i18n'; // Ensure this is present to initialize i18n
   import i18n from './utils/i18n'; // Import the i18n instance
   import { I18nextProvider } from 'react-i18next';
@@ -46,6 +48,7 @@
   const WorkoutStackScreen = createNativeStackNavigator<WorkoutStackParamList>();
   const WorkoutLogStackScreen= createNativeStackNavigator<WorkoutLogStackParamList>();
   const WeightLogStackScreen= createNativeStackNavigator<WeightLogStackParamList>();
+  const StartWorkoutStackScreen = createNativeStackNavigator<StartWorkoutStackParamList>();
 
   
 
@@ -145,6 +148,11 @@
     LogWeights: undefined;
     WeightLogDetail:{ workoutName: string }
     AllLogs: undefined;
+  }
+
+  export type StartWorkoutStackParamList = {
+    StartWorkout: undefined;
+    StartedWorkoutInterface: { workout_log_id: number };
   }
 
   function WorkoutStack() {
@@ -279,6 +287,27 @@
     );
   }
 
+  function StartWorkoutStack() {
+    return (
+      <StartWorkoutStackScreen.Navigator
+        screenOptions={{
+          headerShown: false, // Disable headers for all screens in this stack
+        }}
+      >
+        <StartWorkoutStackScreen.Screen
+          name="StartWorkout"
+          component={StartWorkout}
+          options={{ headerShown: false }}
+        />
+        <StartWorkoutStackScreen.Screen
+          name="StartedWorkoutInterface"
+          component={StartedWorkoutInterface}
+          options={{ headerShown: false }}
+        />
+      </StartWorkoutStackScreen.Navigator>
+    );
+  }
+
 // First, create a component that will handle the recurring workout checks
 function RecurringWorkoutManager() {
   const { checkRecurringWorkouts } = useRecurringWorkouts();
@@ -356,6 +385,7 @@ const AppContent = () => {
               ),
             }}
           />
+
           <Bottom.Screen
             name="My Calendar"
             component={WorkoutLogStack}
@@ -365,6 +395,17 @@ const AppContent = () => {
               ),
             }}
           />
+
+          <Bottom.Screen
+            name="Start Workout"
+            component={StartWorkoutStack}
+            options={{
+              tabBarButton: (props) => (
+                <TabButton {...props} iconName="stopwatch" />
+              ),
+            }}
+          />
+
           <Bottom.Screen
             name="My Progress"
             component={WeightLogStack}
