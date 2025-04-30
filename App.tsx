@@ -1,6 +1,6 @@
   // App.tsx
   import React, {useState, useEffect, useRef } from 'react';
-  import { View, ActivityIndicator, StatusBar, StyleSheet, Pressable, Text } from 'react-native'; // Import Pressable here
+  import { View, ActivityIndicator, StatusBar, StyleSheet, Pressable, Text, Platform } from 'react-native'; // Import Platform
   import * as FileSystem from 'expo-file-system';
   import { SQLiteProvider} from 'expo-sqlite';
   import { Asset } from 'expo-asset';
@@ -38,6 +38,8 @@
   import TemplateDetails from './screens/TemplateDetails';
   import {getAllScheduledNotifications } from './utils/notificationUtils';
   import * as Notifications from 'expo-notifications';
+  import * as TaskManager from 'expo-task-manager';
+  import * as BackgroundFetch from 'expo-background-fetch';
   import { useRecurringWorkouts } from './utils/recurringWorkoutUtils';
   import { AppState } from 'react-native';
 
@@ -435,56 +437,66 @@ const AppContent = () => {
 
 
   export default function App() {
-    const [dbLoaded, setDbLoaded] = useState<boolean>(false);
+    const [dbLoaded, setDbLoaded] = useState(false);
     const [scheduledNotifications, setScheduledNotifications] = useState<Notifications.NotificationRequest[]>([]);
     const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
     useEffect(() => {
+      loadDatabase().then(() => setDbLoaded(true));
+      
+      // Configure notification permissions
       const setupNotifications = async () => {
-        try {
-         // const hasPermission = await requestNotificationPermissions();
-          // setPermissionGranted(hasPermission);
-          
-          // If permission is granted, get all scheduled notifications
-         
-
+        // Request notification permissions
+        const { status: existingStatus } = await Notifications.getPermissionsAsync();
+        let finalStatus = existingStatus;
+        
+        if (existingStatus !== 'granted') {
+          const { status } = await Notifications.requestPermissionsAsync();
+          finalStatus = status;
+        }
+        
+        if (finalStatus !== 'granted') {
+          console.log('Failed to get push token for notifications!');
+          return;
+        }
+        
+        // Configure notification handler
+        await Notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+          }),
+        });
+        
+        // Register for background tasks if on real device (not simulator)
+        if (Platform.OS !== 'web') {
+          try {
+            // Check if device can use background fetch
+            const backgroundFetchStatus = await BackgroundFetch.getStatusAsync();
             
-
-
-            const notifications = await getAllScheduledNotifications();
-            setScheduledNotifications(notifications);
-            console.log('Current scheduled notifications:', notifications.length);
-    
-          
-          // Set up notification listeners
-          const receivedSubscription = Notifications.addNotificationReceivedListener(notification => {
-            console.log('Notification received:', notification);
-          });
-          
-          const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
-            console.log('User interacted with notification:', response);
-            
-            // Navigate to StartWorkout screen when notification is tapped
-            if (navigationRef.current) {
-              navigationRef.current.navigate('Start Workout', {
-                screen: 'StartWorkout',
-                params: { fromNotification: true }
-              });
+            switch (backgroundFetchStatus) {
+              case BackgroundFetch.BackgroundFetchStatus.Available:
+                console.log("Background fetch is available");
+                break;
+              case BackgroundFetch.BackgroundFetchStatus.Restricted:
+                console.log("Background fetch is restricted");
+                break;
+              case BackgroundFetch.BackgroundFetchStatus.Denied:
+                console.log("Background fetch is denied");
+                break;
             }
-            
-          });
-          
-          // Clean up listeners when component unmounts
-          return () => {
-            receivedSubscription.remove();
-            responseSubscription.remove();
-          };
-        } catch (error) {
-          console.error('Error setting up notifications:', error);
+          } catch (err) {
+            console.log("Error checking background fetch status:", err);
+          }
         }
       };
       
       setupNotifications();
+      
+      return () => {
+        // Clean up if needed
+      };
     }, []);
 
     React.useEffect(() => {

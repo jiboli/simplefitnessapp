@@ -8,7 +8,11 @@ import {
   ActivityIndicator,
   TextInput,
   Alert,
-  FlatList
+  FlatList,
+  Vibration,
+  AppState,
+  AppStateStatus,
+  Platform
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -16,6 +20,101 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useSQLiteContext } from 'expo-sqlite';
 import { StartWorkoutStackParamList } from '../App';
+import * as Notifications from 'expo-notifications';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
+import * as TaskManager from 'expo-task-manager';
+import * as BackgroundFetch from 'expo-background-fetch';
+
+// Define background task names
+const WORKOUT_TIMER_TASK = 'WORKOUT_TIMER_TASK';
+const REST_TIMER_TASK = 'REST_TIMER_TASK';
+
+// Define task handlers outside of the component
+TaskManager.defineTask(WORKOUT_TIMER_TASK, async () => {
+  try {
+    // Get stored data from AsyncStorage
+    const workoutTimerData = await Notifications.getLastNotificationResponseAsync();
+    if (!workoutTimerData) {
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
+    
+    // Update workout time in AsyncStorage for later retrieval
+    const { startTime } = workoutTimerData.notification.request.content.data as { startTime: number };
+    const now = Date.now();
+    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+    
+    // Schedule a notification to update the UI when the app is foregrounded
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: 'Workout Timer Update',
+        body: 'Your workout timer is still running',
+        data: { 
+          type: 'workout_timer_update',
+          elapsedSeconds,
+          startTime
+        },
+      },
+      trigger: null,
+    });
+    
+    return BackgroundFetch.BackgroundFetchResult.NewData;
+  } catch (error) {
+    console.error("Error in workout timer background task:", error);
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
+});
+
+TaskManager.defineTask(REST_TIMER_TASK, async () => {
+  try {
+    // Get stored data from the notification response
+    const restTimerData = await Notifications.getLastNotificationResponseAsync();
+    if (!restTimerData) {
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
+    
+    const { startTime, duration, exerciseName, setNumber, totalSets } = 
+      restTimerData.notification.request.content.data as { 
+        startTime: number, 
+        duration: number,
+        exerciseName: string,
+        setNumber: number,
+        totalSets: number
+      };
+    
+    const now = Date.now();
+    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+    
+    // Check if rest time has completed
+    if (elapsedSeconds >= duration) {
+      // Rest time completed - vibrate and notify
+      Vibration.vibrate([500, 300, 500]);
+      
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: 'Rest Time Complete!',
+          body: `Get ready for ${exerciseName} - Set ${setNumber} of ${totalSets}`,
+          data: { 
+            type: 'rest_timer_completed',
+            exerciseName,
+            setNumber,
+            totalSets
+          },
+        },
+        trigger: null,
+      });
+      
+      // Cancel the background task since rest is complete
+      await BackgroundFetch.unregisterTaskAsync(REST_TIMER_TASK);
+      
+      return BackgroundFetch.BackgroundFetchResult.NewData;
+    }
+    
+    return BackgroundFetch.BackgroundFetchResult.NoData;
+  } catch (error) {
+    console.error("Error in rest timer background task:", error);
+    return BackgroundFetch.BackgroundFetchResult.Failed;
+  }
+});
 
 type StartedWorkoutRouteProps = RouteProp<
   StartWorkoutStackParamList,
@@ -74,8 +173,194 @@ export default function StartedWorkoutInterface() {
   // Timer states
   const [workoutTime, setWorkoutTime] = useState(0);
   const [restTimeRemaining, setRestTimeRemaining] = useState(0);
+  const [timerStartTime, setTimerStartTime] = useState<number | null>(null);
+  const [restTimerStartTime, setRestTimerStartTime] = useState<number | null>(null);
   const workoutTimerRef = useRef<NodeJS.Timeout | null>(null);
   const restTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const appState = useRef(AppState.currentState);
+  const [appStateVisible, setAppStateVisible] = useState(appState.current);
+  
+  // Setup notification handling for background timer completion
+  useEffect(() => {
+    // Configure notifications for timers
+    const configureNotifications = async () => {
+      await Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+        }),
+      });
+    };
+    
+    // Setup notification response handler
+    const setupNotificationHandlers = async () => {
+      // Remove any existing notification subscriptions
+      await Notifications.dismissAllNotificationsAsync();
+      
+      // Set up notification response handler
+      const subscription = Notifications.addNotificationResponseReceivedListener(
+        (response) => {
+          const data = response.notification.request.content.data;
+          if (!data) return;
+          
+          if (data.type === 'rest_timer_completed') {
+            // Rest timer completed from background
+            stopRestTimer();
+            setCurrentSetIndex(currentSetIndex + 1);
+            setWorkoutStage('exercise');
+            Vibration.vibrate([500, 300, 500]);
+          } else if (data.type === 'workout_timer_update') {
+            // Workout timer update from background
+            if (data.elapsedSeconds) {
+              setWorkoutTime(data.elapsedSeconds);
+              if (data.startTime) {
+                setTimerStartTime(data.startTime);
+              }
+            }
+          }
+        }
+      );
+      
+      return subscription;
+    };
+    
+    configureNotifications();
+    const notificationSubscription = setupNotificationHandlers();
+    
+    // Keep the app awake while workout is in progress
+    if (workoutStarted) {
+      activateKeepAwakeAsync();
+    }
+    
+    return () => {
+      // Clean up subscriptions and keep awake when component unmounts
+      if (notificationSubscription) {
+        notificationSubscription.then(sub => sub.remove());
+      }
+      deactivateKeepAwake();
+      
+      // Clean up background tasks
+      BackgroundFetch.unregisterTaskAsync(WORKOUT_TIMER_TASK).catch(() => {});
+      BackgroundFetch.unregisterTaskAsync(REST_TIMER_TASK).catch(() => {});
+    };
+  }, [workoutStarted, currentSetIndex]);
+  
+  // Register background tasks when needed
+  const registerBackgroundTasks = async () => {
+    // Check if tasks are already registered
+    const workoutTaskRegistered = await TaskManager.isTaskRegisteredAsync(WORKOUT_TIMER_TASK);
+    const restTaskRegistered = await TaskManager.isTaskRegisteredAsync(REST_TIMER_TASK);
+    
+    // Register workout timer task if not already registered
+    if (!workoutTaskRegistered) {
+      await BackgroundFetch.registerTaskAsync(WORKOUT_TIMER_TASK, {
+        minimumInterval: 60, // update every minute
+        stopOnTerminate: false,
+        startOnBoot: true,
+      });
+    }
+    
+    // Register rest timer task if not already registered
+    if (!restTaskRegistered) {
+      await BackgroundFetch.registerTaskAsync(REST_TIMER_TASK, {
+        minimumInterval: 15, // check more frequently for rest timer
+        stopOnTerminate: false,
+        startOnBoot: true,
+      });
+    }
+  };
+  
+  // Handle AppState changes to manage timers in background
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', nextAppState => {
+      if (appState.current.match(/active/) && nextAppState.match(/inactive|background/)) {
+        // App is going to background
+        if (workoutStarted) {
+          // Start background tasks for timers
+          registerBackgroundTasks().catch(err => console.error("Error registering background tasks:", err));
+          
+          // For workout timer background tracking
+          if (timerStartTime && workoutStage !== 'completed') {
+            Notifications.scheduleNotificationAsync({
+              content: {
+                title: 'Workout in Progress',
+                body: `${workout?.workout_name || 'Your workout'} is still running`,
+                data: { 
+                  startTime: timerStartTime,
+                  type: 'workout_timer'
+                },
+              },
+              trigger: null,
+            });
+          }
+          
+          // For rest timer background tracking
+          if (workoutStage === 'rest' && restTimerStartTime) {
+            const nextSet = currentSetIndex + 1 < allSets.length 
+              ? allSets[currentSetIndex + 1] 
+              : null;
+              
+            if (nextSet) {
+              Notifications.scheduleNotificationAsync({
+                content: {
+                  title: 'Rest Timer',
+                  body: `Rest timer: ${restTimeRemaining} seconds remaining`,
+                  data: { 
+                    startTime: restTimerStartTime,
+                    duration: parseInt(restTime),
+                    exerciseName: nextSet.exercise_name,
+                    setNumber: nextSet.set_number,
+                    totalSets: nextSet.total_sets,
+                    type: 'rest_timer'
+                  },
+                },
+                trigger: null,
+              });
+            }
+          }
+        }
+      } else if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
+        // App has come to the foreground
+        if (workoutStarted && timerStartTime && workoutStage !== 'rest' && workoutStage !== 'completed') {
+          // Recalculate workout time based on elapsed time
+          const now = Date.now();
+          const elapsedSeconds = Math.floor((now - timerStartTime) / 1000);
+          setWorkoutTime(elapsedSeconds);
+          stopWorkoutTimer();
+          startWorkoutTimer();
+        }
+        
+        if (workoutStage === 'rest' && restTimerStartTime) {
+          // Recalculate rest time based on elapsed time
+          const now = Date.now();
+          const elapsedSeconds = Math.floor((now - restTimerStartTime) / 1000);
+          const newRestTime = Math.max(0, parseInt(restTime) - elapsedSeconds);
+          
+          setRestTimeRemaining(newRestTime);
+          
+          if (newRestTime <= 0) {
+            // Rest time has already completed while in background
+            stopRestTimer();
+            setCurrentSetIndex(currentSetIndex + 1);
+            setWorkoutStage('exercise');
+            Vibration.vibrate([500, 300, 500]);
+          } else {
+            // Continue rest timer
+            stopRestTimer();
+            startRestTimer(newRestTime);
+          }
+        }
+      }
+      
+      appState.current = nextAppState;
+      setAppStateVisible(nextAppState);
+    });
+    
+    return () => {
+      subscription.remove();
+    };
+  }, [workoutStarted, timerStartTime, restTimerStartTime, workoutStage, currentSetIndex, restTime, allSets, workout]);
   
   useEffect(() => {
     // Check if completion_time column exists, add it if not
@@ -158,8 +443,9 @@ export default function StartedWorkoutInterface() {
     }
   };
   
-  // Timer functions
+  // Timer functions (updated for background support)
   const startWorkoutTimer = () => {
+    setTimerStartTime(Date.now() - (workoutTime * 1000)); // Account for existing time
     workoutTimerRef.current = setInterval(() => {
       setWorkoutTime(prevTime => prevTime + 1);
     }, 1000);
@@ -174,12 +460,15 @@ export default function StartedWorkoutInterface() {
   
   const startRestTimer = (seconds: number) => {
     setRestTimeRemaining(seconds);
+    setRestTimerStartTime(Date.now());
     restTimerRef.current = setInterval(() => {
       setRestTimeRemaining(prevTime => {
         if (prevTime <= 1) {
           stopRestTimer();
           setCurrentSetIndex(currentSetIndex + 1);
           setWorkoutStage('exercise');
+          // Vibrate device when rest timer completes
+          Vibration.vibrate([500, 300, 500]);
           return 0;
         }
         return prevTime - 1;
@@ -192,6 +481,7 @@ export default function StartedWorkoutInterface() {
       clearInterval(restTimerRef.current);
       restTimerRef.current = null;
     }
+    setRestTimerStartTime(null);
   };
   
   const formatTime = (seconds: number): string => {
