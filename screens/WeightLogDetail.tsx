@@ -343,26 +343,28 @@ export default function WeightLogDetail() {
           onLongPress={confirmDeleteDay}
         >
           <View style={styles.titleContainer}>
-            <AutoSizeText 
-              fontSize={20}
-              numberOfLines={2}
-              mode={ResizeTextMode.max_lines}
-              style={[styles.logDayName, { color: theme.text }]}>
-              {day_name}
-            </AutoSizeText>
-            
-            {completion_time && (
-              <View style={styles.timeContainer}>
-                <Ionicons name="time-outline" size={16} color={theme.text} style={styles.timeIcon} />
-                <AutoSizeText
-                  fontSize={16}
-                  numberOfLines={1}
-                  mode={ResizeTextMode.max_lines}
-                  style={[styles.completionTime, { color: theme.text }]}>
-                  {formattedTime}
-                </AutoSizeText>
-              </View>
-            )}
+            <View style={styles.dayNameColumn}>
+              <AutoSizeText 
+                fontSize={20}
+                numberOfLines={2}
+                mode={ResizeTextMode.max_lines}
+                style={[styles.logDayName, { color: theme.text }]}>
+                {day_name}
+              </AutoSizeText>
+              
+              {completion_time && (
+                <View style={styles.timeContainer}>
+                  <Ionicons name="time-outline" size={14} color={theme.text} style={styles.timeIcon} />
+                  <AutoSizeText
+                    fontSize={14}
+                    numberOfLines={1}
+                    mode={ResizeTextMode.max_lines}
+                    style={[styles.completionTime, { color: theme.text, fontSize: 14, opacity: 0.8 }]}>
+                    {formattedTime}
+                  </AutoSizeText>
+                </View>
+              )}
+            </View>
           </View>
 
           <AutoSizeText 
@@ -572,7 +574,7 @@ const styles = StyleSheet.create({
   logDayName: {
     fontSize: 20,
     fontWeight: '900',
-    maxWidth: '80%',
+    marginBottom: 4,
   },
   logDate: {
     fontSize: 18,
@@ -600,21 +602,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     flex: 1,
+    paddingRight: 10,
+  },
+  dayNameColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 10,
-    maxWidth: 120,
+    marginTop: 2,
   },
   timeIcon: {
     marginRight: 3,
   },
   completionTime: {
-    fontSize: 16,
-    flexShrink: 1,
+    fontSize: 14,
+    opacity: 0.8,
   },
 });

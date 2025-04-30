@@ -339,26 +339,28 @@ export default function AllLogs() {
           onLongPress={confirmDeleteDay}
         >
           <View style={styles.workoutTitleContainer}>
-            <AutoSizeText 
-              fontSize={20}
-              numberOfLines={2}
-              mode={ResizeTextMode.max_lines}
-              style={[styles.logWorkoutName, { color: theme.text }]}>
-                {workout_name}
-            </AutoSizeText>
-            
-            {completion_time && (
-              <View style={styles.timeContainer}>
-                <Ionicons name="time-outline" size={16} color={theme.text} style={styles.timeIcon} />
-                <AutoSizeText
-                  fontSize={16}
-                  numberOfLines={1}
-                  mode={ResizeTextMode.max_lines}
-                  style={[styles.completionTime, { color: theme.text }]}>
-                  {formattedTime}
-                </AutoSizeText>
-              </View>
-            )}
+            <View style={styles.workoutNameColumn}>
+              <AutoSizeText 
+                fontSize={20}
+                numberOfLines={2}
+                mode={ResizeTextMode.max_lines}
+                style={[styles.logWorkoutName, { color: theme.text }]}>
+                  {workout_name}
+              </AutoSizeText>
+              
+              {completion_time && (
+                <View style={styles.timeContainer}>
+                  <Ionicons name="time-outline" size={14} color={theme.text} style={styles.timeIcon} />
+                  <AutoSizeText
+                    fontSize={14}
+                    numberOfLines={1}
+                    mode={ResizeTextMode.max_lines}
+                    style={[styles.completionTime, { color: theme.text, fontSize: 14 }]}>
+                    {formattedTime}
+                  </AutoSizeText>
+                </View>
+              )}
+            </View>
           </View>
           
           <AutoSizeText 
@@ -546,7 +548,7 @@ const styles = StyleSheet.create({
   logWorkoutName: { 
     fontSize: 20, 
     fontWeight: '900',
-    flexShrink: 1,
+    marginBottom: 4,
   },
   logDayName: { 
     fontSize: 20, 
@@ -567,24 +569,24 @@ const styles = StyleSheet.create({
   adContainer: { alignItems: 'center', marginTop: 20 },
   emptyText: { textAlign: 'center', fontSize: 16 },
   workoutTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     flex: 1,
-    flexWrap: 'wrap',
     paddingRight: 10,
+  },
+  workoutNameColumn: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginLeft: 10,
-    maxWidth: 120,
+    marginTop: 2,
   },
   timeIcon: {
     marginRight: 3,
   },
   completionTime: {
-    fontSize: 16,
-    flexShrink: 1,
+    fontSize: 14,
+    opacity: 0.8,
   },
 });
 
