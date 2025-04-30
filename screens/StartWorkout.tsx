@@ -42,6 +42,8 @@ export default function StartWorkout() {
       }
       
       initializeData()
+      console.log('StartWorkout screen focused - data refreshed')
+      
       return () => {};
     }, [])
   );

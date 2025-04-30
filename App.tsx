@@ -151,7 +151,7 @@
   }
 
   export type StartWorkoutStackParamList = {
-    StartWorkout: undefined;
+    StartWorkout: { fromNotification?: boolean } | undefined;
     StartedWorkoutInterface: { workout_log_id: number };
   }
 
@@ -464,9 +464,12 @@ const AppContent = () => {
           const responseSubscription = Notifications.addNotificationResponseReceivedListener(response => {
             console.log('User interacted with notification:', response);
             
-            // Navigate to MyCalendar screen when notification is tapped
+            // Navigate to StartWorkout screen when notification is tapped
             if (navigationRef.current) {
-              navigationRef.current.navigate('MyCalendar');
+              navigationRef.current.navigate('Start Workout', {
+                screen: 'StartWorkout',
+                params: { fromNotification: true }
+              });
             }
             
           });
