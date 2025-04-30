@@ -37,8 +37,10 @@ export default function StartWorkout() {
   useFocusEffect(
     React.useCallback(() => {
       async function initializeData() {
-        await addColumn()
+        await addColumn0 ()
+        await addColumn1()
         await fetchWorkouts()
+        
       }
       
       initializeData()
@@ -48,7 +50,7 @@ export default function StartWorkout() {
     }, [])
   );
 
-  const addColumn = async () => {
+  const addColumn0 = async () => {
     try {
       // Check if column exists first
       const tableInfo = await db.getAllAsync(
@@ -59,7 +61,29 @@ export default function StartWorkout() {
       );
       
       if (!columnExists) {
-        await db.runAsync('ALTER TABLE Weight_Log ADD COLUMN completion_time TEXT;');
+        await db.runAsync('ALTER TABLE Weight_Log ADD COLUMN completion_time INTEGER;');
+        console.log('Column added successfully');
+      } else {
+        console.log('Column already exists, skipping');
+      }
+    } catch (error) {
+      console.error('Error managing column:', error);
+    }
+  };
+
+
+  const addColumn1 = async () => {
+    try {
+      // Check if column exists first
+      const tableInfo = await db.getAllAsync(
+        "PRAGMA table_info(Workout_Log);"
+      );
+      const columnExists = tableInfo.some(
+        (column: any) => column.name === 'completion_time'
+      );
+      
+      if (!columnExists) {
+        await db.runAsync('ALTER TABLE Workout_Log ADD COLUMN completion_time INTEGER;');
         console.log('Column added successfully');
       } else {
         console.log('Column already exists, skipping');

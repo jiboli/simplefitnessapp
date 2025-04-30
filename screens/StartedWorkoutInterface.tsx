@@ -78,6 +78,8 @@ export default function StartedWorkoutInterface() {
   const restTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
+    // Check if completion_time column exists, add it if not
+    checkAndAddCompletionTimeColumn();
     fetchWorkoutDetails()    
     return () => {
       stopWorkoutTimer();
@@ -85,7 +87,20 @@ export default function StartedWorkoutInterface() {
     };
   }, []);
   
-  
+  // Function to check and add completion_time column if needed
+  const checkAndAddCompletionTimeColumn = async () => {
+    try {
+      // Try to check if the column exists
+      await db.runAsync(`
+        ALTER TABLE Workout_Log ADD COLUMN completion_time INTEGER;
+      `).catch(error => {
+        // Column might already exist, ignore error
+        console.log('Column might already exist, continuing execution');
+      });
+    } catch (error) {
+      console.error('Error checking or adding completion_time column:', error);
+    }
+  };
   
   const fetchWorkoutDetails = async () => {
     try {
@@ -473,10 +488,22 @@ export default function StartedWorkoutInterface() {
     
     const saveWorkout = async () => {
       try {
+        console.log('Starting workout save process...');
+        
         // Start a transaction
         await db.runAsync('BEGIN TRANSACTION;');
         
-        // For each completed set, save to Weight_Log with completion time for the first set only
+        // Update Workout_Log with completion time
+        console.log('Saving completion time to Workout_Log:', workoutTime);
+        await db.runAsync(
+          `UPDATE Workout_Log 
+           SET completion_time = ? 
+           WHERE workout_log_id = ?;`,
+          [workoutTime, workout_log_id]
+        );
+        
+        // For each completed set, save to Weight_Log
+        console.log('Saving completed sets:', completedSets.length);
         for (let i = 0; i < completedSets.length; i++) {
           const set = completedSets[i];
           await db.runAsync(
@@ -486,24 +513,22 @@ export default function StartedWorkoutInterface() {
               exercise_name, 
               set_number, 
               weight_logged, 
-              reps_logged,
-              completion_time
-            ) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+              reps_logged
+            ) VALUES (?, ?, ?, ?, ?, ?);`,
             [
               workout_log_id,
               set.exercise_id,
               set.exercise_name,
               set.set_number,
               parseFloat(set.weight),
-              set.reps_done,
-              // Only store completion_time on the first set to avoid duplication
-              i === 0 ? workoutTime : null
+              set.reps_done
             ]
           );
         }
         
         // Commit transaction
         await db.runAsync('COMMIT;');
+        console.log('Workout save completed successfully!');
         
         Alert.alert(
           'Workout Saved',

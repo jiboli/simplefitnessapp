@@ -67,17 +67,17 @@ export default function AllLogs() {
         completion_time: number | null;
       }>(
         `SELECT DISTINCT Workout_Log.workout_name, Workout_Log.day_name, 
-         Workout_Log.workout_date, MIN(Weight_Log.completion_time) as completion_time
-         FROM Weight_Log
-         INNER JOIN Workout_Log 
+         Workout_Log.workout_date, 
+         COALESCE(Workout_Log.completion_time, MIN(Weight_Log.completion_time)) as completion_time
+         FROM Workout_Log
+         LEFT JOIN Weight_Log 
          ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
-         GROUP BY Workout_Log.workout_name, Workout_Log.day_name, Workout_Log.workout_date;`
+         GROUP BY Workout_Log.workout_name, Workout_Log.day_name, Workout_Log.workout_date
+         ORDER BY Workout_Log.workout_date DESC;`
       );
 
-      const sortedDays = result.sort((a, b) => b.workout_date - a.workout_date);
-
-      setDays(sortedDays);
-      setFilteredDays(sortedDays); // Initially show all days
+      setDays(result);
+      setFilteredDays(result); // Initially show all days
     } catch (error) {
       console.error('Error fetching days:', error);
     }
@@ -85,6 +85,25 @@ export default function AllLogs() {
 
   const fetchLogsForDay = async (dayName: string, workoutDate: number) => {
     try {
+      console.log(`Fetching logs for day: ${dayName}, date: ${workoutDate}`);
+      
+      // First, try to get the workout_log_id
+      const workoutLogResult = await db.getAllAsync<{ workout_log_id: number }>(
+        `SELECT workout_log_id FROM Workout_Log 
+         WHERE day_name = ? AND workout_date = ?
+         LIMIT 1;`,
+        [dayName, workoutDate]
+      );
+      
+      if (workoutLogResult.length === 0) {
+        console.error('No workout_log_id found for the given day and date');
+        return;
+      }
+      
+      const workout_log_id = workoutLogResult[0].workout_log_id;
+      console.log(`Found workout_log_id: ${workout_log_id}`);
+      
+      // Now fetch the weight logs
       const result = await db.getAllAsync<{
         workout_name: string;
         exercise_name: string;
@@ -100,9 +119,55 @@ export default function AllLogs() {
          INNER JOIN Workout_Log 
          ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
          WHERE Workout_Log.day_name = ? AND Workout_Log.workout_date = ? 
-         ORDER BY Weight_Log.logged_exercise_id ASC;`,
+         ORDER BY Weight_Log.logged_exercise_id ASC, Weight_Log.set_number ASC;`,
         [dayName, workoutDate]
       );
+      
+      console.log(`Found ${result.length} weight logs`);
+      
+      if (result.length === 0) {
+        // If no weight logs are found, check if there are logged exercises without weights
+        const exercisesResult = await db.getAllAsync<{
+          exercise_name: string;
+          logged_exercise_id: number;
+          sets: number;
+          reps: number;
+        }>(
+          `SELECT exercise_name, logged_exercise_id, sets, reps
+           FROM Logged_Exercises
+           WHERE workout_log_id = ?
+           ORDER BY logged_exercise_id ASC;`,
+          [workout_log_id]
+        );
+        
+        console.log(`Found ${exercisesResult.length} logged exercises without weights`);
+        
+        if (exercisesResult.length > 0) {
+          // Create placeholder logs for these exercises
+          const placeholderLogs: { [key: string]: { loggedExerciseId: number; exerciseName: string; sets: any[] } } = {};
+          
+          exercisesResult.forEach(exercise => {
+            const compositeKey = `${exercise.logged_exercise_id}_${exercise.exercise_name}`;
+            placeholderLogs[compositeKey] = {
+              loggedExerciseId: exercise.logged_exercise_id,
+              exerciseName: exercise.exercise_name,
+              sets: [{ 
+                set_number: 1, 
+                workout_name: 'Workout', 
+                weight_logged: 0, 
+                reps_logged: exercise.reps,
+                note: 'No weight data recorded' 
+              }]
+            };
+          });
+          
+          setLogs((prev) => ({
+            ...prev,
+            [`${dayName}_${workoutDate}`]: placeholderLogs,
+          }));
+          return;
+        }
+      }
 
       const groupedLogs = result.reduce((acc, log) => {
         const { logged_exercise_id, exercise_name, ...setDetails } = log;
