@@ -75,15 +75,14 @@ TaskManager.defineTask(REST_TIMER_TASK, async () => {
       return BackgroundFetch.BackgroundFetchResult.NoData;
     }
     
-    const { startTime, duration, exerciseName, setNumber, totalSets, enableVibration, enableNotifications } = 
+    const { startTime, duration, exerciseName, setNumber, totalSets, enableVibration } = 
       restTimerData.notification.request.content.data as { 
         startTime: number, 
         duration: number,
         exerciseName: string,
         setNumber: number,
         totalSets: number,
-        enableVibration: boolean,
-        enableNotifications: boolean
+        enableVibration: boolean
       };
     
     const now = Date.now();
@@ -97,22 +96,7 @@ TaskManager.defineTask(REST_TIMER_TASK, async () => {
         Vibration.vibrate([500, 300, 500]);
       }
       
-      // Only send notification if enabled by user
-      if (enableNotifications) {
-        await Notifications.scheduleNotificationAsync({
-          content: {
-            title: 'Rest Time Complete!',
-            body: `Get ready for ${exerciseName} - Set ${setNumber} of ${totalSets}`,
-            data: { 
-              type: 'rest_timer_completed',
-              exerciseName,
-              setNumber,
-              totalSets
-            },
-          },
-          trigger: null,
-        });
-      }
+      // No notification for rest timer completion anymore
       
       // Cancel the background task since rest is complete
       await BackgroundFetch.unregisterTaskAsync(REST_TIMER_TASK);
@@ -213,7 +197,7 @@ export default function StartedWorkoutInterface() {
       await Notifications.setNotificationHandler({
         handleNotification: async () => ({
           shouldShowAlert: true,
-          shouldPlaySound: true,
+          shouldPlaySound: false,
           shouldSetBadge: false,
         }),
       });
@@ -311,8 +295,9 @@ export default function StartedWorkoutInterface() {
           // Start background tasks for timers
           registerBackgroundTasks().catch(err => console.error("Error registering background tasks:", err));
           
-          // For workout timer background tracking - only send notification if enabled by user
-          if (timerStartTime && workoutStage !== 'completed' && workoutStage !== 'rest' && enableNotifications) {
+          // Always show the workout running notification when app is backgrounded, 
+          // regardless of whether user is resting or not, BUT ONLY if notifications are enabled
+          if (timerStartTime && workoutStage !== 'completed' && enableNotifications) {
             Notifications.scheduleNotificationAsync({
               content: {
                 title: 'Workout in Progress',
@@ -326,64 +311,7 @@ export default function StartedWorkoutInterface() {
             });
           }
           
-          // For rest timer - don't send an immediate notification, just register the background task
-          // to schedule a notification when rest timer completes
-          if (workoutStage === 'rest' && restTimerStartTime && enableNotifications) {
-            const nextSet = currentSetIndex + 1 < allSets.length 
-              ? allSets[currentSetIndex + 1] 
-              : null;
-              
-            if (nextSet) {
-              // Calculate when rest will be completed
-              const restDuration = parseInt(restTime);
-              const now = Date.now();
-              const elapsedSeconds = Math.floor((now - restTimerStartTime) / 1000);
-              const remainingSeconds = Math.max(0, restDuration - elapsedSeconds);
-              
-              // Schedule a notification to appear exactly when rest timer completes
-              if (remainingSeconds > 0) {
-                Notifications.scheduleNotificationAsync({
-                  content: {
-                    title: 'Rest Time Complete!',
-                    body: `Get ready for ${nextSet.exercise_name} - Set ${nextSet.set_number} of ${nextSet.total_sets}`,
-                    data: { 
-                      type: 'rest_timer_completed',
-                      exerciseName: nextSet.exercise_name,
-                      setNumber: nextSet.set_number,
-                      totalSets: nextSet.total_sets
-                    },
-                  },
-                  trigger: { 
-                    seconds: remainingSeconds,
-                    channelId: 'rest-timer'
-                  },
-                });
-                
-                // Also pass data to background task for monitoring
-                Notifications.scheduleNotificationAsync({
-                  content: {
-                    title: 'Rest Timer',
-                    body: 'Monitoring rest timer in background',
-                    data: { 
-                      startTime: restTimerStartTime,
-                      duration: restDuration,
-                      exerciseName: nextSet.exercise_name,
-                      setNumber: nextSet.set_number,
-                      totalSets: nextSet.total_sets,
-                      type: 'rest_timer',
-                      enableVibration,
-                      enableNotifications
-                    },
-                  },
-                  trigger: null,
-                }).then(() => {
-                  // This is just a silent notification to pass data to the background task
-                  // We immediately dismiss it since we don't want to show it to the user
-                  Notifications.dismissNotificationAsync('rest-timer-monitor');
-                });
-              }
-            }
-          }
+          // No more special notification for rest timer completion
         }
       } else if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
         // App has come to the foreground - dismiss all notifications
@@ -391,8 +319,17 @@ export default function StartedWorkoutInterface() {
           console.error("Error dismissing notifications:", err)
         );
         
+        // Cancel any scheduled notifications as well
+        Notifications.getAllScheduledNotificationsAsync()
+          .then(notifications => {
+            notifications.forEach(notification => {
+              Notifications.cancelScheduledNotificationAsync(notification.identifier);
+            });
+          })
+          .catch(err => console.error("Error cancelling scheduled notifications:", err));
+        
         // Recalculate workout time based on elapsed time
-        if (workoutStarted && timerStartTime && workoutStage !== 'rest' && workoutStage !== 'completed') {
+        if (workoutStarted && timerStartTime && workoutStage !== 'completed') {
           const now = Date.now();
           const elapsedSeconds = Math.floor((now - timerStartTime) / 1000);
           setWorkoutTime(elapsedSeconds);
@@ -413,7 +350,9 @@ export default function StartedWorkoutInterface() {
             stopRestTimer();
             setCurrentSetIndex(currentSetIndex + 1);
             setWorkoutStage('exercise');
-            Vibration.vibrate([500, 300, 500]);
+            if (enableVibration) {
+              Vibration.vibrate([500, 300, 500]);
+            }
           } else {
             // Continue rest timer
             stopRestTimer();
@@ -873,7 +812,7 @@ export default function StartedWorkoutInterface() {
           </View>
           
           <TouchableOpacity
-            style={[styles.addTimeButton, { backgroundColor: theme.type === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)' }]}
+            style={[styles.addTimeButton, { backgroundColor: theme.type === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.2)' }]}
             onPress={() => setRestTimeRemaining(prev => prev + 15)}
           >
             <Text style={[styles.addTimeButtonText, { color: theme.text }]}>+15s</Text>
