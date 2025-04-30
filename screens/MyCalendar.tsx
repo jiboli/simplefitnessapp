@@ -94,7 +94,7 @@ export default function MyCalendar() {
 
       const endOfDayTimestamp = startOfDayTimestamp + 86400 - 1;
 
-      // Fetch today's workout
+      // Fetch today's workout - modified to exclude logged workouts
       const todayResult = await db.getAllAsync<{
         workout_name: string;
         workout_date: number;
@@ -102,7 +102,8 @@ export default function MyCalendar() {
         workout_log_id: number;
       }>(
         `SELECT * FROM Workout_Log 
-         WHERE workout_date BETWEEN ? AND ?;`,
+         WHERE workout_date BETWEEN ? AND ?
+           AND workout_log_id NOT IN (SELECT DISTINCT workout_log_id FROM Weight_Log);`,
         [startOfDayTimestamp, endOfDayTimestamp]
       );
       setTodayWorkout(todayResult[0] || null);
