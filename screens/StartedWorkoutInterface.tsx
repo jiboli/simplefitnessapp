@@ -78,13 +78,14 @@ export default function StartedWorkoutInterface() {
   const restTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
-    fetchWorkoutDetails();
-    
+    fetchWorkoutDetails()    
     return () => {
       stopWorkoutTimer();
       stopRestTimer();
     };
   }, []);
+  
+  
   
   const fetchWorkoutDetails = async () => {
     try {
@@ -475,8 +476,9 @@ export default function StartedWorkoutInterface() {
         // Start a transaction
         await db.runAsync('BEGIN TRANSACTION;');
         
-        // For each completed set, save to Weight_Log
-        for (const set of completedSets) {
+        // For each completed set, save to Weight_Log with completion time for the first set only
+        for (let i = 0; i < completedSets.length; i++) {
+          const set = completedSets[i];
           await db.runAsync(
             `INSERT INTO Weight_Log (
               workout_log_id, 
@@ -484,15 +486,18 @@ export default function StartedWorkoutInterface() {
               exercise_name, 
               set_number, 
               weight_logged, 
-              reps_logged
-            ) VALUES (?, ?, ?, ?, ?, ?);`,
+              reps_logged,
+              completion_time
+            ) VALUES (?, ?, ?, ?, ?, ?, ?);`,
             [
               workout_log_id,
               set.exercise_id,
               set.exercise_name,
               set.set_number,
               parseFloat(set.weight),
-              set.reps_done
+              set.reps_done,
+              // Only store completion_time on the first set to avoid duplication
+              i === 0 ? workoutTime : null
             ]
           );
         }

@@ -16,7 +16,15 @@ import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { AutoSizeText, ResizeTextMode } from 'react-native-auto-size-text';
 
-
+interface WeightLog {
+  dayName: string;
+  workoutDate: number;
+  exercise: string;
+  weight_logged: number;
+  reps_logged: number;
+  set_number: number;
+  completion_time: number | null;
+}
 
 export default function WeightLogDetail() {
   const route = useRoute();
@@ -29,10 +37,10 @@ export default function WeightLogDetail() {
   const { workoutName } = route.params as { workoutName: string };
   const { weightFormat, dateFormat } = useSettings();
   const [days, setDays] = useState<
-    { day_name: string; workout_date: number }[]
+    { day_name: string; workout_date: number; completion_time: number | null }[]
   >([]);
   const [filteredDays, setFilteredDays] = useState<
-    { day_name: string; workout_date: number }[]
+    { day_name: string; workout_date: number; completion_time: number | null }[]
   >([]);
   const [expandedDays, setExpandedDays] = useState<{ [key: string]: boolean }>(
     {}
@@ -67,12 +75,15 @@ export default function WeightLogDetail() {
       const result = await db.getAllAsync<{
         day_name: string;
         workout_date: number;
+        completion_time: number | null;
       }>(
-        `SELECT DISTINCT Workout_Log.day_name, Workout_Log.workout_date
+        `SELECT DISTINCT Workout_Log.day_name, Workout_Log.workout_date, 
+         MIN(Weight_Log.completion_time) as completion_time
          FROM Weight_Log
          INNER JOIN Workout_Log 
          ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
-         WHERE Workout_Log.workout_name = ?;`,
+         WHERE Workout_Log.workout_name = ?
+         GROUP BY Workout_Log.day_name, Workout_Log.workout_date;`,
         [workoutName]
       );
 
@@ -86,48 +97,51 @@ export default function WeightLogDetail() {
     }
   };
 
-  const fetchLogsForDay = async (dayName: string, workoutDate: number) => {
+  const fetchWeights = async (dayName: string, workoutDate: number) => {
     try {
       const result = await db.getAllAsync<{
         exercise_name: string;
-        set_number: number;
         weight_logged: number;
         reps_logged: number;
+        set_number: number;
+        workout_date: number;
+        day_name: string;
         logged_exercise_id: number;
-
       }>(
-        `SELECT Weight_Log.exercise_name, Weight_Log.set_number, 
-                Weight_Log.weight_logged, Weight_Log.reps_logged, Weight_Log.logged_exercise_id
-         FROM Weight_Log
-         INNER JOIN Workout_Log 
-         ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
-         WHERE Workout_Log.day_name = ? AND Workout_Log.workout_date = ? 
-         ORDER BY Weight_Log.logged_exercise_id ASC;`,
+        `SELECT Weight_Log.exercise_name, Weight_Log.weight_logged, Weight_Log.reps_logged, 
+        Weight_Log.set_number, Workout_Log.workout_date, Workout_Log.day_name, 
+        Weight_Log.logged_exercise_id
+        FROM Weight_Log
+        INNER JOIN Workout_Log ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
+        WHERE Workout_Log.day_name = ? AND Workout_Log.workout_date = ?
+        ORDER BY Weight_Log.exercise_name, Weight_Log.set_number;`,
         [dayName, workoutDate]
       );
 
-      // Group sets by exercise_name
-      const groupedLogs = result.reduce((acc, log) => {
-        const { logged_exercise_id, exercise_name, ...setDetails } = log;
-        const compositeKey = `${logged_exercise_id}_${exercise_name}`;
-        
-        if (!acc[compositeKey]) {
-          acc[compositeKey] = {
-            loggedExerciseId: logged_exercise_id,
-            exerciseName: exercise_name,
-            sets: []
-          };
-        }
-        acc[compositeKey].sets.push(setDetails);
-        return acc;
-      }, {} as { [key: string]: { loggedExerciseId: number; exerciseName: string; sets: any[] } });
+      if (result.length > 0) {
+        // Group sets by exercise_name
+        const groupedLogs = result.reduce((acc, log) => {
+          const { logged_exercise_id, exercise_name, ...setDetails } = log;
+          const compositeKey = `${logged_exercise_id}_${exercise_name}`;
+          
+          if (!acc[compositeKey]) {
+            acc[compositeKey] = {
+              loggedExerciseId: logged_exercise_id,
+              exerciseName: exercise_name,
+              sets: []
+            };
+          }
+          acc[compositeKey].sets.push(setDetails);
+          return acc;
+        }, {} as { [key: string]: { loggedExerciseId: number; exerciseName: string; sets: any[] } });
 
-      setLogs((prev) => ({
-        ...prev,
-        [`${dayName}_${workoutDate}`]: groupedLogs,
-      }));
+        setLogs((prev) => ({
+          ...prev,
+          [`${dayName}_${workoutDate}`]: groupedLogs,
+        }));
+      }
     } catch (error) {
-      console.error('Error fetching logs for day:', error);
+      console.error('Error fetching weights:', error);
     }
   };
 
@@ -140,7 +154,7 @@ export default function WeightLogDetail() {
 
     // Fetch logs if the day is being expanded and hasn't been fetched yet
     if (!logs[key]) {
-      fetchLogsForDay(dayName, workoutDate);
+      fetchWeights(dayName, workoutDate);
     }
   };
 
@@ -196,16 +210,32 @@ export default function WeightLogDetail() {
       : `${day}-${month}-${year}`;
   };
 
+  const formatTime = (timestamp: number | null): string => {
+    if (timestamp === null) {
+      return '';
+    }
+    
+    // Format seconds into HH:MM:SS format
+    const hrs = Math.floor(timestamp / 3600);
+    const mins = Math.floor((timestamp % 3600) / 60);
+    const secs = timestamp % 60;
+    
+    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  };
+
   const renderDay = ({
     day_name,
     workout_date,
+    completion_time
   }: {
     day_name: string;
     workout_date: number;
+    completion_time: number | null;
   }) => {
     const key = `${day_name}_${workout_date}`;
-    const isExpanded = expandedDays[key];
+    const isExpanded = expandedDays[key] as boolean;
     const formattedDate = formatDate(workout_date);
+    const formattedTime = formatTime(completion_time);
   
     const confirmDeleteDay = () => {
       Alert.alert(
@@ -244,51 +274,70 @@ export default function WeightLogDetail() {
     };
   
     return (
-<View key={key} style={[styles.logContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
-  <TouchableOpacity
-    style={styles.logHeader}
-    onPress={() => toggleDayExpansion(day_name, workout_date)}
-    onLongPress={confirmDeleteDay} // Add this line for long press functionality
-  >
-     <AutoSizeText 
-      fontSize={20}
-      numberOfLines={2}
-      mode={ResizeTextMode.max_lines}
-    style={[styles.logDayName, { color: theme.text }]}>
-      {day_name}
-    </AutoSizeText>
+      <View key={key} style={[styles.logContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <TouchableOpacity
+          style={styles.logHeader}
+          onPress={() => toggleDayExpansion(day_name, workout_date)}
+          onLongPress={confirmDeleteDay}
+        >
+          <View style={styles.titleContainer}>
+            <AutoSizeText 
+              fontSize={20}
+              numberOfLines={2}
+              mode={ResizeTextMode.max_lines}
+              style={[styles.logDayName, { color: theme.text }]}>
+              {day_name}
+            </AutoSizeText>
+            
+            {completion_time && (
+              <View style={styles.timeContainer}>
+                <Ionicons name="time-outline" size={16} color={theme.text} style={styles.timeIcon} />
+                <AutoSizeText
+                  fontSize={16}
+                  numberOfLines={1}
+                  mode={ResizeTextMode.max_lines}
+                  style={[styles.completionTime, { color: theme.text }]}>
+                  {formattedTime}
+                </AutoSizeText>
+              </View>
+            )}
+          </View>
 
-
-    <Text style={[styles.logDate, { color: theme.text }]}>{formattedDate}</Text>
-    <Ionicons
-      name={isExpanded ? 'chevron-up' : 'chevron-down'}
-      size={20}
-      color={theme.text}
-    />
-  </TouchableOpacity>
-  {isExpanded && logs[key] && (
-    <View style={styles.logList}>
-               {Object.values(logs[key])
-                  .sort((a, b) => a.loggedExerciseId - b.loggedExerciseId)
-                  .map(({ exerciseName, sets, loggedExerciseId }) => (
-                    <View key={`${loggedExerciseId}_${exerciseName}`} style={styles.logItem}>
-                      <Text style={[styles.exerciseName, { color: theme.text }]}>
-                        {exerciseName}
-                      </Text>
-                      {sets.map((set, index) => (
-                        <Text
-                          key={index}
-                          style={[styles.logDetail, { color: theme.text }]}
-                        >
-                          {t('Set')} {set.set_number}: {set.weight_logged} {weightFormat} {} {set.reps_logged}  {t('Reps')}
-                        </Text>
-                      ))}
-                    </View>
+          <AutoSizeText 
+            fontSize={18}
+            numberOfLines={2}
+            mode={ResizeTextMode.max_lines}
+            style={[styles.logDate, { color: theme.text }]}>
+            {formattedDate}
+          </AutoSizeText>
+          <Ionicons
+            name={isExpanded ? 'chevron-up' : 'chevron-down'}
+            size={20}
+            color={theme.text}
+          />
+        </TouchableOpacity>
+        {isExpanded && logs[key] && (
+          <View style={styles.logList}>
+            {Object.values(logs[key])
+              .sort((a, b) => a.loggedExerciseId - b.loggedExerciseId)
+              .map(({ exerciseName, sets, loggedExerciseId }) => (
+                <View key={`${loggedExerciseId}_${exerciseName}`} style={styles.logItem}>
+                  <Text style={[styles.exerciseName, { color: theme.text }]}>
+                    {exerciseName}
+                  </Text>
+                  {sets.map((set, index) => (
+                    <Text
+                      key={index}
+                      style={[styles.logDetail, { color: theme.text }]}
+                    >
+                      {t('Set')} {set.set_number}: {set.weight_logged} {weightFormat} × {set.reps_logged} {t('Reps')}
+                    </Text>
                   ))}
-    </View>
-  )}
-</View>
-
+                </View>
+              ))}
+          </View>
+        )}
+      </View>
     );
   };
   
@@ -461,10 +510,14 @@ const styles = StyleSheet.create({
   logDayName: {
     fontSize: 20,
     fontWeight: '900',
+    maxWidth: '80%',
   },
   logDate: {
     fontSize: 18,
     fontWeight: 'bold',
+    maxWidth: 120,
+    textAlign: 'right',
+    marginHorizontal: 10,
   },
   logList: {
     marginTop: 10,
@@ -483,5 +536,23 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     fontSize: 16,
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  timeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 10,
+    maxWidth: 120,
+  },
+  timeIcon: {
+    marginRight: 3,
+  },
+  completionTime: {
+    fontSize: 16,
+    flexShrink: 1,
   },
 });

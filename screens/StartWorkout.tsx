@@ -36,10 +36,37 @@ export default function StartWorkout() {
 
   useFocusEffect(
     React.useCallback(() => {
-      fetchWorkouts();
+      async function initializeData() {
+        await addColumn()
+        await fetchWorkouts()
+      }
+      
+      initializeData()
       return () => {};
     }, [])
   );
+
+  const addColumn = async () => {
+    try {
+      // Check if column exists first
+      const tableInfo = await db.getAllAsync(
+        "PRAGMA table_info(Weight_Log);"
+      );
+      const columnExists = tableInfo.some(
+        (column: any) => column.name === 'completion_time'
+      );
+      
+      if (!columnExists) {
+        await db.runAsync('ALTER TABLE Weight_Log ADD COLUMN completion_time TEXT;');
+        console.log('Column added successfully');
+      } else {
+        console.log('Column already exists, skipping');
+      }
+    } catch (error) {
+      console.error('Error managing column:', error);
+    }
+  };
+
 
   const fetchWorkouts = async () => {
     try {

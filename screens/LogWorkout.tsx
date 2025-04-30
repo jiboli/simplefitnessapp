@@ -44,8 +44,16 @@ export default function LogWorkout() {
 
   useFocusEffect(
     useCallback(() => {
-      fetchWorkouts();
-      addColumn();
+      const setup = async () => {
+        await addColumn();
+        await fetchWorkouts();
+      };
+      
+      setup();
+      
+      return () => {
+        // Cleanup function if needed
+      };
     }, [])
   );
 
