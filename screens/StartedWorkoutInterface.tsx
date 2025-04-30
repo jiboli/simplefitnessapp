@@ -12,7 +12,8 @@ import {
   Vibration,
   AppState,
   AppStateStatus,
-  Platform
+  Platform,
+  Switch
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,6 +25,7 @@ import * as Notifications from 'expo-notifications';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
+import { useSettings } from '../context/SettingsContext';
 
 // Define background task names
 const WORKOUT_TIMER_TASK = 'WORKOUT_TIMER_TASK';
@@ -72,13 +74,15 @@ TaskManager.defineTask(REST_TIMER_TASK, async () => {
       return BackgroundFetch.BackgroundFetchResult.NoData;
     }
     
-    const { startTime, duration, exerciseName, setNumber, totalSets } = 
+    const { startTime, duration, exerciseName, setNumber, totalSets, enableVibration, enableNotifications } = 
       restTimerData.notification.request.content.data as { 
         startTime: number, 
         duration: number,
         exerciseName: string,
         setNumber: number,
-        totalSets: number
+        totalSets: number,
+        enableVibration: boolean,
+        enableNotifications: boolean
       };
     
     const now = Date.now();
@@ -86,22 +90,27 @@ TaskManager.defineTask(REST_TIMER_TASK, async () => {
     
     // Check if rest time has completed
     if (elapsedSeconds >= duration) {
-      // Rest time completed - vibrate and notify
-      Vibration.vibrate([500, 300, 500]);
+      // Rest time completed - vibrate only if enabled
+      if (enableVibration) {
+        Vibration.vibrate([500, 300, 500]);
+      }
       
-      await Notifications.scheduleNotificationAsync({
-        content: {
-          title: 'Rest Time Complete!',
-          body: `Get ready for ${exerciseName} - Set ${setNumber} of ${totalSets}`,
-          data: { 
-            type: 'rest_timer_completed',
-            exerciseName,
-            setNumber,
-            totalSets
+      // Send notification only if enabled
+      if (enableNotifications) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Rest Time Complete!',
+            body: `Get ready for ${exerciseName} - Set ${setNumber} of ${totalSets}`,
+            data: { 
+              type: 'rest_timer_completed',
+              exerciseName,
+              setNumber,
+              totalSets
+            },
           },
-        },
-        trigger: null,
-      });
+          trigger: null,
+        });
+      }
       
       // Cancel the background task since rest is complete
       await BackgroundFetch.unregisterTaskAsync(REST_TIMER_TASK);
@@ -149,6 +158,7 @@ export default function StartedWorkoutInterface() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const db = useSQLiteContext();
+  const { notificationPermissionGranted, requestNotificationPermission } = useSettings();
   
   const { workout_log_id } = route.params;
   
@@ -165,6 +175,20 @@ export default function StartedWorkoutInterface() {
   const [workoutStage, setWorkoutStage] = useState<WorkoutStage>('overview');
   const [restTime, setRestTime] = useState('30');
   const [workoutStarted, setWorkoutStarted] = useState(false);
+  
+  // User preference toggles
+  const [enableVibration, setEnableVibration] = useState(true);
+  const [enableNotifications, setEnableNotifications] = useState(false);
+  
+  // Update enableNotifications only if permission is granted and user hasn't manually set it
+  useEffect(() => {
+    // Only set to true if permission is granted, never auto-enable
+    if (notificationPermissionGranted && !enableNotifications) {
+      // Optional: enable notifications by default if permission is granted
+      // Comment this line to require explicit user toggling
+      // setEnableNotifications(true);
+    }
+  }, [notificationPermissionGranted]);
   
   // Sets data for tracking workout
   const [allSets, setAllSets] = useState<ExerciseSet[]>([]);
@@ -203,6 +227,11 @@ export default function StartedWorkoutInterface() {
         (response) => {
           const data = response.notification.request.content.data;
           if (!data) return;
+          
+          // Always dismiss all notifications when user interacts with one
+          Notifications.dismissAllNotificationsAsync().catch(err => 
+            console.error("Error dismissing notifications:", err)
+          );
           
           if (data.type === 'rest_timer_completed') {
             // Rest timer completed from background
@@ -295,8 +324,8 @@ export default function StartedWorkoutInterface() {
             });
           }
           
-          // For rest timer background tracking
-          if (workoutStage === 'rest' && restTimerStartTime) {
+          // For rest timer background tracking - only if notifications are enabled
+          if (workoutStage === 'rest' && restTimerStartTime && enableNotifications) {
             const nextSet = currentSetIndex + 1 < allSets.length 
               ? allSets[currentSetIndex + 1] 
               : null;
@@ -312,7 +341,9 @@ export default function StartedWorkoutInterface() {
                     exerciseName: nextSet.exercise_name,
                     setNumber: nextSet.set_number,
                     totalSets: nextSet.total_sets,
-                    type: 'rest_timer'
+                    type: 'rest_timer',
+                    enableVibration,
+                    enableNotifications
                   },
                 },
                 trigger: null,
@@ -321,9 +352,13 @@ export default function StartedWorkoutInterface() {
           }
         }
       } else if (appState.current.match(/inactive|background/) && nextAppState === 'active') {
-        // App has come to the foreground
+        // App has come to the foreground - dismiss all notifications
+        Notifications.dismissAllNotificationsAsync().catch(err => 
+          console.error("Error dismissing notifications:", err)
+        );
+        
+        // Recalculate workout time based on elapsed time
         if (workoutStarted && timerStartTime && workoutStage !== 'rest' && workoutStage !== 'completed') {
-          // Recalculate workout time based on elapsed time
           const now = Date.now();
           const elapsedSeconds = Math.floor((now - timerStartTime) / 1000);
           setWorkoutTime(elapsedSeconds);
@@ -360,15 +395,22 @@ export default function StartedWorkoutInterface() {
     return () => {
       subscription.remove();
     };
-  }, [workoutStarted, timerStartTime, restTimerStartTime, workoutStage, currentSetIndex, restTime, allSets, workout]);
+  }, [workoutStarted, timerStartTime, restTimerStartTime, workoutStage, currentSetIndex, restTime, allSets, workout, enableNotifications, enableVibration]);
   
   useEffect(() => {
     // Check if completion_time column exists, add it if not
     checkAndAddCompletionTimeColumn();
     fetchWorkoutDetails()    
     return () => {
+      // Clean up resources
       stopWorkoutTimer();
       stopRestTimer();
+      deactivateKeepAwake();
+      
+      // Dismiss any remaining notifications
+      Notifications.dismissAllNotificationsAsync().catch(err => 
+        console.error("Error dismissing notifications on unmount:", err)
+      );
     };
   }, []);
   
@@ -467,8 +509,12 @@ export default function StartedWorkoutInterface() {
           stopRestTimer();
           setCurrentSetIndex(currentSetIndex + 1);
           setWorkoutStage('exercise');
-          // Vibrate device when rest timer completes
-          Vibration.vibrate([500, 300, 500]);
+          
+          // Vibrate only if enabled
+          if (enableVibration) {
+            Vibration.vibrate([500, 300, 500]);
+          }
+          
           return 0;
         }
         return prevTime - 1;
@@ -504,6 +550,35 @@ export default function StartedWorkoutInterface() {
     setWorkoutStarted(true);
     setWorkoutStage('exercise');
     startWorkoutTimer();
+  };
+  
+  // Handle notification toggle with permission check
+  const handleNotificationToggle = async () => {
+    if (!enableNotifications) {
+      // User is trying to enable notifications
+      if (!notificationPermissionGranted) {
+        // Permission not granted, navigate to settings
+        Alert.alert(
+          'Permission Required',
+          'Notification permission is required. Please enable notifications in the Settings page.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Go to Settings', 
+              onPress: () => navigation.navigate('Settings' as never),
+              style: 'default' 
+            },
+          ]
+        );
+        return;
+      }
+      
+      // Permission already granted, enable notifications
+      setEnableNotifications(true);
+    } else {
+      // User is turning off notifications - simply disable
+      setEnableNotifications(false);
+    }
   };
   
   // Render functions for different workout stages
@@ -557,6 +632,35 @@ export default function StartedWorkoutInterface() {
             maxLength={3}
             placeholderTextColor={theme.type === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'}
           />
+          
+          {/* Toggle switches for user preferences */}
+          <Text style={[styles.setupLabel, { color: theme.text, marginTop: 15 }]}>Workout Settings:</Text>
+          
+          <View style={[styles.toggleRow, { 
+            backgroundColor: theme.type === 'dark' ? '#121212' : '#f0f0f0',
+            borderColor: theme.type === 'dark' ? '#000000' : '#e0e0e0'
+          }]}>
+            <Text style={[styles.toggleText, { color: theme.text }]}>Vibration</Text>
+            <Switch
+              value={enableVibration}
+              onValueChange={setEnableVibration}
+              trackColor={{ false: theme.type === 'dark' ? '#444' : '#ccc', true: theme.buttonBackground }}
+              thumbColor={enableVibration ? (theme.type === 'dark' ? '#fff' : '#fff') : (theme.type === 'dark' ? '#888' : '#f4f3f4')}
+            />
+          </View>
+          
+          <View style={[styles.toggleRow, { 
+            backgroundColor: theme.type === 'dark' ? '#121212' : '#f0f0f0',
+            borderColor: theme.type === 'dark' ? '#000000' : '#e0e0e0'
+          }]}>
+            <Text style={[styles.toggleText, { color: theme.text }]}>Notifications</Text>
+            <Switch
+              value={enableNotifications}
+              onValueChange={() => handleNotificationToggle()}
+              trackColor={{ false: theme.type === 'dark' ? '#444' : '#ccc', true: theme.buttonBackground }}
+              thumbColor={enableNotifications ? (theme.type === 'dark' ? '#fff' : '#fff') : (theme.type === 'dark' ? '#888' : '#f4f3f4')}
+            />
+          </View>
           
           <TouchableOpacity
             style={[styles.startButton, { backgroundColor: theme.buttonBackground }]}
@@ -975,6 +1079,22 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     justifyContent: 'center',
     flex: 1
+  },
+  
+  // Toggle styles
+  toggleRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    paddingVertical: 10, 
+    paddingHorizontal: 15, 
+    borderRadius: 8, 
+    borderWidth: 1, 
+    marginBottom: 10 
+  },
+  toggleText: { 
+    fontSize: 16, 
+    fontWeight: '600' 
   },
   
   // Overview screen styles

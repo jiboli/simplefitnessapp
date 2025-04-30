@@ -438,29 +438,14 @@ const AppContent = () => {
 
   export default function App() {
     const [dbLoaded, setDbLoaded] = useState(false);
-    const [scheduledNotifications, setScheduledNotifications] = useState<Notifications.NotificationRequest[]>([]);
     const navigationRef = useRef<NavigationContainerRef<any>>(null);
-
+    
     useEffect(() => {
       loadDatabase().then(() => setDbLoaded(true));
       
       // Configure notification permissions
       const setupNotifications = async () => {
-        // Request notification permissions
-        const { status: existingStatus } = await Notifications.getPermissionsAsync();
-        let finalStatus = existingStatus;
-        
-        if (existingStatus !== 'granted') {
-          const { status } = await Notifications.requestPermissionsAsync();
-          finalStatus = status;
-        }
-        
-        if (finalStatus !== 'granted') {
-          console.log('Failed to get push token for notifications!');
-          return;
-        }
-        
-        // Configure notification handler
+        // Don't request permissions on app start - this will be handled when needed
         await Notifications.setNotificationHandler({
           handleNotification: async () => ({
             shouldShowAlert: true,
@@ -469,7 +454,7 @@ const AppContent = () => {
           }),
         });
         
-        // Register for background tasks if on real device (not simulator)
+        // Check if device can use background fetch, but don't request permissions
         if (Platform.OS !== 'web') {
           try {
             // Check if device can use background fetch
