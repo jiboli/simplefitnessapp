@@ -6,6 +6,9 @@ import { useSettings } from '../context/SettingsContext';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../utils/useNotifications';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import * as DocumentPicker from 'expo-document-picker';
 
 export default function Settings() {
 
@@ -151,6 +154,122 @@ export default function Settings() {
     </TouchableOpacity>
   );
 
+  // Database management functions
+  const exportDatabase = async () => {
+    try {
+      const dbName = "SimpleDB.db";
+      const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
+      
+      // Check if the database file exists
+      const fileInfo = await FileSystem.getInfoAsync(dbFilePath);
+      
+      if (!fileInfo.exists) {
+        Alert.alert(
+          t('exportFailedTitle') || 'Export Failed',
+          t('databaseNotFound') || 'Database file not found',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
+      // Create a copy of the database to share
+      const tempExportPath = `${FileSystem.cacheDirectory}${dbName}`;
+      await FileSystem.copyAsync({
+        from: dbFilePath,
+        to: tempExportPath
+      });
+      
+      // Check if sharing is available on this device
+      const isAvailable = await Sharing.isAvailableAsync();
+      
+      if (!isAvailable) {
+        Alert.alert(
+          t('exportFailedTitle') || 'Export Failed',
+          t('sharingNotAvailable') || 'Sharing is not available on this device',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+      
+      // Share the database file
+      await Sharing.shareAsync(tempExportPath, {
+        mimeType: 'application/x-sqlite3',
+        dialogTitle: t('exportDatabaseTitle') || 'Export Workout Database',
+        UTI: 'public.database'  // iOS file type
+      });
+      
+    } catch (error) {
+      console.error("Error exporting database:", error);
+      Alert.alert(
+        t('exportFailedTitle') || 'Export Failed',
+        t('exportErrorMessage') || 'Failed to export database',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+  
+  const importDatabase = async () => {
+    try {
+      // Show a confirmation dialog before importing
+      Alert.alert(
+        t('importConfirmTitle') || 'Import Database',
+        t('importConfirmMessage') || 'Importing a database will replace your current data. This action cannot be undone. Continue?',
+        [
+          {
+            text: t('cancel') || 'Cancel',
+            style: 'cancel',
+          },
+          { 
+            text: t('confirm') || 'Confirm', 
+            onPress: async () => {
+              try {
+                // Pick the document to import
+                const result = await DocumentPicker.getDocumentAsync({
+                  type: ['application/x-sqlite3', 'application/octet-stream'],
+                  copyToCacheDirectory: true
+                });
+                
+                if (result.canceled) {
+                  return;
+                }
+                
+                const dbName = "SimpleDB.db";
+                const dbFilePath = `${FileSystem.documentDirectory}SQLite/${dbName}`;
+                
+                // Replace the current database with the imported one
+                await FileSystem.copyAsync({
+                  from: result.assets[0].uri,
+                  to: dbFilePath
+                });
+                
+                Alert.alert(
+                  t('importSuccessTitle') || 'Import Successful',
+                  t('importSuccessMessage') || 'Database imported successfully. Please restart the app for changes to take effect.',
+                  [{ text: 'OK' }]
+                );
+              } catch (error) {
+                console.error("Error during import process:", error);
+                Alert.alert(
+                  t('importFailedTitle') || 'Import Failed',
+                  t('importErrorMessage') || 'Failed to import database',
+                  [{ text: 'OK' }]
+                );
+              }
+            }
+          },
+        ],
+        { cancelable: true }
+      );
+    } catch (error) {
+      console.error("Error importing database:", error);
+      Alert.alert(
+        t('importFailedTitle') || 'Import Failed',
+        t('importErrorMessage') || 'Failed to import database',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
 
@@ -265,6 +384,65 @@ export default function Settings() {
               >
                 {theme.background === '#FFFFFF' ? t('settingsSwitchDark') : t('settingsSwitchLight')}
               </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Data Management Section */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('dataManagement') || 'Data Management'}</Text>
+          
+          <View style={styles.buttonGroup}>
+            {/* Export Database Button */}
+            <TouchableOpacity 
+              style={[
+                styles.button,
+                { backgroundColor:'#121212' }
+              ]} 
+              onPress={exportDatabase}
+            >
+              <View style={styles.buttonContent}>
+                <Ionicons 
+                  name="share-outline" 
+                  size={18} 
+                  color={'#FFFFFF'} 
+                  style={styles.dataButtonIcon} 
+                />
+                <Text 
+                  style={[
+                    styles.buttonText, 
+                    { color:'#FFFFFF' }
+                  ]}
+                >
+                  {t('exportData') || 'Export Data'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            
+            {/* Import Database Button */}
+            <TouchableOpacity 
+              style={[
+                styles.button,
+                { backgroundColor:'#FFFFFF' }
+              ]} 
+              onPress={importDatabase}
+            >
+              <View style={styles.buttonContent}>
+                <Ionicons 
+                  name="download-outline" 
+                  size={18} 
+                  color={'#000000'} 
+                  style={styles.dataButtonIcon} 
+                />
+                <Text 
+                  style={[
+                    styles.buttonText, 
+                    { color:'#000000' }
+                  ]}
+                >
+                  {t('importData') || 'Import Data'}
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -390,5 +568,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 40,
+  },
+  dataButtonIcon: {
+    marginRight: 5,
   },
 });
