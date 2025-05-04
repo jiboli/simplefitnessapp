@@ -13,7 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 type WeightLogNavigationProp = StackNavigationProp<
   WeightLogStackParamList,
-  'LogWeights' | 'WeightLogDetail' | 'AllLogs'
+  'LogWeights' | 'WeightLogDetail' | 'AllLogs' | 'GraphsWorkoutSelection'
 >;
 
 export default function MyProgress() {
@@ -143,16 +143,37 @@ export default function MyProgress() {
   {/* Title */}
   <Text style={[styles.title, { color: theme.text }]}>{t('myProgress')}</Text>
 
-  {/* Log Weights Button */}
+  {/* Buttons Row */}
+  <View style={styles.buttonRow}>
+  
+
+    {/* Log Weights Button */}
+    <TouchableOpacity
+      style={[styles.actionButton, { backgroundColor: theme.buttonBackground }]}
+      onPress={() => navigation.navigate('LogWeights')}
+    >
+      <Ionicons name="stats-chart" size={24} color={theme.buttonText} />
+      <Text style={[styles.actionButtonText, { color: theme.buttonText }]}>
+        {t('trackAWorkout')}
+      </Text>
+    </TouchableOpacity>
+
+  {/* Graphs Button */}
   <TouchableOpacity
-    style={[styles.logWeightsButton, { backgroundColor: theme.buttonBackground }]}
-    onPress={() => navigation.navigate('LogWeights')}
-  >
-    <Ionicons name="stats-chart" size={24} color={theme.buttonText} />
-    <Text style={[styles.logWeightsButtonText, { color: theme.buttonText }]}>
-    {t('trackAWorkout')}    
-    </Text>
-  </TouchableOpacity>
+      style={[styles.actionButton, { backgroundColor: theme.buttonBackground }]}
+      onPress={() => navigation.navigate('GraphsWorkoutSelection')}
+    >
+      <Ionicons name="trending-up" size={24} color={theme.buttonText} />
+      <Text style={[styles.actionButtonText, { color: theme.buttonText }]}>
+        {t('Graphs')}
+      </Text>
+    </TouchableOpacity>
+
+
+
+
+
+  </View>
 
   <TouchableOpacity
         style={[styles.workoutCard, { backgroundColor: theme.card, borderColor: theme.border }]}
@@ -226,16 +247,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#000000',
   },
-
-  tipText: {
-    marginTop: 20, // Space above the text
-    paddingBottom:20,
-    textAlign: 'center', // Center align
-    fontSize: 14, // Smaller font size
-    fontStyle: 'italic', // Italic for emphasis
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 20,
   },
-
-  logWeightsButton: {
+  actionButton: {
     backgroundColor: '#000000',
     borderRadius: 20,
     paddingVertical: 15,
@@ -243,19 +261,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
-    marginBottom:20,
+    flex: 0.48, // Take up slightly less than half the available space
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 5,
   },
-  logWeightsButtonText: {
+  actionButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
-    fontSize: 18,
-    marginLeft: 10,
+    fontSize: 16, // Slightly smaller to fit
+    marginLeft: 8,
+  },
+  tipText: {
+    marginTop: 20, // Space above the text
+    paddingBottom:20,
+    textAlign: 'center', // Center align
+    fontSize: 14, // Smaller font size
+    fontStyle: 'italic', // Italic for emphasis
   },
   workoutCard: {
     backgroundColor: '#F7F7F7',

@@ -42,6 +42,8 @@
   import * as BackgroundFetch from 'expo-background-fetch';
   import { useRecurringWorkouts } from './utils/recurringWorkoutUtils';
   import { AppState } from 'react-native';
+  import GraphsWorkoutSelection from './screens/GraphsWorkoutSelection';
+  import GraphsWorkoutDetails from './screens/GraphsWorkoutDetails';
 
 
 
@@ -150,6 +152,8 @@
     LogWeights: undefined;
     WeightLogDetail:{ workoutName: string }
     AllLogs: undefined;
+    GraphsWorkoutSelection: undefined;
+    GraphsWorkoutDetails: { workoutName: string };
   }
 
   export type StartWorkoutStackParamList = {
@@ -284,6 +288,17 @@
           component={AllLogs}
           options={{ headerShown: false }} // No header for MyCalendar screen
         />    
+      
+      <WeightLogStackScreen.Screen
+        name="GraphsWorkoutSelection"
+        component={GraphsWorkoutSelection}
+        options={{ headerShown: false }}
+      />
+      <WeightLogStackScreen.Screen
+        name="GraphsWorkoutDetails"
+        component={GraphsWorkoutDetails}
+        options={{ headerShown: false }}
+      />
       
       </WeightLogStackScreen.Navigator>
     );
