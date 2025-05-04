@@ -469,7 +469,7 @@ export default function CreateRecurringWorkout() {
                     { color: intervalType === 'custom' ? theme.buttonText : theme.text },
                   ]}
                 >
-                  {t('everyXDays')}
+                  {t('dayInterval')}
                 </Text>
                 <TextInput
                   style={[
@@ -491,7 +491,6 @@ export default function CreateRecurringWorkout() {
                     { color: intervalType === 'custom' ? theme.buttonText : theme.text },
                   ]}
                 >
-                  {t('days')}
                 </Text>
               </View>
               {intervalType === 'custom' && (

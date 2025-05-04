@@ -262,7 +262,7 @@ export default function MyCalendar() {
               fetchWorkouts(); // Refresh the list
             } catch (error) {
               console.error('Error deleting workout log:', error);
-              Alert.alert('Error', 'Failed to delete workout log.');
+              Alert.alert(t('errorTitle'), t('failedToDeleteWorkoutLog'));
             }
           },
         },
@@ -310,7 +310,7 @@ export default function MyCalendar() {
         onPress={() => navigation.navigate('RecurringWorkoutOptions')}
       >
         <Ionicons
-          name="repeat"
+          name="time"
           size={22}
           color={theme.buttonText}
           style={styles.icon}

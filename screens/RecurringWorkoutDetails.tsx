@@ -106,7 +106,7 @@ export default function RecurringWorkoutDetails() {
     if (workout.recurring_interval === 1) {
       return t('everyday');
     } else if (workout.recurring_interval > 1) {
-      return t('everyXDays', { count: workout.recurring_interval });
+      return t('dayInterval', { count: workout.recurring_interval });
     } else if (workout.recurring_interval === 0 && workout.recurring_days) {
       // Weekly schedule with specific days
       return t('weekly');
