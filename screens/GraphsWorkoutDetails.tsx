@@ -6,12 +6,13 @@ import {
   TouchableOpacity, 
   ScrollView,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  FlatList,
+  Modal
 } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useSQLiteContext } from 'expo-sqlite';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Picker } from '@react-native-picker/picker';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { LineChart } from 'react-native-chart-kit';
@@ -41,6 +42,7 @@ type ProcessedDataPoint = {
   x: string; // Date string for display
   y: number; // Value (CES or 1RM)
   timestamp: number; // Raw timestamp for sorting
+  originalData: LogData[]; // Store original data for tooltip
 };
 
 export default function GraphsWorkoutDetails() {
@@ -62,6 +64,14 @@ export default function GraphsWorkoutDetails() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [logData, setLogData] = useState<LogData[]>([]);
   const [chartData, setChartData] = useState<ProcessedDataPoint[]>([]);
+
+  // Dropdown visibility state
+  const [dayDropdownVisible, setDayDropdownVisible] = useState<boolean>(false);
+  const [exerciseDropdownVisible, setExerciseDropdownVisible] = useState<boolean>(false);
+  
+  // Tooltip state
+  const [tooltipVisible, setTooltipVisible] = useState<boolean>(false);
+  const [selectedPoint, setSelectedPoint] = useState<ProcessedDataPoint | null>(null);
 
   // Fetch days for the selected workout
   useEffect(() => {
@@ -234,7 +244,8 @@ export default function GraphsWorkoutDetails() {
       return {
         x: formattedDate,
         y: Number(value.toFixed(1)),
-        timestamp: parseInt(dateStr)
+        timestamp: parseInt(dateStr),
+        originalData: logs
       };
     });
     
@@ -244,6 +255,77 @@ export default function GraphsWorkoutDetails() {
       .slice(-10);
     
     setChartData(sortedData);
+  };
+
+  const handleDataPointClick = (data: any) => {
+    // Find the data point that was clicked
+    if (data.index !== undefined && chartData[data.index]) {
+      setSelectedPoint(chartData[data.index]);
+      setTooltipVisible(true);
+    }
+  };
+
+  const closeTooltip = () => {
+    setTooltipVisible(false);
+    setSelectedPoint(null);
+  };
+
+  // Render tooltip
+  const renderTooltip = () => {
+    if (!selectedPoint) return null;
+
+    const date = new Date(selectedPoint.timestamp * 1000);
+    const formattedDate = date.toLocaleDateString();
+    
+    return (
+      <Modal
+        transparent={true}
+        visible={tooltipVisible}
+        onRequestClose={closeTooltip}
+        animationType="fade"
+      >
+        <TouchableOpacity 
+          style={styles.tooltipOverlay} 
+          activeOpacity={1} 
+          onPress={closeTooltip}
+        >
+          <View style={[styles.tooltipContainer, { backgroundColor: theme.card, borderColor: theme.border }]}>
+            <View style={styles.tooltipHeader}>
+              <Text style={[styles.tooltipTitle, { color: theme.text }]}>
+                {selectedExercise} - {formattedDate}
+              </Text>
+              <TouchableOpacity onPress={closeTooltip}>
+                <Ionicons name="close" size={24} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={[styles.tooltipSubtitle, { color: theme.text }]}>
+              {calculationType === 'CES' 
+                ? `${t('CES')}: ${selectedPoint.y.toFixed(1)}`
+                : `${t('1RM')}: ${selectedPoint.y.toFixed(1)} ${t('kg')}`
+              }
+            </Text>
+            
+            <View style={styles.tooltipSetsList}>
+              <Text style={[styles.tooltipSetsHeader, { color: theme.text }]}>
+                {t('Sets')}:
+              </Text>
+              <FlatList
+                data={selectedPoint.originalData}
+                keyExtractor={(item, index) => `${item.logged_exercise_id}_${index}`}
+                renderItem={({ item }) => (
+                  <View style={styles.tooltipSetItem}>
+                    <Text style={[styles.tooltipSetText, { color: theme.text }]}>
+                      {t('Set')} {item.set_number}: {item.weight_logged} {t('kg')} × {item.reps_logged} {t('Reps')}
+                    </Text>
+                  </View>
+                )}
+              />
+            </View>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    );
   };
 
   // Render the chart
@@ -298,6 +380,7 @@ export default function GraphsWorkoutDetails() {
           bezier
           style={styles.chart}
           verticalLabelRotation={30}
+          onDataPointClick={handleDataPointClick}
         />
       </View>
     );
@@ -347,8 +430,168 @@ export default function GraphsWorkoutDetails() {
     );
   };
 
+  // Render day dropdown button
+  const renderDayDropdown = () => {
+    const selectedDayObj = days.find(day => day.value === selectedDay);
+    
+    return (
+      <View style={styles.pickerContainer}>
+        <Text style={[styles.pickerLabel, { color: theme.text }]}>
+          {t('Select Day')}
+        </Text>
+        <TouchableOpacity
+          style={[styles.dropdownButton, { backgroundColor: theme.card, borderColor: theme.border }]}
+          onPress={() => {
+            setDayDropdownVisible(!dayDropdownVisible);
+            setExerciseDropdownVisible(false); // Close other dropdown
+          }}
+        >
+          <Text style={[styles.dropdownButtonText, { color: theme.text }]}>
+            {selectedDayObj ? selectedDayObj.label : t('Select a day')}
+          </Text>
+          <Ionicons
+            name={dayDropdownVisible ? 'chevron-up' : 'chevron-down'}
+            size={18}
+            color={theme.text}
+            style={styles.dropdownIcon}
+          />
+        </TouchableOpacity>
+        
+        {dayDropdownVisible && days.length > 0 && (
+          <View style={[styles.dropdownListContainer, { borderColor: theme.border }]}>
+            <FlatList
+              data={days}
+              keyExtractor={(item) => item.value}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownItem,
+                    selectedDay === item.value && styles.dropdownItemActive,
+                    { backgroundColor: selectedDay === item.value ? theme.buttonBackground : theme.card }
+                  ]}
+                  onPress={() => {
+                    setSelectedDay(item.value);
+                    setDayDropdownVisible(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      selectedDay === item.value && styles.dropdownItemTextActive,
+                      { color: selectedDay === item.value ? theme.buttonText : theme.text }
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  {selectedDay === item.value && (
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color={theme.buttonText}
+                      style={styles.dropdownItemIcon}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
+              style={styles.dropdownList}
+              nestedScrollEnabled={true}
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  // Render exercise dropdown button
+  const renderExerciseDropdown = () => {
+    const selectedExerciseObj = exercises.find(exercise => exercise.value === selectedExercise);
+    
+    return (
+      <View style={styles.pickerContainer}>
+        <Text style={[styles.pickerLabel, { color: theme.text }]}>
+          {t('Select Exercise')}
+        </Text>
+        <TouchableOpacity
+          style={[styles.dropdownButton, { backgroundColor: theme.card, borderColor: theme.border }]}
+          onPress={() => {
+            if (exercises.length > 0) {
+              setExerciseDropdownVisible(!exerciseDropdownVisible);
+              setDayDropdownVisible(false); // Close other dropdown
+            }
+          }}
+          disabled={exercises.length === 0}
+        >
+          <Text style={[
+            styles.dropdownButtonText, 
+            { color: exercises.length > 0 ? theme.text : theme.inactivetint }
+          ]}>
+            {selectedExerciseObj 
+              ? selectedExerciseObj.label 
+              : exercises.length > 0 
+                ? t('Select an exercise') 
+                : t('No exercises available')}
+          </Text>
+          {exercises.length > 0 && (
+            <Ionicons
+              name={exerciseDropdownVisible ? 'chevron-up' : 'chevron-down'}
+              size={18}
+              color={theme.text}
+              style={styles.dropdownIcon}
+            />
+          )}
+        </TouchableOpacity>
+        
+        {exerciseDropdownVisible && exercises.length > 0 && (
+          <View style={[styles.dropdownListContainer, { borderColor: theme.border }]}>
+            <FlatList
+              data={exercises}
+              keyExtractor={(item) => item.value}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownItem,
+                    selectedExercise === item.value && styles.dropdownItemActive,
+                    { backgroundColor: selectedExercise === item.value ? theme.buttonBackground : theme.card }
+                  ]}
+                  onPress={() => {
+                    setSelectedExercise(item.value);
+                    setExerciseDropdownVisible(false);
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.dropdownItemText,
+                      selectedExercise === item.value && styles.dropdownItemTextActive,
+                      { color: selectedExercise === item.value ? theme.buttonText : theme.text }
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  {selectedExercise === item.value && (
+                    <Ionicons
+                      name="checkmark"
+                      size={18}
+                      color={theme.buttonText}
+                      style={styles.dropdownItemIcon}
+                    />
+                  )}
+                </TouchableOpacity>
+              )}
+              style={styles.dropdownList}
+              nestedScrollEnabled={true}
+            />
+          </View>
+        )}
+      </View>
+    );
+  };
+
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+    <ScrollView 
+      style={[styles.container, { backgroundColor: theme.background }]}
+      nestedScrollEnabled={true}
+      contentContainerStyle={styles.scrollContent}
+    >
       {/* Back Button */}
       <TouchableOpacity
         style={styles.backButton}
@@ -407,45 +650,10 @@ export default function GraphsWorkoutDetails() {
       </View>
       
       {/* Day and Exercise Selectors */}
-      <View style={styles.selectionContainer}>
-        {/* Day selection */}
-        <View style={styles.pickerContainer}>
-          <Text style={[styles.pickerLabel, { color: theme.text }]}>
-            {t('Select Day')}
-          </Text>
-          <View style={[styles.pickerWrapper, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Picker
-              selectedValue={selectedDay}
-              onValueChange={(itemValue) => setSelectedDay(itemValue)}
-              style={[styles.picker, { color: theme.text }]}
-              dropdownIconColor={theme.text}
-            >
-              {days.map((day) => (
-                <Picker.Item key={day.value} label={day.label} value={day.value} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        
-        {/* Exercise selection */}
-        <View style={styles.pickerContainer}>
-          <Text style={[styles.pickerLabel, { color: theme.text }]}>
-            {t('Select Exercise')}
-          </Text>
-          <View style={[styles.pickerWrapper, { backgroundColor: theme.card, borderColor: theme.border }]}>
-            <Picker
-              selectedValue={selectedExercise}
-              onValueChange={(itemValue) => setSelectedExercise(itemValue)}
-              style={[styles.picker, { color: theme.text }]}
-              dropdownIconColor={theme.text}
-              enabled={exercises.length > 0}
-            >
-              {exercises.map((exercise) => (
-                <Picker.Item key={exercise.value} label={exercise.label} value={exercise.value} />
-              ))}
-            </Picker>
-          </View>
-        </View>
+      <View style={[styles.selectionContainer, (dayDropdownVisible || exerciseDropdownVisible) && styles.expandedSelectionContainer]}>
+        {/* Custom dropdown selectors */}
+        {renderDayDropdown()}
+        {renderExerciseDropdown()}
       </View>
       
       {/* Graph Area */}
@@ -475,6 +683,9 @@ export default function GraphsWorkoutDetails() {
       
       {/* Timeframe selector */}
       {renderTimeFrameButtons()}
+      
+      {/* Tooltip Modal */}
+      {renderTooltip()}
     </ScrollView>
   );
 }
@@ -483,6 +694,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
   backButton: {
     marginTop: 40,
@@ -520,22 +734,67 @@ const styles = StyleSheet.create({
   selectionContainer: {
     marginBottom: 20,
   },
+  expandedSelectionContainer: {
+    marginBottom: 20,
+  },
   pickerContainer: {
     marginBottom: 15,
+    zIndex: 1,
   },
   pickerLabel: {
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 5,
   },
-  pickerWrapper: {
-    borderRadius: 10,
+  dropdownButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 15,
+  },
+  dropdownButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  dropdownIcon: {
+    marginLeft: 10,
+  },
+  dropdownListContainer: {
+    borderWidth: 1,
+    borderRadius: 10,
+    marginTop: 5,
+    marginBottom: 15,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
     overflow: 'hidden',
   },
-  picker: {
-    height: 50,
-    width: '100%',
+  dropdownList: {
+    maxHeight: 200,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+  },
+  dropdownItemActive: {
+    backgroundColor: '#007AFF',
+  },
+  dropdownItemText: {
+    fontSize: 16,
+  },
+  dropdownItemTextActive: {
+    fontWeight: 'bold',
+  },
+  dropdownItemIcon: {
+    marginLeft: 10,
   },
   graphSection: {
     marginBottom: 20,
@@ -609,5 +868,58 @@ const styles = StyleSheet.create({
   loader: {
     height: 220,
     justifyContent: 'center',
+  },
+  inactivetint: {
+    opacity: 0.5,
+  },
+  // Tooltip styles
+  tooltipOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  tooltipContainer: {
+    width: '90%',
+    borderRadius: 15,
+    padding: 15,
+    borderWidth: 1,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  tooltipHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  tooltipTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  tooltipSubtitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 15,
+  },
+  tooltipSetsList: {
+    maxHeight: 300,
+  },
+  tooltipSetsHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  tooltipSetItem: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
+  },
+  tooltipSetText: {
+    fontSize: 15,
   },
 }); 
