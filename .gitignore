@@ -17,6 +17,8 @@ eas.json
 *.p12
 *.key
 *.mobileprovision
+*.apk
+*.aab
 
 # Metro
 .metro-health-check*
@@ -37,3 +39,5 @@ yarn-error.*
 *.tsbuildinfo
 
 /keys
+
+/utils/notesaboutfeature.txt
