@@ -27,6 +27,7 @@ import * as TaskManager from 'expo-task-manager';
 import * as BackgroundFetch from 'expo-background-fetch';
 import { useSettings } from '../context/SettingsContext';
 
+
 // Define background task names
 const WORKOUT_TIMER_TASK = 'WORKOUT_TIMER_TASK';
 const REST_TIMER_TASK = 'REST_TIMER_TASK';
@@ -144,7 +145,7 @@ export default function StartedWorkoutInterface() {
   const { theme } = useTheme();
   const { t } = useTranslation();
   const db = useSQLiteContext();
-  const { notificationPermissionGranted, requestNotificationPermission } = useSettings();
+  const { notificationPermissionGranted, requestNotificationPermission, weightFormat, setWeightFormat } = useSettings();
   
   const { workout_log_id } = route.params;
   
@@ -701,7 +702,7 @@ export default function StartedWorkoutInterface() {
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: theme.text }]}>{t('weightKgLbs')}</Text>
+              <Text style={[styles.inputLabel, { color: theme.text }]}> {t('Weight')} ({weightFormat})</Text>
               <TextInput
                 style={[styles.input, { 
                   backgroundColor: theme.card,
