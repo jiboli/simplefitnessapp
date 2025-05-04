@@ -393,7 +393,7 @@ export default function GraphsWorkoutDetails() {
           strokeWidth: 2
         }
       ],
-      legend: [calculationType === 'CES' ? 'Combined Effort Score' : 'Estimated 1RM']
+      legend: [calculationType === 'CES' ? 'Combined Effort Score' : t('Estimated 1RM')]
     };
 
     const chartConfig = {
