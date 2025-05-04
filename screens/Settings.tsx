@@ -392,16 +392,16 @@ export default function Settings() {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>{t('dataManagement') || 'Data Management'}</Text>
           
-          <View style={styles.buttonGroup}>
+          <View style={styles.dataManagementButtonGroup}>
             {/* Export Database Button */}
             <TouchableOpacity 
               style={[
-                styles.button,
+                styles.dataManagementButton,
                 { backgroundColor:'#121212' }
               ]} 
               onPress={exportDatabase}
             >
-              <View style={styles.buttonContent}>
+              <View style={styles.dataManagementButtonContent}>
                 <Ionicons 
                   name="share-outline" 
                   size={18} 
@@ -410,9 +410,10 @@ export default function Settings() {
                 />
                 <Text 
                   style={[
-                    styles.buttonText, 
+                    styles.dataManagementButtonText, 
                     { color:'#FFFFFF' }
                   ]}
+                  numberOfLines={2}
                 >
                   {t('exportData') || 'Export Data'}
                 </Text>
@@ -422,12 +423,12 @@ export default function Settings() {
             {/* Import Database Button */}
             <TouchableOpacity 
               style={[
-                styles.button,
+                styles.dataManagementButton,
                 { backgroundColor:'#FFFFFF' }
               ]} 
               onPress={importDatabase}
             >
-              <View style={styles.buttonContent}>
+              <View style={styles.dataManagementButtonContent}>
                 <Ionicons 
                   name="download-outline" 
                   size={18} 
@@ -436,9 +437,10 @@ export default function Settings() {
                 />
                 <Text 
                   style={[
-                    styles.buttonText, 
+                    styles.dataManagementButtonText, 
                     { color:'#000000' }
                   ]}
+                  numberOfLines={2}
                 >
                   {t('importData') || 'Import Data'}
                 </Text>
@@ -571,5 +573,31 @@ const styles = StyleSheet.create({
   },
   dataButtonIcon: {
     marginRight: 5,
+  },
+  dataManagementButtonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  dataManagementButton: {
+    borderWidth: 1,
+    borderColor: '#000000',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    minWidth: 130,
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  dataManagementButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
+  dataManagementButtonText: {
+    fontSize: 18,
+    fontWeight: '600',
+    flexShrink: 1,
   },
 });
