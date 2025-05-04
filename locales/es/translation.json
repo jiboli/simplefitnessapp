@@ -292,7 +292,10 @@
       "Year": "Año",
       "All Time": "Todo el tiempo",
       "Select an exercise": "Selecciona un ejercicio",
-      "No exercises available": "No hay ejercicios disponibles"
+      "No exercises available": "No hay ejercicios disponibles",
+
+      "Track a workout first to see your progress": "Registra un entrenamiento primero para ver tu progreso",
+      "No workout data available for graphs": "No hay datos de entrenamiento disponibles para gráficos"
 
 
 

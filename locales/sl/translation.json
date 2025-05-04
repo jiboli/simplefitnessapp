@@ -294,7 +294,9 @@
       "Year": "Leto",
       "All Time": "Ves čas",
       "Select an exercise": "Izberite vajo",
-      "No exercises available": "Ni razpoložljivih vaj"
+      "No exercises available": "Ni razpoložljivih vaj",
+      "Track a workout first to see your progress": "Sledi vadbi, da vidite svoj napredek",
+      "No workout data available for graphs": "Ni podatkov o vadbah za grafi"
         
 
     

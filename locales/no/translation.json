@@ -302,7 +302,9 @@
       "Year": "År",
       "All Time": "All tid",
       "Select an exercise": "Velg en øvelse",
-      "No exercises available": "Ingen øvelser tilgjengelig"
+      "No exercises available": "Ingen øvelser tilgjengelig",
+      "Track a workout first to see your progress": "Spør en økt først for å se din fremgang",
+      "No workout data available for graphs": "Ingen treningsdata tilgjengelig for grafer"
         
 
 }

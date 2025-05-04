@@ -328,6 +328,8 @@
     "Year": "Year",
     "All Time": "All Time",
     "Select an exercise": "Select an exercise",
-    "No exercises available": "No exercises available"
+    "No exercises available": "No exercises available",
+    "Track a workout first to see your progress": "Track a workout first to see your progress",
+    "No workout data available for graphs": "No workout data available for graphs"
   }
   

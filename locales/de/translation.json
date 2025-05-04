@@ -287,7 +287,12 @@
   "Year": "Jahr",
   "All Time": "Gesamtzeitraum",
   "Select an exercise": "Wähle eine Übung",
-  "No exercises available": "Keine Übungen verfügbar"
+  "No exercises available": "Keine Übungen verfügbar",
+
+   "Track a workout first to see your progress": "Erfasse zuerst ein Workout, um deinen Fortschritt zu sehen",
+  "No workout data available for graphs": "Keine Workout-Daten für Diagramme verfügbar"
+
+
 
 
 }

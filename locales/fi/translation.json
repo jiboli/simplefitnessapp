@@ -296,7 +296,9 @@
   "Year": "Vuosi",
   "All Time": "Kaikki ajat",
   "Select an exercise": "Valitse liike",
-  "No exercises available": "Liikkeitä ei ole saatavilla"
+  "No exercises available": "Liikkeitä ei ole saatavilla",
+  "Track a workout first to see your progress": "Seuraa harjoitusta ensin, jotta voit nähdä edistymisesi",
+  "No workout data available for graphs": "Ei treenitietoja graafeille"
     
     
 
