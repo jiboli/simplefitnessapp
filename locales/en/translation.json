@@ -312,13 +312,22 @@
     "_comment_Graphs": "These are Graphs-related strings.",
 
     "Graphs": "Graphs",
-    "SelectWorkoutforGraph": "Select a Workout for Graphs"
-
-
-    
-
-
-
-
+    "SelectWorkoutforGraph": "Select a Workout for Graphs",
+   
+    "No data available for the selected criteria": "No data available for the selected criteria",
+    "Combined Effort Score": "Combined Effort Score",
+    "About CES": "About CES",
+    "About 1RM": "About 1RM",
+    "CESExplanation": "CES (Combined Effort Score) measures your total workout volume accounting for weight, reps, and intensity.",
+    "1RMExplanation": "1RM (One Rep Max) estimates the maximum weight you could lift for a single repetition based on your performance.\n(This is not the actual 1RM, developer of the app is not responsible for any injuries if you use this estimate as your 1RM)",
+    "Time Frame": "Time Frame",
+    "Estimated 1RM": "Estimated 1RM",
+    "Select Exercise": "Select Exercise",
+    "Week": "Week",
+    "Month": "Month",
+    "Year": "Year",
+    "All Time": "All Time",
+    "Select an exercise": "Select an exercise",
+    "No exercises available": "No exercises available"
   }
   

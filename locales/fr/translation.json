@@ -274,8 +274,34 @@
     "remindScheduledWorkouts": "Rappeler les entraînements programmés",
 
     "completeSet": "Terminer la série",
-"upcomingSet": "Série à venir",
-"set": "Série"
+    "upcomingSet": "Série à venir",
+    "set": "Série",
+
+
+
+    
+      "_comment_Graphs": "Ces chaînes sont liées aux graphiques.",
+      "Graphs": "Graphiques",
+      "SelectWorkoutforGraph": "Sélectionnez un entraînement pour les graphiques",
+      "No data available for the selected criteria": "Aucune donnée disponible pour les critères sélectionnés",
+      "Combined Effort Score": "CES (Combined Effort Score)",
+      "About CES": "À propos de CES",
+      "About 1RM": "À propos de 1RM",
+      "CESExplanation": "Le CES (Combined Effort Score) mesure votre volume total d’entraînement en tenant compte du poids, des répétitions et de l’intensité.",
+      "1RMExplanation": "Le 1RM (One Rep Max) estime la charge maximale que vous pourriez soulever pour une seule répétition selon vos performances.\n(Il ne s’agit pas du 1RM réel ; le développeur n’est pas responsable des blessures en cas d’utilisation de cette estimation comme votre 1RM.)",
+      "Time Frame": "Période",
+      "Select Exercise": "Sélectionnez un exercice",
+      "Estimated 1RM": "1RM estimé",
+      "Week": "Semaine",
+      "Month": "Mois",
+      "Year": "Année",
+      "All Time": "Tout le temps",
+      "Select an exercise": "Sélectionnez un exercice",
+      "No exercises available": "Aucun exercice disponible"
+    
+    
+
+
 
 
 

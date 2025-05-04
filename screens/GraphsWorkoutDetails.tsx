@@ -480,7 +480,7 @@ export default function GraphsWorkoutDetails() {
     return (
       <View style={styles.pickerContainer}>
         <Text style={[styles.pickerLabel, { color: theme.text }]}>
-          {t('Select Day')}
+          {t('selectDay')}
         </Text>
         <TouchableOpacity
           style={[styles.dropdownButton, { backgroundColor: theme.card, borderColor: theme.border }]}
@@ -490,7 +490,7 @@ export default function GraphsWorkoutDetails() {
           }}
         >
           <Text style={[styles.dropdownButtonText, { color: theme.text }]}>
-            {selectedDayObj ? selectedDayObj.label : t('Select a day')}
+            {selectedDayObj ? selectedDayObj.label : t('selectDay')}
           </Text>
           <Ionicons
             name={dayDropdownVisible ? 'chevron-up' : 'chevron-down'}
@@ -718,8 +718,8 @@ export default function GraphsWorkoutDetails() {
           </Text>
           <Text style={[styles.infoText, { color: theme.text }]}>
             {calculationType === 'CES' 
-              ? t('CES (Combined Effort Score) measures your total workout volume accounting for weight, reps, and intensity.')
-              : t('1RM (One Rep Max) estimates the maximum weight you could lift for a single repetition based on your performance.')}
+              ? t('CESExplanation')
+              : t('1RMExplanation')}
           </Text>
         </View>
       </View>

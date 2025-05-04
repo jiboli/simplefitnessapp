@@ -274,7 +274,31 @@
 
     "completeSet": "Set voltooien",
     "upcomingSet": "Aanstaande set",
-    "set": "Set"
+    "set": "Set",
+
+
+
+  
+      "_comment_Graphs": "Dit zijn tekenreeksen voor grafieken.",
+      "Graphs": "Grafieken",
+      "SelectWorkoutforGraph": "Kies een training voor grafieken",
+      "No data available for the selected criteria": "Geen gegevens voor de geselecteerde criteria",
+      "Combined Effort Score": "CES (Combined Effort Score)",
+      "About CES": "Over CES",
+      "About 1RM": "Over 1RM",
+      "Estimated 1RM": "Geschatte 1RM",
+      "CESExplanation": "CES (Combined Effort Score) meet je totale trainingsvolume rekening houdend met gewicht, herhalingen en intensiteit.",
+      "1RMExplanation": "1RM (One Rep Max) schat het maximale gewicht dat je voor één herhaling kunt tillen op basis van je prestatie.\n(Dit is niet je daadwerkelijke 1RM; de ontwikkelaar is niet verantwoordelijk voor blessures bij gebruik van deze schatting als je 1RM.)",
+      "Time Frame": "Tijdsbestek",
+      "Select Exercise": "Kies oefening",
+      "Week": "Week",
+      "Month": "Maand",
+      "Year": "Jaar",
+      "All Time": "Alle tijden",
+      "Select an exercise": "Kies een oefening",
+      "No exercises available": "Geen oefeningen beschikbaar"
+    
+    
     
 
 

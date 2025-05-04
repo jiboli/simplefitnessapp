@@ -268,7 +268,27 @@
   "remindScheduledWorkouts": "Geplante Workouts erinnern",
   "completeSet": "Satz abschließen",
 "upcomingSet": "Kommender Satz",
-"set": "Satz"
+"set": "Satz",
+
+  "_comment_Graphs": "Dies sind Zeichenketten zu Diagrammen.",
+  "Graphs": "Diagramme",
+  "SelectWorkoutforGraph": "Wähle ein Workout für Diagramme",
+  "No data available for the selected criteria": "Für die gewählten Kriterien sind keine Daten verfügbar",
+  "Combined Effort Score": "CES (Combined Effort Score)",
+  "About CES": "Über CES",
+  "Estimated 1RM": "Geschätztes 1RM",
+  "About 1RM": "Über 1RM",
+  "CESExplanation": "Der CES (Combined Effort Score) misst dein gesamtes Trainingsvolumen unter Berücksichtigung von Gewicht, Wiederholungen und Intensität.",
+  "1RMExplanation": "1RM (One Rep Max) schätzt das maximale Gewicht, das du bei einer einzigen Wiederholung heben könntest, basierend auf deiner Leistung.\n(Dies ist nicht dein tatsächliches 1RM, der Entwickler der App übernimmt keine Verantwortung für Verletzungen bei Verwendung dieser Schätzung als dein 1RM.)",
+  "Time Frame": "Zeitraum",
+  "Select Exercise": "Übung auswählen",
+  "Week": "Woche",
+  "Month": "Monat",
+  "Year": "Jahr",
+  "All Time": "Gesamtzeitraum",
+  "Select an exercise": "Wähle eine Übung",
+  "No exercises available": "Keine Übungen verfügbar"
+
 
 }
   

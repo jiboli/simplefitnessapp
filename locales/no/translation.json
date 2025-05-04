@@ -279,6 +279,30 @@
 
     "completeSet": "Fullfør sett",
     "upcomingSet": "Kommende sett",
-    "set": "Sett"
+    "set": "Sett",
+
+
+
+
+    
+      "_comment_Graphs": "Disse strengene gjelder grafer.",
+      "Graphs": "Grafer",
+      "SelectWorkoutforGraph": "Velg en økt for grafer",
+      "No data available for the selected criteria": "Ingen data for de valgte kriteriene",
+      "Combined Effort Score": "CES (Combined Effort Score)",
+      "About CES": "Om CES",
+      "About 1RM": "Om 1RM",
+      "CESExplanation": "CES (Combined Effort Score) måler ditt totale treningsvolum med vekt på vekt, repetisjoner og intensitet.",
+      "1RMExplanation": "1RM (One Rep Max) anslår maksimal vekt du kan løfte én repetisjon med, basert på ytelsen din.\n(Ikke det faktiske 1RM – utvikler er ikke ansvarlig for skader ved bruk av dette estimatet som ditt 1RM.)",
+      "Time Frame": "Tidsperiode",
+      "Estimated 1RM": "Estimert 1RM",
+      "Select Exercise": "Velg øvelse",
+      "Week": "Uke",
+      "Month": "Måned",
+      "Year": "År",
+      "All Time": "All tid",
+      "Select an exercise": "Velg en øvelse",
+      "No exercises available": "Ingen øvelser tilgjengelig"
+        
 
 }

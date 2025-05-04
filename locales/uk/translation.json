@@ -273,6 +273,28 @@
 
     "completeSet": "Завершити підхід",
     "upcomingSet": "Наступний підхід",
-    "set": "Підхід"
+    "set": "Підхід",
+
+
+  
+      "_comment_Graphs": "Ці рядки пов’язані з графіками.",
+      "Graphs": "Графіки",
+      "SelectWorkoutforGraph": "Виберіть тренування для графіків",
+      "No data available for the selected criteria": "Немає даних за обраними критеріями",
+      "Combined Effort Score": "CES (Combined Effort Score)",
+      "About CES": "Про CES",
+      "About 1RM": "Про 1RM",
+      "CESExplanation": "CES (Combined Effort Score) вимірює загальний обсяг тренування з урахуванням ваги, повторень і інтенсивності.",
+      "1RMExplanation": "1RM (One Rep Max) оцінює максимальну вагу, яку ви могли б підняти за одне повторення на основі ваших результатів.\n(Це не реальний 1RM; розробник не несе відповідальності за травми при використанні цієї оцінки як вашого 1RM.)",
+      "Time Frame": "Проміжок часу",
+      "Estimated 1RM": "Оцінений 1RM",
+      "Select Exercise": "Виберіть вправу",
+      "Week": "Тиждень",
+      "Month": "Місяць",
+      "Year": "Рік",
+      "All Time": "За весь час",
+      "Select an exercise": "Виберіть вправу",
+      "No exercises available": "Немає доступних вправ"
+        
     
 }

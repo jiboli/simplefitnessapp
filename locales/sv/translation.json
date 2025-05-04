@@ -276,7 +276,30 @@
 
     "completeSet": "Slutför set",
     "upcomingSet": "Kommande set",
-    "set": "Set"
+    "set": "Set",
+
+
+
+    
+      "_comment_Graphs": "Dessa strängar gäller grafer.",
+      "Graphs": "Grafer",
+      "SelectWorkoutforGraph": "Välj ett träningspass för grafer",
+      "No data available for the selected criteria": "Ingen data för de valda kriterierna",
+      "Combined Effort Score": "CES (Combined Effort Score)",
+      "About CES": "Om CES",
+      "About 1RM": "Om 1RM",
+      "CESExplanation": "CES (Combined Effort Score) mäter din totala träningsvolym med hänsyn till vikt, repetitioner och intensitet.",
+      "1RMExplanation": "1RM (One Rep Max) uppskattar den maximala vikt du kan lyfta för en repetition baserat på din prestation.\n(Detta är inte ditt faktiska 1RM; utvecklaren ansvarar inte för skador om du använder denna uppskattning som ditt 1RM.)",
+      "Time Frame": "Tidsram",
+      "Estimated 1RM": "Beräknad 1RM",
+      "Select Exercise": "Välj övning",
+      "Week": "Vecka",
+      "Month": "Månad",
+      "Year": "År",
+      "All Time": "All tid",
+      "Select an exercise": "Välj en övning",
+      "No exercises available": "Inga övningar tillgängliga"
+        
 
     
 }

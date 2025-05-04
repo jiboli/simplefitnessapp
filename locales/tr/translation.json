@@ -303,7 +303,31 @@
 
       "completeSet": "Seti Tamamla",
       "upcomingSet": "Sıradaki Set",
-      "set": "Set"
+      "set": "Set",
+
+
+
+
+      
+        "_comment_Graphs": "Bunlar grafiklerle ilgili metinlerdir.",
+        "Graphs": "Grafikler",
+        "SelectWorkoutforGraph": "Grafikler için bir antrenman seçin",
+        "No data available for the selected criteria": "Seçilen ölçütlere uygun veri yok",
+        "Combined Effort Score": "CES (Combined Effort Score)",
+        "About CES": "CES hakkında",
+        "About 1RM": "1RM hakkında",
+        "CESExplanation": "CES (Combined Effort Score), ağırlık, tekrar ve yoğunluğu dikkate alarak toplam antrenman hacminizi ölçer.",
+        "1RMExplanation": "1RM (One Rep Max), performansınıza dayanarak tek bir tekrar için kaldırabileceğiniz maksimum ağırlığı tahmin eder.\n(Bu gerçek 1RM’niz değildir; bu ağırlık ile antrenman yapmanız durumunda olası yaralanmalardan geliştirici sorumlu değildir.)",
+        "Time Frame": "Zaman Aralığı",
+        "Select Exercise": "Egzersiz seç",
+        "Week": "Hafta",
+        "Estimated 1RM": "Tahmini 1RM",
+        "Month": "Ay",
+        "Year": "Yıl",
+        "All Time": "Tüm Zamanlar",
+        "Select an exercise": "Bir egzersiz seçin",
+        "No exercises available": "Egzersiz bulunmuyor"
+            
         
     
     

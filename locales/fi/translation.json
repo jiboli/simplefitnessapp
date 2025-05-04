@@ -271,8 +271,34 @@
     "remindScheduledWorkouts": "Muistuta aikataulutetuista harjoituksista",
 
     "completeSet": "Suorita sarja",
-"upcomingSet": "Seuraava sarja",
-"set": "Sarja"
+    "upcomingSet": "Seuraava sarja",
+    "set": "Sarja",
+
+
+
+
+
+  
+  "_comment_Graphs": "Nämä merkkijonot liittyvät graafeihin.",
+  "Graphs": "Graafit",
+  "SelectWorkoutforGraph": "Valitse harjoitus graafeihin",
+  "No data available for the selected criteria": "Valituilla kriteereillä ei ole saatavilla dataa",
+  "Combined Effort Score": "CES (Combined Effort Score)",
+  "About CES": "Tietoja CES:stä",
+  "About 1RM": "Tietoja 1RM:stä",
+  "CESExplanation": "CES (Combined Effort Score) mittaa kokonaistreenimääräsi huomioiden painon, toistot ja intensiteetin.",
+  "1RMExplanation": "1RM (One Rep Max) arvioi maksimipainon, jonka voit nostaa yhdellä toistolla suorituksesi perusteella.\n(Ei varsinaista 1RM-arvoasi; sovelluksen kehittäjä ei ota vastuuta loukkaantumisista, jos käytät tätä arviota 1RM:änäsi.)",
+  "Time Frame": "Aikaväli",
+  "Estimated 1RM": "1RM estimado",
+  "Select Exercise": "Valitse liike",
+  "Week": "Viikko",
+  "Month": "Kuukausi",
+  "Year": "Vuosi",
+  "All Time": "Kaikki ajat",
+  "Select an exercise": "Valitse liike",
+  "No exercises available": "Liikkeitä ei ole saatavilla"
+    
+    
 
 
     
