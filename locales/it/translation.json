@@ -268,7 +268,11 @@
     "importFailedTitle": "Importazione fallita",
     "importErrorMessage": "Importazione database fallita",
     "dayInterval": "Intervallo di giorni:",
-    "remindScheduledWorkouts": "Ricorda allenamenti programmati"
+    "remindScheduledWorkouts": "Ricorda allenamenti programmati",
+   "completeSet": "Completa serie",
+    "upcomingSet": "Serie in arrivo",
+    "set": "Serie"
+  
     
 
 

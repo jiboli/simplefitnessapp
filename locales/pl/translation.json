@@ -268,6 +268,11 @@
     "importSuccessMessage": "Baza danych zaimportowana. Uruchom ponownie aplikację.",
     "importFailedTitle": "Import nie powiódł się",
     "importErrorMessage": "Import bazy danych nie powiódł się",
-    "remindScheduledWorkouts": "Przypomnij o zaplanowanych treningach"
+    "remindScheduledWorkouts": "Przypomnij o zaplanowanych treningach",
+
+    "completeSet": "Ukończ serię",
+    "upcomingSet": "Nadchodząca seria",
+    "set": "Seria"
+
     
 }

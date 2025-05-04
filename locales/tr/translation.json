@@ -299,7 +299,11 @@
       "importSuccessMessage": "Veritabanı başarıyla içe aktarıldı. Değişiklikler için uygulamayı yeniden başlatın.",
       "importFailedTitle": "İçe Aktarma Başarısız",
       "importErrorMessage": "Veritabanı içe aktarma başarısız",
-      "remindScheduledWorkouts": "Planlanan Antrenmanları Hatırlat"
+      "remindScheduledWorkouts": "Planlanan Antrenmanları Hatırlat",
+
+      "completeSet": "Seti Tamamla",
+      "upcomingSet": "Sıradaki Set",
+      "set": "Set"
         
     
     

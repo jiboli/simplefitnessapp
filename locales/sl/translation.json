@@ -267,6 +267,11 @@
     "importFailedTitle": "Uvoz ni uspel",
     "importErrorMessage": "Uvoz baze ni uspel",
     "dayInterval": "Interval dni:",
-    "remindScheduledWorkouts": "Opomni na načrtovane treninge"
+    "remindScheduledWorkouts": "Opomni na načrtovane treninge",
+
+    "completeSet": "Dokončaj sklop",
+    "upcomingSet": "Naslednji sklop",
+    "set": "Sklop"
+
     
 }

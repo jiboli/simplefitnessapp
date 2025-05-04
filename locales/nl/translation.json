@@ -269,7 +269,12 @@
     "importSuccessMessage": "Database succesvol geïmporteerd. Start de app opnieuw op om wijzigingen toe te passen.",
     "importFailedTitle": "Import mislukt",
     "importErrorMessage": "Database-import mislukt",
-    "remindScheduledWorkouts": "Herinner geplande trainingen"
+    "remindScheduledWorkouts": "Herinner geplande trainingen",
+
+
+    "completeSet": "Set voltooien",
+    "upcomingSet": "Aanstaande set",
+    "set": "Set"
     
 
 

@@ -275,6 +275,10 @@
     "importSuccessMessage": "Database importert. Vennligst start appen på nytt.",
     "importFailedTitle": "Import mislyktes",
     "importErrorMessage": "Import av database mislyktes",
-    "remindScheduledWorkouts": "Påminn om planlagte økter"
-    
+    "remindScheduledWorkouts": "Påminn om planlagte økter",
+
+    "completeSet": "Fullfør sett",
+    "upcomingSet": "Kommende sett",
+    "set": "Sett"
+
 }

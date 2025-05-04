@@ -271,6 +271,12 @@
     "importSuccessMessage": "Databas importerad. Starta om appen för att ändringar ska gälla.",
     "importFailedTitle": "Import kunde inte slutföras",
     "importErrorMessage": "Fel vid import av databas",
-    "remindScheduledWorkouts": "Pausa om schemalagda pass"
+    "remindScheduledWorkouts": "Pausa om schemalagda pass",
+
+
+    "completeSet": "Slutför set",
+    "upcomingSet": "Kommande set",
+    "set": "Set"
+
     
 }

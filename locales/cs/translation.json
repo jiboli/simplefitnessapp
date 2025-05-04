@@ -267,6 +267,10 @@
     "importSuccessMessage": "Databáze byla úspěšně importována. Pro změny restartujte aplikaci.",
     "importFailedTitle": "Import selhal",
     "importErrorMessage": "Nepodařilo se importovat databázi",
-    "remindScheduledWorkouts": "Připomenout naplánované tréninky"
+    "remindScheduledWorkouts": "Připomenout naplánované tréninky",
+
+  "completeSet": "Dokončit sérii",
+  "upcomingSet": "Nadcházející série",
+  "set": "Série"
     
 }

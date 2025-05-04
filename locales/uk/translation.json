@@ -269,6 +269,10 @@
     "importSuccessMessage": "Базу даних успішно імпортовано. Перезапустіть застосунок для застосування змін.",
     "importFailedTitle": "Помилка імпорту",
     "importErrorMessage": "Не вдалося імпортувати базу даних",
-    "remindScheduledWorkouts": "Нагадувати про заплановані тренування"
+    "remindScheduledWorkouts": "Нагадувати про заплановані тренування",
+
+    "completeSet": "Завершити підхід",
+    "upcomingSet": "Наступний підхід",
+    "set": "Підхід"
     
 }

@@ -268,7 +268,13 @@
     "importSuccessMessage": "Tietokanta tuotiin onnistuneesti. Käynnistä sovellus uudelleen muutosten jälkeen.",
     "importFailedTitle": "Tuonti epäonnistui",
     "importErrorMessage": "Tietokannan tuonti epäonnistui",
-    "remindScheduledWorkouts": "Muistuta aikataulutetuista harjoituksista"
+    "remindScheduledWorkouts": "Muistuta aikataulutetuista harjoituksista",
+
+    "completeSet": "Suorita sarja",
+"upcomingSet": "Seuraava sarja",
+"set": "Sarja"
+
+
     
 
 

@@ -265,7 +265,10 @@
   "importSuccessMessage": "Datenbank erfolgreich importiert. Bitte starte die App neu, damit Änderungen wirksam werden.",
   "importFailedTitle": "Import fehlgeschlagen",
   "importErrorMessage": "Datenbankimport fehlgeschlagen",
-  "remindScheduledWorkouts": "Geplante Workouts erinnern"
+  "remindScheduledWorkouts": "Geplante Workouts erinnern",
+  "completeSet": "Satz abschließen",
+"upcomingSet": "Kommender Satz",
+"set": "Satz"
 
 }
   
