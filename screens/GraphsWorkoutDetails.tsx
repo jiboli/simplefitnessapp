@@ -16,6 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { LineChart } from 'react-native-chart-kit';
+import { useSettings } from '../context/SettingsContext';
 
 // Define the type for route params
 type GraphsParamList = {
@@ -52,6 +53,7 @@ export default function GraphsWorkoutDetails() {
   const db = useSQLiteContext();
   const { theme } = useTheme();
   const { t } = useTranslation();
+  const { dateFormat, weightFormat } = useSettings();
   const screenWidth = Dimensions.get('window').width - 40; // Account for padding
 
   // State variables
@@ -220,6 +222,28 @@ export default function GraphsWorkoutDetails() {
     return maxWeightSet.weight_logged * (1 + maxWeightSet.reps_logged / 30);
   };
 
+  // Format date according to the user's preference
+  const formatDate = (timestamp: number): string => {
+    const date = new Date(timestamp * 1000);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    
+    return dateFormat === 'mm-dd-yyyy' 
+      ? `${month}/${day}/${year}`
+      : `${day}/${month}/${year}`;
+  };
+
+  // Format weight according to the user's preference
+  const formatWeight = (weight: number): string => {
+    if (weightFormat === 'lbs') {
+      // Convert kg to lbs (1 kg ≈ 2.20462 lbs)
+      const weightInLbs = weight * 2.20462;
+      return `${weightInLbs.toFixed(1)} ${t('lbs')}`;
+    }
+    return `${weight.toFixed(1)} ${t('kg')}`;
+  };
+
   const processDataForChart = () => {
     // Group logs by date
     const logsByDate = logData.reduce((acc, log) => {
@@ -234,7 +258,13 @@ export default function GraphsWorkoutDetails() {
     // Process each date's data
     const processedData: ProcessedDataPoint[] = Object.entries(logsByDate).map(([dateStr, logs]) => {
       const date = new Date(parseInt(dateStr) * 1000);
-      const formattedDate = `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+      
+      // Format the date for display in chart (shorter format for chart labels)
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const formattedDate = dateFormat === 'mm-dd-yyyy'
+        ? `${month}/${day}`
+        : `${day}/${month}`;
       
       // Calculate the value based on selected calculation type
       const value = calculationType === 'CES' 
@@ -274,8 +304,7 @@ export default function GraphsWorkoutDetails() {
   const renderTooltip = () => {
     if (!selectedPoint) return null;
 
-    const date = new Date(selectedPoint.timestamp * 1000);
-    const formattedDate = date.toLocaleDateString();
+    const formattedDate = formatDate(selectedPoint.timestamp);
     
     return (
       <Modal
@@ -302,7 +331,7 @@ export default function GraphsWorkoutDetails() {
             <Text style={[styles.tooltipSubtitle, { color: theme.text }]}>
               {calculationType === 'CES' 
                 ? `${t('CES')}: ${selectedPoint.y.toFixed(1)}`
-                : `${t('1RM')}: ${selectedPoint.y.toFixed(1)} ${t('kg')}`
+                : `${t('1RM')}: ${formatWeight(selectedPoint.y)}`
               }
             </Text>
             
@@ -316,7 +345,7 @@ export default function GraphsWorkoutDetails() {
                 renderItem={({ item }) => (
                   <View style={styles.tooltipSetItem}>
                     <Text style={[styles.tooltipSetText, { color: theme.text }]}>
-                      {t('Set')} {item.set_number}: {item.weight_logged} {t('kg')} × {item.reps_logged} {t('Reps')}
+                      {t('Set')} {item.set_number}: {formatWeight(item.weight_logged)} × {item.reps_logged} {t('Reps')}
                     </Text>
                   </View>
                 )}
