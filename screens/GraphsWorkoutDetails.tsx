@@ -236,12 +236,8 @@ export default function GraphsWorkoutDetails() {
 
   // Format weight according to the user's preference
   const formatWeight = (weight: number): string => {
-    if (weightFormat === 'lbs') {
-      // Convert kg to lbs (1 kg ≈ 2.20462 lbs)
-      const weightInLbs = weight * 2.20462;
-      return `${weightInLbs.toFixed(1)} ${t('lbs')}`;
-    }
-    return `${weight.toFixed(1)} ${t('kg')}`;
+    // Just apply the correct unit without conversion
+    return `${weight.toFixed(1)} ${weightFormat}`;
   };
 
   const processDataForChart = () => {
@@ -370,11 +366,29 @@ export default function GraphsWorkoutDetails() {
       );
     }
 
+    // Ensure dates are formatted according to user's preference
+    const formattedChartData = chartData.map(point => {
+      // Parse the date from timestamp
+      const date = new Date(point.timestamp * 1000);
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      
+      // Format according to preference (short format for chart labels)
+      const formattedDate = dateFormat === 'mm-dd-yyyy'
+        ? `${month}/${day}`
+        : `${day}/${month}`;
+        
+      return {
+        ...point,
+        x: formattedDate
+      };
+    });
+
     const data = {
-      labels: chartData.map(point => point.x),
+      labels: formattedChartData.map(point => point.x),
       datasets: [
         {
-          data: chartData.map(point => point.y),
+          data: formattedChartData.map(point => point.y),
           color: (opacity = 1) => `rgba(0, 123, 255, ${opacity})`,
           strokeWidth: 2
         }
