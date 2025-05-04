@@ -983,7 +983,7 @@ export default function StartedWorkoutInterface() {
           <Ionicons name="arrow-back" size={24} color={theme.text} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: theme.text }]}>
-          {workoutStarted ? (workout ? `${workout.workout_name} - ${workout.day_name}` : 'Workout') : 'Start Workout'}
+          {workoutStarted ? (workout ? `${workout.workout_name} - ${workout.day_name}` : 'Workout') : t("startWorkout")}
         </Text>
       </View>
       

@@ -235,7 +235,7 @@ export default function StartWorkout() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Text style={[styles.title, { color: theme.text }]}>Start Workout</Text>
+      <Text style={[styles.title, { color: theme.text }]}>{t('startWorkout')}</Text>
       
       <TouchableOpacity
         style={[
