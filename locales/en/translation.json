@@ -306,7 +306,15 @@
     "importFailedTitle": "Import Failed",
     "importErrorMessage": "Failed to import database",
     "remindScheduledWorkouts": "Remind scheduled workouts",
-    "dayInterval": "Day Interval:"
+    "dayInterval": "Day Interval:",
+
+
+    "_comment_Graphs": "These are Graphs-related strings.",
+
+    "Graphs": "Graphs",
+    "SelectWorkoutforGraph": "Select a Workout for Graphs"
+
+
     
 
 

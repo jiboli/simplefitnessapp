@@ -61,7 +61,7 @@ export default function GraphsWorkoutSelection() {
       
       {/* Title */}
       <Text style={[styles.title, { color: theme.text }]}>
-        {t('Select Workout for Graph')}
+        {t('SelectWorkoutforGraph')}
       </Text>
       
       {/* Workouts List */}
