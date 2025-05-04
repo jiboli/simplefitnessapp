@@ -133,7 +133,7 @@ export default function GraphsWorkoutDetails() {
          INNER JOIN Workout_Log 
          ON Weight_Log.workout_log_id = Workout_Log.workout_log_id
          WHERE Workout_Log.workout_name = ? AND Workout_Log.day_name = ?
-         ORDER BY Weight_Log.exercise_name ASC`,
+         ORDER BY Weight_Log.logged_exercise_id ASC`,
         [workoutName, selectedDay]
       );
       
