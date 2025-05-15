@@ -4,6 +4,20 @@ Welcome to **Simple.**
 
 An easy to use fitness app that lets you create, schedule and track your workouts locally.
 
+## 🪙 Donate
+
+![BTC QR Code](https://github.com/user-attachments/assets/cc2c2281-73c1-4df6-b574-54678806ae03)
+
+`bc1qn6z9q8a9gjhdjj89ladvque74hzlalvm7d8a8l9hpke9f6y49uuqa2s622`
+
+[![Donate BTC](https://img.shields.io/badge/Donate-BTC-orange?logo=bitcoin&style=for-the-badge)](https://github.com/user-attachments/assets/cc2c2281-73c1-4df6-b574-54678806ae03)
+
+
+
+
+
+
+
 
 
 ## 📸 **Screenshots**
