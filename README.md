@@ -45,7 +45,7 @@ An easy to use fitness app that lets you create, schedule and track your workout
 - Choose between `dd-mm-yyyy` or `mm-dd-yyyy` date formats and toggle between `kg` or `lbs` for weights.  
 
 ## 🌍 **Languages**
-🇨🇿 🇩🇪 🇬🇧 🇪🇸 🇫🇮 🇫🇷 🇮🇹 🇳🇱 🇳🇴 🇵🇱 🇵🇹 🇷🇺 🇸🇮 🇸🇪 🇹🇷 🇺🇦
+🇨🇿 🇩🇪 🇩🇰 🇬🇧 🇪🇸 🇫🇮 🇫🇷 🇮🇹 🇯🇵 🇰🇷 🇳🇱 🇳🇴 🇵🇱 🇵🇹 🇷🇺 🇸🇮 🇸🇪 🇹🇷 🇺🇦 🇨🇳
 
 ## 🛠️ **How It Works**
 
