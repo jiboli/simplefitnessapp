@@ -1,0 +1,24 @@
+name: General Issue
+description: File a general issue for this repository
+title: "[Issue]: "
+is_default: true
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Please do not use AI-generated content when creating issues.**
+  - type: checkboxes
+    id: ai-content
+    attributes:
+      label: AI Content Declaration
+      description: Please confirm you have not used AI-generated content.
+      options:
+        - label: I confirm that I have not used AI-generated content in this issue, these are my own words.
+          required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe your issue
+      description: (Your own words here)
+      required: true
