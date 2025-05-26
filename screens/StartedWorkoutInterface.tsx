@@ -295,7 +295,7 @@ export default function StartedWorkoutInterface() {
     if (!workoutTaskRegistered) {
       await BackgroundFetch.registerTaskAsync(WORKOUT_TIMER_TASK, {
         minimumInterval: 60, // update every minute
-        stopOnTerminate: false,
+        stopOnTerminate: true,
         startOnBoot: true,
       });
     }
@@ -304,7 +304,7 @@ export default function StartedWorkoutInterface() {
     if (!restTaskRegistered) {
       await BackgroundFetch.registerTaskAsync(REST_TIMER_TASK, {
         minimumInterval: 15, // check more frequently for rest timer
-        stopOnTerminate: false,
+        stopOnTerminate: true,
         startOnBoot: true,
       });
     }
