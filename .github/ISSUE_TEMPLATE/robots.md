@@ -12,6 +12,4 @@ assignees: ''
 
 ---
 
-**Describe your issue (Your own words here):**
-
-<!-- Please provide a clear and concise description of your issue. -->
+**Describe your issue:**
