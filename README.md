@@ -29,7 +29,7 @@ An easy to use fitness app that lets you create, schedule and track your workout
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/3e1eadfe-a687-4caf-aed0-238d07d53274"
+    src="https://github.com/user-attachments/assets/2e7ceab1-4676-4882-82e3-6aec0565a27b"
     width="200"
   />
   <img
