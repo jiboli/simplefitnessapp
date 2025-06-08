@@ -20,11 +20,27 @@ An easy to use fitness app that lets you create, schedule and track your workout
 ## 📸 **Screenshots**
 
 <div align="center">
-  <img src="https://github.com/user-attachments/assets/d04a192f-836e-439e-aa0a-6fd8010cb13a" width="200"/>
-  <img src="https://github.com/user-attachments/assets/0bd94a1f-bca0-41ab-a67d-5745ed4d8599" width="200"/>
-  <img src="https://github.com/user-attachments/assets/7011f5ae-c0d7-444e-9bdc-1023d4bfd546" width="200"/> 
-  <img src="https://github.com/user-attachments/assets/de2a6493-ec9e-4935-a49b-c33dd9f66829" width="200"/>  
-</div> 
+  <img
+    src="https://github.com/user-attachments/assets/48e3b6b2-3cea-4813-9060-9608c0e66772"
+    width="200"
+  />
+  <img
+    src="https://github.com/user-attachments/assets/581f72ba-cb9f-464e-a729-12cc6d58f144"
+    width="200"
+  />
+  <img
+    src="https://github.com/user-attachments/assets/2e7ceab1-4676-4882-82e3-6aec0565a27b"
+    width="200"
+  />
+  <img
+    src="https://github.com/user-attachments/assets/93913f30-0462-41a6-82cc-1f5380d4d1f2"
+    width="200"
+  />
+  <img
+    src="https://github.com/user-attachments/assets/32d1cb40-0879-4b0e-8f4d-528d4d97dfe5"
+    width="200"
+  />
+</div>
 
 ## 🚀 **Features**
 
@@ -45,6 +61,8 @@ An easy to use fitness app that lets you create, schedule and track your workout
 - Choose between `dd-mm-yyyy` or `mm-dd-yyyy` date formats and toggle between `kg` or `lbs` for weights.  
 
 ## 🌍 **Languages**
+
+
 🇨🇿 🇩🇪 🇩🇰 🇬🇧 🇪🇸 🇫🇮 🇫🇷 🇮🇹 🇯🇵 🇰🇷 🇳🇱 🇳🇴 🇵🇱 🇵🇹 🇷🇺 🇸🇮 🇸🇪 🇹🇷 🇺🇦 🇨🇳
 
 ## 🛠️ **How It Works**
