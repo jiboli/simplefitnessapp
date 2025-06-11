@@ -26,5 +26,9 @@ Which version of the app are you using? (1.x.x)
 
 -
 
+Your Device Specifications (ex. Samsung A54/Android 15.0) 
+
+-
+
 
 **Describe your issue:**
