@@ -1,4 +1,3 @@
-
 <div align="center">
 
 ## 🪙 Donate  
@@ -71,10 +70,10 @@ An easy to use fitness app that lets you create, schedule and track your workout
 
 ## 🛠️ **How It Works**
 
-1. **Adjust Settings**: Change the Date and Weight Formats to your liking.  
-2. **Create Workouts**: Start by adding days, exercises, sets, and reps.  
-3. **Schedule Workouts**: Plan your fitness routine by selecting a date.  
-4. **Track Progress**: Log weights and reps you have done during your workouts to see your improvement.  
+1.  **Adjust Settings**: Change the Date and Weight Formats to your liking.  
+2.  **Create Workouts**: Start by adding days, exercises, sets, and reps.  
+3.  **Schedule Workouts**: Plan your fitness routine by selecting a date.  
+4.  **Track Progress**: Log weights and reps you have done during your workouts to see your improvement.  
 
 ## ⬇️ **Installation Methods**
 
@@ -87,6 +86,7 @@ An easy to use fitness app that lets you create, schedule and track your workout
 <a href="https://f-droid.org/packages/tr.com.basarsubasi.simplefitnessapp" style="padding: 10px;">
     <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" width="180">
 </a>
+
 </br>
 
 <a href="https://play.google.com/store/apps/details?id=tr.com.basarsubasi.simplefitnessapp" style="padding: 10px;">
@@ -99,8 +99,6 @@ An easy to use fitness app that lets you create, schedule and track your workout
 </a>
 </div>
 
+*(Notification functionality is not available on the F-Droid builds due to package incompatibility with F-Droid policies.)*
 
 ###  Thank you for using **Simple.** ❤️
-
-
-
