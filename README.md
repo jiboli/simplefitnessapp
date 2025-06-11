@@ -21,23 +21,27 @@ An easy to use fitness app that lets you create, schedule and track your workout
 
 <div align="center">
   <img
-    src="https://github.com/user-attachments/assets/48e3b6b2-3cea-4813-9060-9608c0e66772"
+    src="https://github.com/user-attachments/assets/36020f7e-3cbc-4838-b726-0302b90d3ef2"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/581f72ba-cb9f-464e-a729-12cc6d58f144"
+    src="https://github.com/user-attachments/assets/dff21cb5-cd1e-414a-b17d-ca82fe5b5ee9"
+    width="200"
+  />
+   <img
+    src="https://github.com/user-attachments/assets/0542720a-65ea-40c2-be0e-68dd21de56cf"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/2e7ceab1-4676-4882-82e3-6aec0565a27b"
+    src="https://github.com/user-attachments/assets/a7d5a63f-4109-479b-97c1-66dbefed4dcd"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/93913f30-0462-41a6-82cc-1f5380d4d1f2"
+    src="https://github.com/user-attachments/assets/00588301-720a-40d0-8d00-10e816b60cd3"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/32d1cb40-0879-4b0e-8f4d-528d4d97dfe5"
+    src="https://github.com/user-attachments/assets/addc611a-f830-446e-b9d4-c224b2bb7327"
     width="200"
   />
 </div>
