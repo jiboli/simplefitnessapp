@@ -1,4 +1,3 @@
-
 <div align="center">
 
 ## 🪙 Donate  
@@ -21,23 +20,27 @@ An easy to use fitness app that lets you create, schedule and track your workout
 
 <div align="center">
   <img
-    src="https://github.com/user-attachments/assets/48e3b6b2-3cea-4813-9060-9608c0e66772"
+    src="https://github.com/user-attachments/assets/36020f7e-3cbc-4838-b726-0302b90d3ef2"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/581f72ba-cb9f-464e-a729-12cc6d58f144"
+    src="https://github.com/user-attachments/assets/dff21cb5-cd1e-414a-b17d-ca82fe5b5ee9"
+    width="200"
+  />
+   <img
+    src="https://github.com/user-attachments/assets/0542720a-65ea-40c2-be0e-68dd21de56cf"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/2e7ceab1-4676-4882-82e3-6aec0565a27b"
+    src="https://github.com/user-attachments/assets/35319582-c612-486f-9149-d059db44bf36"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/93913f30-0462-41a6-82cc-1f5380d4d1f2"
+    src="https://github.com/user-attachments/assets/00588301-720a-40d0-8d00-10e816b60cd3"
     width="200"
   />
   <img
-    src="https://github.com/user-attachments/assets/32d1cb40-0879-4b0e-8f4d-528d4d97dfe5"
+    src="https://github.com/user-attachments/assets/addc611a-f830-446e-b9d4-c224b2bb7327"
     width="200"
   />
 </div>
@@ -67,10 +70,10 @@ An easy to use fitness app that lets you create, schedule and track your workout
 
 ## 🛠️ **How It Works**
 
-1. **Adjust Settings**: Change the Date and Weight Formats to your liking.  
-2. **Create Workouts**: Start by adding days, exercises, sets, and reps.  
-3. **Schedule Workouts**: Plan your fitness routine by selecting a date.  
-4. **Track Progress**: Log weights and reps you have done during your workouts to see your improvement.  
+1.  **Adjust Settings**: Change the Date and Weight Formats to your liking.  
+2.  **Create Workouts**: Start by adding days, exercises, sets, and reps.  
+3.  **Schedule Workouts**: Plan your fitness routine by selecting a date.  
+4.  **Track Progress**: Log weights and reps you have done during your workouts to see your improvement.  
 
 ## ⬇️ **Installation Methods**
 
@@ -83,6 +86,7 @@ An easy to use fitness app that lets you create, schedule and track your workout
 <a href="https://f-droid.org/packages/tr.com.basarsubasi.simplefitnessapp" style="padding: 10px;">
     <img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" width="180">
 </a>
+
 </br>
 
 <a href="https://play.google.com/store/apps/details?id=tr.com.basarsubasi.simplefitnessapp" style="padding: 10px;">
@@ -95,8 +99,6 @@ An easy to use fitness app that lets you create, schedule and track your workout
 </a>
 </div>
 
+*(Notification functionality is not available on the F-Droid builds due to package incompatibility with F-Droid policies.)*
 
 ###  Thank you for using **Simple.** ❤️
-
-
-
