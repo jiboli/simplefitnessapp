@@ -90,7 +90,7 @@ An easy to use fitness app that lets you create, schedule and track your workout
 </br>
 
 <a href="https://play.google.com/store/apps/details?id=tr.com.basarsubasi.simplefitnessapp" style="padding: 10px;">
-    <img src="https://github.com/user-attachments/assets/c11a6262-0a5b-4100-9394-0832507f8eef" alt="Get it on Google Play" width="180">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play" width="180">
 </a>
 </br>
 
