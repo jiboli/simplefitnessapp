@@ -1,17 +1,6 @@
 <div align="center">
-
-## 🪙 Donate  
-
-<img
-  src="https://github.com/user-attachments/assets/cc2c2281-73c1-4df6-b574-54678806ae03"
-  alt="BTC QR Code"
-  width="200"
-  height="200"
-/>
-
-`bc1qn6z9q8a9gjhdjj89ladvque74hzlalvm7d8a8l9hpke9f6y49uuqa2s622` (btc)  
-
-[![Donate BTC](https://img.shields.io/badge/Donate-BTC-orange?logo=bitcoin&style=for-the-badge)](https://github.com/user-attachments/assets/cc2c2281-73c1-4df6-b574-54678806ae03)
+  
+[![Join our Discord](https://img.shields.io/badge/Discord-Join_Our_Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/A38Ny7UggP) [![Donate BTC](https://img.shields.io/badge/Donate-BTC-orange?logo=bitcoin&style=for-the-badge)](https://github.com/user-attachments/assets/cc2c2281-73c1-4df6-b574-54678806ae03) [![Contact Me](https://img.shields.io/badge/Email-Contact_Me-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:basar@basarsubasi.com.tr)
 
 </div>
 
