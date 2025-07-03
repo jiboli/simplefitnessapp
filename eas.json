@@ -20,6 +20,11 @@
       "android": {
         "buildType": "app-bundle"
       }
+    },
+    "development": {
+      "extends": "production",
+      "developmentClient": true,
+      "distribution": "internal"
     }
   },
 

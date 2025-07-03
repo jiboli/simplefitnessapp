@@ -26,6 +26,30 @@ const LightTheme = {
   logborder:'rgba(0, 0, 0, 0.2)',
 };
 
+const CatppuccinLatteLightTheme = {
+  type: 'light',
+  background: '#EFF1F5', // Latte Base
+  text: '#4C4F69',       // Latte Text
+  card: '#E6E9EF',       // Latte Surface0
+  border: '#CCD0DA',     // Latte Overlay0
+  buttonBackground: '#8839EF', // Latte Mauve
+  buttonText: '#EFF1F5', // Latte Base for contrast
+  homeCardColor1: '#E6E9EF', // Latte Surface0
+  homeCardColor2:'#E6E9EF', // Latte Surface0
+  homeCardColor3:'#E6E9EF', // Latte Surface0
+  homeButtonColor1:'#8839EF', // Latte Mauve
+  homeButtonColor2:'#8839EF', // Latte Mauve
+  homeButtonColor3:'#8839EF', // Latte Mauve
+  homeButtonText1: '#EFF1F5', // Latte Base
+  homeButtonText2:'#EFF1F5', // Latte Base
+  homeButtonText3:'#EFF1F5', // Latte Base
+  homeCardText1: '#4C4F69', // Latte Text
+  homeCardText2: '#4C4F69', // Latte Text
+  inactivetint: '#CCD0DA', // Latte Overlay0
+  logborder:'#CCD0DA'     // Latte Overlay0
+};
+
+
 const DarkTheme = {
   type: 'dark',
   background: '#121212',
@@ -49,6 +73,30 @@ const DarkTheme = {
   logborder:'rgba(245, 245, 245, 0.1)'
 };
 
+const CatppuccinFrappeDarkTheme = {
+  type: 'dark',
+  background: '#303446', // Frappe Base
+  text: '#C6D0F5',       // Frappe Text
+  card: '#414559',       // Frappe Surface0
+  border: '#626880',     // Frappe Overlay0
+  buttonBackground: '#DDB6F2', // Frappe Mauve
+  buttonText: '#303446', // Frappe Base for contrast
+  homeCardColor1: '#414559', // Frappe Surface0
+  homeCardColor2:'#414559', // Frappe Surface0
+  homeCardColor3:'#414559', // Frappe Surface0
+  homeButtonColor1:'#DDB6F2', // Frappe Mauve
+  homeButtonColor2:'#DDB6F2', // Frappe Mauve
+  homeButtonColor3:'#DDB6F2', // Frappe Mauve
+  homeButtonText1: '#303446', // Frappe Base
+  homeButtonText2:'#303446', // Frappe Base
+  homeButtonText3:'#303446', // Frappe Base
+  homeCardText1: '#C6D0F5', // Frappe Text
+  homeCardText2: '#C6D0F5', // Frappe Text
+  inactivetint: '#626880', // Frappe Overlay0
+  logborder:'#626880'     // Frappe Overlay0
+};
+
+
 // Context for theme management
 const ThemeContext = createContext({
   theme: LightTheme, // Default theme
@@ -68,7 +116,15 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
     const loadTheme = async () => {
       try {
         const storedTheme = await FileSystem.readAsStringAsync(themeFilePath);
-        setTheme(storedTheme === 'dark' ? DarkTheme : LightTheme);
+        if (storedTheme === 'dark') {
+          setTheme(DarkTheme);
+        } else if (storedTheme === 'catppuccin-latte') {
+          setTheme(CatppuccinLatteLightTheme);
+        } else if (storedTheme === 'catppuccin-frappe') {
+          setTheme(CatppuccinFrappeDarkTheme);
+        } else {
+          setTheme(LightTheme);
+        }
       } catch {
         const colorScheme = Appearance.getColorScheme();
         setTheme(colorScheme === 'dark' ? DarkTheme : LightTheme);
@@ -78,9 +134,26 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
   }, []);
 
   const toggleTheme = async () => {
-    const newTheme = theme === LightTheme ? DarkTheme : LightTheme;
+   const newTheme =
+      theme === LightTheme
+        ? DarkTheme
+        : theme === DarkTheme
+        ? CatppuccinLatteLightTheme
+        : theme === CatppuccinLatteLightTheme
+        ? CatppuccinFrappeDarkTheme
+        : LightTheme; // Default back to LightTheme if none of the above
+
+    const newThemeTypeString =
+      theme === LightTheme
+        ? 'dark'
+        : theme === DarkTheme
+        ? 'catppuccin-latte'
+        : theme === CatppuccinLatteLightTheme
+        ? 'catppuccin-frappe'
+        : 'light'; // Default back to 'light'
+        
     setTheme(newTheme);
-    await FileSystem.writeAsStringAsync(themeFilePath, theme === LightTheme ? 'dark' : 'light');
+    await FileSystem.writeAsStringAsync(themeFilePath, newThemeTypeString);
   };
 
   return (

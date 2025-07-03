@@ -16,7 +16,11 @@
     },
     "android": {
       "versionCode": 51,
-      "blockedPermissions": ["android.permission.INTERNET", "android.permission.RECEIVE_BOOT_COMPLETED", "android.permission.RECORD_AUDIO" ],
+      "blockedPermissions": [
+        "android.permission.INTERNET",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/simpleicon.png",
         "backgroundColor": "#ffffff"
@@ -28,7 +32,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "1b72cc6b-8e1a-47b1-a7d3-8fcf199a3015"
+        "projectId": "2298891a-04aa-41a6-910a-1c540f256658"
       }
     },
     "plugins": [
@@ -43,6 +47,6 @@
         }
       ]
     ],
-    "owner": "basarsubasi"
+    "owner": "jiboli"
   }
 }
